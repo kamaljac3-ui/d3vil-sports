@@ -19,6 +19,8 @@
   --ncaaw: #ff9ecb;
   --ufc: #ff3b3b;
   --boxing: #c9a15a;
+  --golf: #a8c15a;
+  --horse: #a0673f;
 }
 
 @media (prefers-color-scheme: light) {
@@ -159,6 +161,8 @@ main { padding: 36px 0 80px; }
 .chip.NCAAW { border-color: var(--ncaaw); color: var(--ncaaw); }
 .chip.UFC { border-color: var(--ufc); color: var(--ufc); }
 .chip.Boxing { border-color: var(--boxing); color: var(--boxing); }
+.chip.Golf { border-color: var(--golf); color: var(--golf); }
+.chip.HorseRacing { border-color: var(--horse); color: var(--horse); }
 
 /* Post cards on index */
 .post-card {
@@ -277,6 +281,8 @@ main { padding: 36px 0 80px; }
 .league-section.NCAAW h2 { color: var(--ncaaw); }
 .league-section.UFC h2 { color: var(--ufc); }
 .league-section.Boxing h2 { color: var(--boxing); }
+.league-section.Golf h2 { color: var(--golf); }
+.league-section.HorseRacing h2 { color: var(--horse); }
 
 .story {
   margin-bottom: 18px;

@@ -11,14 +11,15 @@ do not duplicate it.
 
 ## 2. Gather material, per category
 
-Cover all ten, in this order: **NFL, CFB, NBA, NCAAM, WNBA, NCAAW, MLB, NHL,
-UFC, Boxing**. (CFB = college football. NCAAM = men's college basketball.
-NCAAW = women's college basketball. UFC covers MMA generally, not just
-UFC-promoted cards.)
+Cover all twelve, in this order: **NFL, CFB, NBA, NCAAM, WNBA, NCAAW, MLB,
+NHL, UFC, Boxing, Golf, Horse Racing**. (CFB = college football. NCAAM =
+men's college basketball. NCAAW = women's college basketball. UFC covers
+MMA generally, not just UFC-promoted cards. Horse Racing covers the major
+US circuits/stakes races, not just Triple Crown season.)
 
 For each category:
 
-1. Pull the baseline ESPN news RSS feed:
+1. Pull the baseline ESPN news RSS feed where one exists:
    - NFL:    https://www.espn.com/espn/rss/nfl/news
    - CFB:    https://www.espn.com/espn/rss/ncf/news
    - NBA:    https://www.espn.com/espn/rss/nba/news
@@ -29,6 +30,9 @@ For each category:
    - NHL:    https://www.espn.com/espn/rss/nhl/news
    - UFC:    https://www.espn.com/espn/rss/mma/news
    - Boxing: https://www.espn.com/espn/rss/boxing/news
+   - Golf:   https://www.espn.com/espn/rss/golf/news
+   - Horse Racing: no reliable baseline RSS feed — rely on web search for
+     this one (see step 2).
 2. Also do a broad web search for what's actually being talked about around
    that category in the last 24-48 hours. RSS alone under-covers
    front-office drama, contract disputes, suspensions, fight-card
@@ -39,16 +43,19 @@ For each category:
    from a single unreliable tabloid source.
 3. Note that CFB, NCAAM, and NCAAW are seasonal — during their offseason,
    news will mostly be recruiting, transfer portal, and coaching moves.
-   That's fine, cover what's actually happening rather than forcing
+   Golf and Horse Racing run nearly year-round but news volume swings
+   hard around major weeks (majors/playoffs for golf; Triple Crown season
+   and the Breeders' Cup for horse racing) versus quiet weeks. In all
+   cases, cover what's actually happening rather than forcing
    in-season-style content.
 4. From everything gathered, pick the 2-4 most *substantial* stories for
    that category — the ones a genuinely engaged fan would want to know
    about today. Substantial means: trades, signings, injuries,
    suspensions, coaching/front-office moves, contract disputes, retirement
-   news, a fight/bout being announced or falling apart, significant game
-   or result with real stakes, or a widely-covered off-field storyline.
-   Skip minor transactions and routine recaps with no broader
-   significance.
+   news, a fight/bout being announced or falling apart, a big
+   tournament/stakes-race result or leaderboard swing, or a widely-covered
+   off-field storyline. Skip minor transactions and routine recaps with
+   no broader significance.
 5. If a category genuinely has nothing substantial that day, it's fine to
    include just 1 story, or a single short "quiet day" line — don't pad.
 
@@ -68,11 +75,13 @@ For each category:
 
 Copy `posts/2026-08-17.html` as a structural template: same HTML shell,
 same Google Fonts `<link>` tags, same `<div class="spectrum-bar"></div>`,
-same `.jump-nav` block, and the same ten `<section class="league-section
-CATEGORY" id="slug">` blocks in NFL/CFB/NBA/NCAAM/WNBA/NCAAW/MLB/NHL/
-UFC/Boxing order (id values: nfl, cfb, nba, ncaam, wnba, ncaaw, mlb, nhl,
-ufc, boxing — lowercase, matching the `.jump-nav` anchors already in the
-template; don't change these).
+same `.jump-nav` block, and the same twelve `<section class="league-section
+CATEGORY" id="slug">` blocks in NFL/CFB/NBA/NCAAM/WNBA/NCAAW/MLB/NHL/UFC/
+Boxing/Golf/HorseRacing order (id values: nfl, cfb, nba, ncaam, wnba,
+ncaaw, mlb, nhl, ufc, boxing, golf, horse-racing — lowercase, matching the
+`.jump-nav` anchors already in the template; note the class for horse
+racing is `HorseRacing` — no space, no hyphen — while its id is
+`horse-racing`; don't change these).
 
 For the new file `posts/<date>.html`:
 
@@ -83,7 +92,7 @@ For the new file `posts/<date>.html`:
   punchy headline capturing the day's biggest storyline (not "Daily
   Roundup" — an actual headline, e.g. "MVP candidate out 6 weeks, and a
   trade that changes the AL wild card race").
-- Leave the `.jump-nav` block exactly as in the template (all ten links).
+- Leave the `.jump-nav` block exactly as in the template (all twelve links).
 - Inside each `.league-section`, replace the placeholder `.story` blocks
   with one `.story` div per real story:
   ```html
