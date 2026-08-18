@@ -35,3 +35,31 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+  newsletter:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Detect newly added post
+        id: detect
+        run: |
+          NEW_POST=$(git diff --name-only --diff-filter=A HEAD~1 HEAD -- 'posts/*.html' | head -n1)
+          if [ -z "$NEW_POST" ]; then
+            echo "No new post in this push — skipping newsletter send."
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "New post detected: $NEW_POST"
+            echo "found=true" >> "$GITHUB_OUTPUT"
+            echo "file=$NEW_POST" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Send newsletter
+        if: steps.detect.outputs.found == 'true'
+        env:
+          KIT_API_KEY: ${{ secrets.KIT_API_KEY }}
+          POST_FILE: ${{ steps.detect.outputs.file }}
+        run: node scripts/send-newsletter.js

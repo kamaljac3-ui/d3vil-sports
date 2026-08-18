@@ -134,6 +134,12 @@ git push
 Pushing to `main` triggers the GitHub Pages deployment automatically (via
 `.github/workflows/deploy.yml`) — no separate deploy step needed.
 
+That same push also triggers the newsletter send (a separate job in the
+same workflow, using `scripts/send-newsletter.js`) if it detects a newly
+added file under `posts/`. This is fully automatic — do not send an email,
+call any newsletter API, or otherwise duplicate this. Just commit and push
+the post as normal and the workflow handles the rest.
+
 ## 7. If something fails
 
 If an RSS feed is unreachable or a search turns up nothing usable for a
