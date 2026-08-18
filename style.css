@@ -1,12 +1,12 @@
 /* Full Slate — shared styles */
 
 :root {
-  --bg: #0a0c0f;
-  --bg-elevated: #14171c;
-  --bg-raised: #1b1f26;
-  --border: #262b33;
-  --text: #eef1f5;
-  --text-dim: #9aa4b2;
+  --bg: #0c0605;
+  --bg-elevated: #1c1210;
+  --bg-raised: #241713;
+  --border: #3a221c;
+  --text: #f5ede9;
+  --text-dim: #b09a92;
   --accent: #ff5a3c;
 
   --nfl: #6f9de3;
@@ -23,12 +23,12 @@
 
 @media (prefers-color-scheme: light) {
   :root {
-    --bg: #f7f6f3;
-    --bg-elevated: #ffffff;
-    --bg-raised: #ffffff;
-    --border: #e3e0da;
-    --text: #16181c;
-    --text-dim: #5b6270;
+    --bg: #f5efe9;
+    --bg-elevated: #fffaf7;
+    --bg-raised: #fdf5f1;
+    --border: #e8ddd4;
+    --text: #1c1210;
+    --text-dim: #7a655c;
   }
 }
 
@@ -37,11 +37,17 @@
 html, body {
   margin: 0;
   padding: 0;
-  background: var(--bg);
   color: var(--text);
   font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+}
+
+body {
+  background:
+    radial-gradient(900px 500px at 100% 0%, rgba(255, 90, 60, 0.07), transparent 60%),
+    radial-gradient(900px 620px at 0% 100%, rgba(150, 20, 10, 0.12), transparent 60%),
+    var(--bg);
 }
 
 h1, h2, h3, .brand {
@@ -61,8 +67,7 @@ a { color: inherit; }
   width: 100%;
   background: linear-gradient(
     90deg,
-    var(--nfl), var(--cfb), var(--nba), var(--ncaam), var(--wnba),
-    var(--ncaaw), var(--mlb), var(--nhl), var(--ufc), var(--boxing)
+    #2b0805, var(--accent), #ffb347, var(--accent), #2b0805
   );
 }
 
@@ -71,8 +76,8 @@ header.site {
   padding: 32px 0 24px;
   overflow: visible;
   background:
-    radial-gradient(700px 220px at 15% -20%, rgba(255, 90, 60, 0.08), transparent 70%),
-    var(--bg);
+    radial-gradient(650px 240px at 12% -25%, rgba(255, 90, 60, 0.18), transparent 70%),
+    radial-gradient(500px 200px at 92% 110%, rgba(180, 30, 15, 0.16), transparent 70%);
 }
 
 header.site .wrap {
@@ -170,7 +175,7 @@ main { padding: 36px 0 80px; }
 .post-card:hover {
   border-color: var(--accent);
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 10px 28px rgba(255, 90, 60, 0.14), 0 8px 22px rgba(0, 0, 0, 0.3);
 }
 
 .post-card .date {
