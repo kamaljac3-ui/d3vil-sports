@@ -4,23 +4,23 @@
 
   <!-- tail -->
   <path d="M170 275 C 190 285, 206 276, 211 258 C 213 248, 207 244, 202 249
-           C 200 260, 190 270, 175 270 Z" fill="#0d0f12"/>
-  <path d="M206 250 L219 243 L213 259 Z" fill="#0d0f12"/>
+           C 200 260, 190 270, 175 270 Z" fill="#420f09"/>
+  <path d="M206 250 L219 243 L213 259 Z" fill="#420f09"/>
 
   <!-- left arm, resting at side -->
   <path d="M112 196 C 95 201, 85 221, 88 246 C 90 259, 100 263, 108 259
-           C 112 241, 110 216, 119 199 Z" fill="#14171c"/>
-  <circle cx="94" cy="256" r="11" fill="#14171c"/>
+           C 112 241, 110 216, 119 199 Z" fill="#7a2a1c"/>
+  <circle cx="94" cy="256" r="11" fill="#7a2a1c"/>
 
   <!-- torso -->
   <path d="M101 201 C 101 186, 121 179, 150 179 C 179 179, 199 186, 199 201
-           C 204 231, 194 271, 150 286 C 106 271, 96 231, 101 201 Z" fill="#14171c"/>
-  <path d="M132 210 C 140 220, 160 220, 168 210" stroke="#0d0f12" stroke-width="4" fill="none" stroke-linecap="round" opacity="0.6"/>
+           C 204 231, 194 271, 150 286 C 106 271, 96 231, 101 201 Z" fill="#7a2a1c"/>
+  <path d="M132 210 C 140 220, 160 220, 168 210" stroke="#420f09" stroke-width="4" fill="none" stroke-linecap="round" opacity="0.6"/>
 
   <!-- right arm, raised -->
   <path d="M188 198 C 205 195, 218 175, 222 145 C 224 120, 227 96, 230 73
-           C 236 79, 237 96, 235 119 C 233 146, 227 176, 206 206 Z" fill="#14171c"/>
-  <circle cx="232" cy="69" r="13" fill="#14171c"/>
+           C 236 79, 237 96, 235 119 C 233 146, 227 176, 206 206 Z" fill="#7a2a1c"/>
+  <circle cx="232" cy="69" r="13" fill="#7a2a1c"/>
 
   <!-- flame in raised hand -->
   <path d="M232 16 C 245 32, 249 48, 232 58 C 215 48, 219 32, 232 16 Z" fill="#ff5a3c"/>
@@ -28,26 +28,26 @@
 
   <!-- head -->
   <path d="M178 98 C 188 76, 206 62, 216 44 C 220 58, 212 76, 196 92
-           C 190 98, 184 100, 178 98 Z" fill="#0d0f12"/>
+           C 190 98, 184 100, 178 98 Z" fill="#420f09"/>
   <path d="M122 98 C 112 76, 94 62, 84 44 C 80 58, 88 76, 104 92
-           C 110 98, 116 100, 122 98 Z" fill="#0d0f12"/>
+           C 110 98, 116 100, 122 98 Z" fill="#420f09"/>
 
   <path d="M150 56 C 196 56, 218 88, 212 124 C 208 154, 184 180, 150 184
-           C 116 180, 92 154, 88 124 C 82 88, 104 56, 150 56 Z" fill="#14171c"/>
+           C 116 180, 92 154, 88 124 C 82 88, 104 56, 150 56 Z" fill="#7a2a1c"/>
 
-  <path d="M136 62 L150 80 L164 62 C 158 58, 142 58, 136 62 Z" fill="#0d0f12"/>
+  <path d="M136 62 L150 80 L164 62 C 158 58, 142 58, 136 62 Z" fill="#420f09"/>
 
   <path d="M108 112 L124 98 L142 108" stroke="#eef1f5" stroke-width="4.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
   <path d="M158 108 L176 98 L192 112" stroke="#eef1f5" stroke-width="4.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="126" cy="119" r="6" fill="#ff5a3c"/>
-  <circle cx="174" cy="119" r="6" fill="#ff5a3c"/>
+  <circle cx="126" cy="119" r="6" fill="#0c0605"/>
+  <circle cx="174" cy="119" r="6" fill="#0c0605"/>
 
   <path d="M114 141 C 132 159, 168 159, 190 137 C 178 157, 150 165, 128 157
-           C 120 154, 116 148, 114 141 Z" fill="#0d0f12"/>
+           C 120 154, 116 148, 114 141 Z" fill="#420f09"/>
   <path d="M169 142 L179 138 L173 151 Z" fill="#eef1f5"/>
   <path d="M131 143 L121 139 L127 152 Z" fill="#eef1f5"/>
 
-  <path d="M142 167 C 146 181, 154 181, 158 167 C 152 173, 148 173, 142 167 Z" fill="#0d0f12"/>
+  <path d="M142 167 C 146 181, 154 181, 158 167 C 152 173, 148 173, 142 167 Z" fill="#420f09"/>
 
   <!-- glossy sticker sheen -->
   <ellipse cx="128" cy="82" rx="30" ry="20" fill="#ffffff" opacity="0.1"/>
