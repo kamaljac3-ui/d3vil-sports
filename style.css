@@ -1,0 +1,206 @@
+/* Full Slate — shared styles */
+
+:root {
+  --bg: #0b0d10;
+  --bg-elevated: #14171c;
+  --border: #262b33;
+  --text: #eef1f5;
+  --text-dim: #9aa4b2;
+  --accent: #ff5a3c;
+  --nfl: #6f9de3;
+  --nba: #e8a33d;
+  --mlb: #d94f4f;
+  --nhl: #7fd0c9;
+  --wnba: #d4649a;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #f7f6f3;
+    --bg-elevated: #ffffff;
+    --border: #e3e0da;
+    --text: #16181c;
+    --text-dim: #5b6270;
+  }
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
+  line-height: 1.55;
+}
+
+a { color: inherit; }
+
+.wrap {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+header.site {
+  border-bottom: 1px solid var(--border);
+  padding: 28px 0 22px;
+}
+
+header.site .wrap { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+
+.brand {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  text-decoration: none;
+}
+
+.brand span { color: var(--accent); }
+
+.tagline {
+  color: var(--text-dim);
+  font-size: 14px;
+}
+
+main { padding: 36px 0 80px; }
+
+.leagues-legend {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 4px 0 32px;
+}
+
+.chip {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+}
+
+.chip.NFL { border-color: var(--nfl); color: var(--nfl); }
+.chip.NBA { border-color: var(--nba); color: var(--nba); }
+.chip.MLB { border-color: var(--mlb); color: var(--mlb); }
+.chip.NHL { border-color: var(--nhl); color: var(--nhl); }
+.chip.WNBA { border-color: var(--wnba); color: var(--wnba); }
+
+/* Post cards on index */
+.post-card {
+  display: block;
+  text-decoration: none;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px 22px;
+  margin-bottom: 16px;
+  transition: border-color 0.15s ease;
+}
+
+.post-card:hover { border-color: var(--accent); }
+
+.post-card .date {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+}
+
+.post-card h2 {
+  margin: 6px 0 8px;
+  font-size: 20px;
+  letter-spacing: -0.01em;
+}
+
+.post-card p {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 14.5px;
+}
+
+/* Post detail page */
+.post-header { margin-bottom: 32px; }
+
+.post-header .date {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+}
+
+.post-header h1 {
+  font-size: 30px;
+  letter-spacing: -0.02em;
+  margin: 8px 0 0;
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 24px;
+  font-size: 14px;
+  color: var(--text-dim);
+  text-decoration: none;
+}
+
+.back-link:hover { color: var(--accent); }
+
+.league-section {
+  margin-bottom: 34px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.league-section h2 {
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0 0 14px;
+  padding: 4px 0;
+  border-bottom: 3px solid currentColor;
+  display: inline-block;
+}
+
+.league-section.NFL h2 { color: var(--nfl); }
+.league-section.NBA h2 { color: var(--nba); }
+.league-section.MLB h2 { color: var(--mlb); }
+.league-section.NHL h2 { color: var(--nhl); }
+.league-section.WNBA h2 { color: var(--wnba); }
+
+.story {
+  margin-bottom: 16px;
+}
+
+.story h3 {
+  font-size: 16.5px;
+  margin: 0 0 4px;
+}
+
+.story p {
+  margin: 0 0 4px;
+  color: var(--text);
+  font-size: 15px;
+}
+
+.story .src {
+  font-size: 12.5px;
+}
+
+.story .src a {
+  color: var(--text-dim);
+  text-decoration: underline;
+}
+
+.story .src a:hover { color: var(--accent); }
+
+footer.site {
+  border-top: 1px solid var(--border);
+  padding: 24px 0;
+  color: var(--text-dim);
+  font-size: 13px;
+}
