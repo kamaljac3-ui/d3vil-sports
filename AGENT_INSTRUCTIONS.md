@@ -79,15 +79,28 @@ For each category:
    and the Breeders' Cup for horse racing) versus quiet weeks. In all
    cases, cover what's actually happening rather than forcing
    in-season-style content.
-6. From everything gathered, pick the 2-4 most *substantial and fresh*
+6. **For leagues playing games that day/night (MLB in season, NHL/NBA in
+   season, any in-season college sport), always check last night's box
+   scores and game recaps for standout individual performances, not just
+   transaction news.** A multi-homer game, a robbed grand slam, a
+   walk-off, a no-hitter bid, a hat trick, a milestone stat line — these
+   are exactly the kind of daily, fresh, substantial content a category
+   like MLB should be full of during the season, and they're easy to
+   under-cover if you only search for trades/injuries/suspensions.
+   Search things like "MLB top performances last night", "[date] MLB
+   recap", or a specific team's recap page, in addition to transaction
+   news. Do not let a day where 15 real games were played end up
+   covered only by roster moves.
+7. From everything gathered, pick the 2-4 most *substantial and fresh*
    stories for that category — the ones a genuinely engaged fan would want
    to know about today. Substantial means: trades, signings, injuries,
    suspensions, coaching/front-office moves, contract disputes, retirement
-   news, a fight/bout being announced or falling apart, a big
+   news, a fight/bout being announced or falling apart, a standout
+   individual performance or notable result from that day's games, a big
    tournament/stakes-race result or leaderboard swing, or a widely-covered
    off-field storyline. Skip minor transactions and routine recaps with
    no broader significance.
-7. If a category genuinely has nothing substantial and fresh that day,
+8. If a category genuinely has nothing substantial and fresh that day,
    it's fine to include just 1 story, or a single short "quiet day" line
    — don't pad with stale news just to fill space.
 
