@@ -203,8 +203,8 @@ In `index.html`, insert a new `.post-card` immediately after the
 </a>
 ```
 
-Leave every earlier `.post-card` in place below it — this is an append-only
-archive. Do not delete or rewrite old posts.
+Leave every earlier `.post-card` in place below it for now — pruning down
+to the last 3 happens in step 7, after the "latest" alias is updated.
 
 ## 6. Update the "latest" alias
 
@@ -222,7 +222,31 @@ cp posts/<date>.html posts/latest.html
 -Force` instead.) Do this every day — it's the one file in `posts/` that
 *is* meant to be overwritten rather than appended to.
 
-## 7. Commit and push
+## 7. Enforce 3-day retention
+
+The site keeps only the 3 most recent daily posts — a rolling window, not
+a permanent archive. After updating `posts/latest.html`:
+
+1. List every dated post file (this excludes `latest.html`); since
+   filenames are `YYYY-MM-DD.html`, sorting them sorts oldest to newest:
+   ```
+   ls posts/*.html | grep -v 'posts/latest.html' | sort
+   ```
+2. If there are more than 3, everything except the last 3 lines of that
+   output needs to go:
+   ```
+   ls posts/*.html | grep -v 'posts/latest.html' | sort | head -n -3
+   ```
+3. For each file that comes back from that command:
+   - Remove it: `git rm posts/<date>.html`
+   - Remove its matching `.post-card` block from `index.html` — the
+     whole `<a class="post-card" href="posts/<date>.html">...</a>`
+     element, including its `.date`, `<h2>`, and `<p>` — delete the full
+     block, don't leave a broken/empty entry behind.
+4. If there are 3 or fewer dated posts total (true for the first few days
+   after this policy started), there's nothing to remove — skip this step.
+
+## 8. Commit and push
 
 ```
 git add index.html posts/
@@ -239,7 +263,7 @@ added file under `posts/`. This is fully automatic — do not send an email,
 call any newsletter API, or otherwise duplicate this. Just commit and push
 the post as normal and the workflow handles the rest.
 
-## 8. If something fails
+## 9. If something fails
 
 If an RSS feed is unreachable or a search turns up nothing usable for a
 category, don't block the whole post on it — note it in that section as a
