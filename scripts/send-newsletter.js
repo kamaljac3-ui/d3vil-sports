@@ -44,7 +44,7 @@ async function main() {
     <h1 style="font-size:24px;line-height:1.3;margin:0 0 16px;color:#f5ede9;">${headline}</h1>
     <p style="font-size:15px;line-height:1.6;color:#d8cec8;margin:0 0 24px;">${description}</p>
     <a href="${postUrl}" style="display:inline-block;padding:12px 22px;background:#ff5a3c;color:#ffffff;text-decoration:none;border-radius:8px;font-weight:bold;font-size:15px;">Read today's full roundup &rarr;</a>
-    <p style="font-size:12px;color:#7a655c;margin-top:32px;">Full Slate — NFL, CFB, NBA, NCAAM, WNBA, NCAAW, MLB, NHL, UFC, Boxing, Golf &amp; Horse Racing, every day.</p>
+    <p style="font-size:12px;color:#7a655c;margin-top:32px;">D3vil Sports — NFL, CFB, NBA, NCAAM, WNBA, NCAAW, MLB, NHL, UFC, Boxing, Golf &amp; Horse Racing, every day.</p>
   </div>`.trim();
 
   const res = await fetch("https://api.kit.com/v4/broadcasts", {
@@ -54,7 +54,7 @@ async function main() {
       "X-Kit-Api-Key": apiKey,
     },
     body: JSON.stringify({
-      subject: `Full Slate — ${headline}`,
+      subject: `D3vil Sports — ${headline}`,
       preview_text: description.slice(0, 140),
       content: emailHtml,
       description: `Auto-sent for ${postFile}`,

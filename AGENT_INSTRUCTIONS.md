@@ -1,4 +1,4 @@
-# Full Slate — daily update procedure
+# D3vil Sports — daily update procedure
 
 This file is the complete, self-contained procedure for producing one day's
 roundup. Follow it exactly so the site stays consistent day to day.
@@ -85,7 +85,7 @@ racing is `HorseRacing` — no space, no hyphen — while its id is
 
 For the new file `posts/<date>.html`:
 
-- Set `<title>` to `Month D, YYYY — Full Slate`.
+- Set `<title>` to `Month D, YYYY — D3vil Sports`.
 - Set the meta description to a one-sentence summary of the day's biggest
   headline across all categories.
 - Set `.post-header .date` to the human-readable date and `<h1>` to a short
@@ -123,7 +123,23 @@ In `index.html`, insert a new `.post-card` immediately after the
 Leave every earlier `.post-card` in place below it — this is an append-only
 archive. Do not delete or rewrite old posts.
 
-## 6. Commit and push
+## 6. Update the "latest" alias
+
+The homepage's league chips (in the `.leagues-legend`) link to
+`posts/latest.html#<slug>` — a stable URL that always points at whatever
+today's post is, so those links never need editing. After finishing
+`posts/<date>.html`, copy it to `posts/latest.html`, overwriting whatever
+was there:
+
+```
+cp posts/<date>.html posts/latest.html
+```
+
+(On Windows/PowerShell use `Copy-Item posts/<date>.html posts/latest.html
+-Force` instead.) Do this every day — it's the one file in `posts/` that
+*is* meant to be overwritten rather than appended to.
+
+## 7. Commit and push
 
 ```
 git add index.html posts/
@@ -140,7 +156,7 @@ added file under `posts/`. This is fully automatic — do not send an email,
 call any newsletter API, or otherwise duplicate this. Just commit and push
 the post as normal and the workflow handles the rest.
 
-## 7. If something fails
+## 8. If something fails
 
 If an RSS feed is unreachable or a search turns up nothing usable for a
 category, don't block the whole post on it — note it in that section as a

@@ -1,4 +1,4 @@
-name: Deploy Full Slate to GitHub Pages
+name: Deploy D3vil Sports to GitHub Pages
 
 on:
   push:
@@ -47,7 +47,7 @@ jobs:
       - name: Detect newly added post
         id: detect
         run: |
-          NEW_POST=$(git diff --name-only --diff-filter=A HEAD~1 HEAD -- 'posts/*.html' | head -n1)
+          NEW_POST=$(git diff --name-only --diff-filter=A HEAD~1 HEAD -- 'posts/*.html' | grep -v '^posts/latest.html$' | head -n1)
           if [ -z "$NEW_POST" ]; then
             echo "No new post in this push — skipping newsletter send."
             echo "found=false" >> "$GITHUB_OUTPUT"
