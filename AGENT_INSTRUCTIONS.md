@@ -72,13 +72,29 @@ For each category:
    `posts/latest.html` and, if it exists, the post before it) so you don't
    run the same story two nights in a row without a genuinely new
    development since then.
-5. Note that CFB, NCAAM, and NCAAW are seasonal — during their offseason,
-   news will mostly be recruiting, transfer portal, and coaching moves.
+5. CFB, NCAAM, and NCAAW are seasonal, but "offseason" doesn't mean
+   "nothing to cover" — widen what counts:
+   - Leadership/administrative moves are news year-round, not just head
+     coaching changes: athletic director hires and firings are exactly as
+     newsworthy as a coaching change and should be covered the same way.
+   - CFB starts its season in late August, so as that approaches, camp
+     battles, depth-chart news, preseason injuries, and marquee
+     season-opener previews are all fair game even before Week 1 — don't
+     wait for kickoff to start covering it like an in-season sport if
+     camp is already generating real news.
+   - Once CFB/NCAAM/NCAAW are actually in season, treat them like any
+     other in-season league under point 6 below: a ranked team getting
+     upset by an unranked one, or a standout individual performance in a
+     marquee game (e.g. a QB throwing for 400 yards to lead the No. 1
+     team to a win), is exactly the kind of substantial, fresh story to
+     lead with — not just recruiting/transfer-portal news once there are
+     actual games being played.
    Golf and Horse Racing run nearly year-round but news volume swings
    hard around major weeks (majors/playoffs for golf; Triple Crown season
    and the Breeders' Cup for horse racing) versus quiet weeks. In all
-   cases, cover what's actually happening rather than forcing
-   in-season-style content.
+   cases, cover what's actually happening rather than defaulting to
+   recruiting/portal news when a sport is actually generating real,
+   fresher storylines.
 6. **For every category, first check whether that league/sport currently
    has games being played** — don't assume from a fixed list, since this
    changes throughout the year (as of this writing, MLB and WNBA are both
@@ -100,8 +116,9 @@ For each category:
 7. From everything gathered, pick the 2-4 most *substantial and fresh*
    stories for that category — the ones a genuinely engaged fan would want
    to know about today. Substantial means: trades, signings, injuries,
-   suspensions, coaching/front-office moves, contract disputes, retirement
-   news, a fight/bout being announced or falling apart, a standout
+   suspensions, coaching/front-office/athletic-director moves, contract
+   disputes, retirement news, a fight/bout being announced or falling
+   apart, a standout
    individual performance or notable result from that day's games, a big
    tournament/stakes-race result or leaderboard swing, or a widely-covered
    off-field storyline. Skip minor transactions and routine recaps with
