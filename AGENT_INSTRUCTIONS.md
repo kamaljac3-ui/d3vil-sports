@@ -153,7 +153,11 @@ For each category:
 ## 4. Build today's post page
 
 Copy `posts/2026-08-17.html` as a structural template: same HTML shell,
-same Google Fonts `<link>` tags, same `<div class="spectrum-bar"></div>`,
+same Google Fonts `<link>` tags, same theme-toggle `<script>` in `<head>`
+and the `<button class="theme-toggle">` + its `toggleTheme()` `<script>`
+right after `<body>` (this is what makes the site start in dark mode and
+lets visitors switch to light — do not drop it), same
+`<div class="spectrum-bar"></div>`,
 same `.jump-nav` block, and the same twelve `<section class="league-section
 CATEGORY" id="slug">` blocks in NFL/CFB/NBA/NCAAM/WNBA/NCAAW/MLB/NHL/UFC/
 Boxing/Golf/HorseRacing order (id values: nfl, cfb, nba, ncaam, wnba,

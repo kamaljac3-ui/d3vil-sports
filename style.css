@@ -23,16 +23,42 @@
   --horse: #a0673f;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    --bg: #f5efe9;
-    --bg-elevated: #fffaf7;
-    --bg-raised: #fdf5f1;
-    --border: #e8ddd4;
-    --text: #1c1210;
-    --text-dim: #7a655c;
-  }
+/* Dark is the default (above). Light only applies when explicitly
+   chosen via the toggle -- never from system prefers-color-scheme, so
+   the site always starts dark regardless of visitor OS settings. */
+:root[data-theme="light"] {
+  --bg: #f5efe9;
+  --bg-elevated: #fffaf7;
+  --bg-raised: #fdf5f1;
+  --border: #e8ddd4;
+  --text: #1c1210;
+  --text-dim: #7a655c;
 }
+
+.theme-toggle {
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  z-index: 50;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  padding: 0;
+}
+
+.theme-toggle:hover { border-color: var(--accent); }
+
+.theme-toggle .icon-sun { display: none; }
+:root[data-theme="light"] .theme-toggle .icon-moon { display: none; }
+:root[data-theme="light"] .theme-toggle .icon-sun { display: inline; }
 
 * { box-sizing: border-box; }
 

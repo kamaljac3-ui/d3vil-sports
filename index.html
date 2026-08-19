@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<script>(function(){if(localStorage.getItem('theme')==='light')document.documentElement.setAttribute('data-theme','light');})();</script>
 <title>D3vil Sports — daily roundup across every major league</title>
 <meta name="description" content="A daily roundup of what actually matters across the NFL, NBA, WNBA, MLB, NHL, CFB, NCAA hoops, UFC, Boxing, Golf, and Horse Racing.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,6 +13,23 @@
 <link rel="icon" type="image/png" href="assets/devil-face.png">
 </head>
 <body>
+
+<button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle light/dark mode">
+  <span class="icon-moon">&#127769;</span>
+  <span class="icon-sun">&#9728;</span>
+</button>
+<script>
+function toggleTheme(){
+  var root = document.documentElement;
+  if (root.getAttribute('data-theme') === 'light') {
+    root.removeAttribute('data-theme');
+    localStorage.setItem('theme', 'dark');
+  } else {
+    root.setAttribute('data-theme', 'light');
+    localStorage.setItem('theme', 'light');
+  }
+}
+</script>
 
 <div class="spectrum-bar"></div>
 
