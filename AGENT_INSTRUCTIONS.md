@@ -95,6 +95,17 @@ For each category:
    cases, cover what's actually happening rather than defaulting to
    recruiting/portal news when a sport is actually generating real,
    fresher storylines.
+
+   The same "offseason still has real news" principle applies to NHL and
+   NBA in their offseasons too — arbitration cases, offer sheets,
+   entry-level contract signings, prospect development camps, and
+   front-office moves are all genuine daily stories even without games,
+   not just the same handful of marquee trade rumors rehashed night after
+   night. And UFC/MMA in particular has an almost constant news cycle —
+   fight announcements, rankings shakeups, callouts, weigh-ins, injury
+   pullouts, contract disputes — regardless of whether an event is
+   actually happening that day, so it should never come up thin just
+   because there's no card this week.
 6. **For every category, first check whether that league/sport currently
    has games being played** — don't assume from a fixed list, since this
    changes throughout the year (as of this writing, MLB and WNBA are both
