@@ -79,18 +79,24 @@ For each category:
    and the Breeders' Cup for horse racing) versus quiet weeks. In all
    cases, cover what's actually happening rather than forcing
    in-season-style content.
-6. **For leagues playing games that day/night (MLB in season, NHL/NBA in
-   season, any in-season college sport), always check last night's box
-   scores and game recaps for standout individual performances, not just
-   transaction news.** A multi-homer game, a robbed grand slam, a
-   walk-off, a no-hitter bid, a hat trick, a milestone stat line — these
-   are exactly the kind of daily, fresh, substantial content a category
-   like MLB should be full of during the season, and they're easy to
-   under-cover if you only search for trades/injuries/suspensions.
-   Search things like "MLB top performances last night", "[date] MLB
-   recap", or a specific team's recap page, in addition to transaction
-   news. Do not let a day where 15 real games were played end up
-   covered only by roster moves.
+6. **For every category, first check whether that league/sport currently
+   has games being played** — don't assume from a fixed list, since this
+   changes throughout the year (as of this writing, MLB and WNBA are both
+   in season with games most nights; NBA, NHL, and the college sports are
+   not — but that will change, and this file won't always be updated the
+   day it does). If a league has games happening, always check last
+   night's/that day's box scores and game recaps for standout individual
+   performances and notable results, not just transaction news. A
+   multi-homer game, a robbed grand slam, a walk-off, a triple-double, a
+   buzzer-beater, a milestone stat line — this is exactly the kind of
+   daily, fresh, substantial content an in-season league should be full
+   of, and it's easy to under-cover if you only search for
+   trades/injuries/suspensions. Search things like "<league> top
+   performances last night", "<league> recap <date>", or a specific
+   team's recap page, in addition to transaction news. Do not let a day
+   where real games were played end up covered only by roster moves —
+   that applies to every in-season league equally, not just whichever one
+   happened to have a big trade recently.
 7. From everything gathered, pick the 2-4 most *substantial and fresh*
    stories for that category — the ones a genuinely engaged fan would want
    to know about today. Substantial means: trades, signings, injuries,
