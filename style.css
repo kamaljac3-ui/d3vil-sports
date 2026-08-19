@@ -111,34 +111,16 @@ header.site {
 header.site .wrap {
   position: relative;
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
 }
 
-.hero-mascot {
-  position: absolute;
-  right: 0;
-  top: -6px;
-  height: 100px;
-  width: auto;
-  pointer-events: none;
-}
-
-@media (min-width: 521px) {
-  header.site .wrap { padding-right: 116px; }
-}
-
-@media (max-width: 520px) {
-  header.site .wrap { padding-right: 68px; }
-  .hero-mascot { height: 60px; top: -3px; }
-}
-
 .brand {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 14px;
   font-size: 24px;
   font-weight: 800;
   letter-spacing: -0.02em;
@@ -146,9 +128,13 @@ header.site .wrap {
 }
 
 .brand .mascot {
-  height: 34px;
+  height: 72px;
   width: auto;
   display: block;
+}
+
+@media (max-width: 520px) {
+  .brand .mascot { height: 52px; }
 }
 
 .brand .accent-char { color: var(--accent); }
