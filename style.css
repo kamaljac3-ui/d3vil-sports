@@ -105,7 +105,8 @@ header.site .wrap {
 }
 
 @media (max-width: 520px) {
-  .hero-mascot { display: none; }
+  header.site .wrap { padding-right: 68px; }
+  .hero-mascot { height: 60px; top: -3px; }
 }
 
 .brand {
