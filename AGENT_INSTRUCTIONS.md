@@ -33,31 +33,63 @@ For each category:
    - Golf:   https://www.espn.com/espn/rss/golf/news
    - Horse Racing: no reliable baseline RSS feed — rely on web search for
      this one (see step 2).
-2. Also do a broad web search for what's actually being talked about around
-   that category in the last 24-48 hours. RSS alone under-covers
-   front-office drama, contract disputes, suspensions, fight-card
-   changes, and off-field storylines — search explicitly for those too.
-   **Off-field stories are in scope, including relationship/dating news
-   about players/fighters, as long as it's a real story multiple outlets
-   are actually covering** — not manufactured filler, and not anything
-   from a single unreliable tabloid source.
-3. Note that CFB, NCAAM, and NCAAW are seasonal — during their offseason,
+2. Also pull from at least 2-3 of these per category, not just ESPN —
+   RSS/search results skew toward whatever's easiest to find, and relying
+   on one feed is exactly how stale stories slip through:
+   - The league's own news page (nba.com/news, nhl.com/news, mlb.com/news,
+     wnba.com/news, nfl.com/news, ncaa.com, pgatour.com, ufc.com/news) —
+     these post daily even in quiet stretches (minor transactions, G-League
+     call-ups, practice-squad moves, injury-report updates) that ESPN's
+     RSS often skips.
+   - A transactions tracker (spotrac.com/<league>/transactions,
+     prosportstransactions.com) to catch same-day roster moves.
+   - A direct, date-anchored search: `"<league> news" "<today's date>"` or
+     `"<league> transactions today"` — not just a generic topic search,
+     which tends to surface whatever's most-linked (often weeks old)
+     rather than what's newest.
+   - For pro leagues in their offseason (e.g. NBA/NHL in July-September),
+     also check: Summer League/prospect news, front-office and coaching
+     staff hires below head-coach level, contract extensions or option
+     decisions hitting deadlines, guaranteed-date roster cuts, and
+     international/preseason news involving the league's players. These
+     are genuinely NEW even when there's no game-result news to report.
+3. **Freshness bar:** prefer stories from the last 24-48 hours. A story is
+   only "current" because a trade or signing *happened* recently — if the
+   underlying event is from weeks or months ago (a June trade, a July
+   signing) and nothing new has occurred since, that story is stale, not
+   news, even if it's still the most-discussed topic in search results.
+   Two ways to handle an old-but-still-relevant storyline:
+   - If there's a genuine new development on it (a status update, a
+     reaction, a related move), write the story around *that* new angle,
+     not a recap of the original event.
+   - If there's truly nothing new, drop it rather than re-reporting
+     old news as if it just happened.
+   This applies most to injuries specifically: report the *latest* status
+   and timeline, not a recap of the original injury news from days/weeks
+   back — search for "<player> injury update" to confirm you have the
+   current state, not the initial report.
+4. Before finalizing, check the last 1-2 prior posts (read
+   `posts/latest.html` and, if it exists, the post before it) so you don't
+   run the same story two nights in a row without a genuinely new
+   development since then.
+5. Note that CFB, NCAAM, and NCAAW are seasonal — during their offseason,
    news will mostly be recruiting, transfer portal, and coaching moves.
    Golf and Horse Racing run nearly year-round but news volume swings
    hard around major weeks (majors/playoffs for golf; Triple Crown season
    and the Breeders' Cup for horse racing) versus quiet weeks. In all
    cases, cover what's actually happening rather than forcing
    in-season-style content.
-4. From everything gathered, pick the 2-4 most *substantial* stories for
-   that category — the ones a genuinely engaged fan would want to know
-   about today. Substantial means: trades, signings, injuries,
+6. From everything gathered, pick the 2-4 most *substantial and fresh*
+   stories for that category — the ones a genuinely engaged fan would want
+   to know about today. Substantial means: trades, signings, injuries,
    suspensions, coaching/front-office moves, contract disputes, retirement
    news, a fight/bout being announced or falling apart, a big
    tournament/stakes-race result or leaderboard swing, or a widely-covered
    off-field storyline. Skip minor transactions and routine recaps with
    no broader significance.
-5. If a category genuinely has nothing substantial that day, it's fine to
-   include just 1 story, or a single short "quiet day" line — don't pad.
+7. If a category genuinely has nothing substantial and fresh that day,
+   it's fine to include just 1 story, or a single short "quiet day" line
+   — don't pad with stale news just to fill space.
 
 ## 3. Write it up — copyright rules (non-negotiable)
 
