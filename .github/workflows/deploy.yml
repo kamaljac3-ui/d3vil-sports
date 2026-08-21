@@ -37,6 +37,15 @@ jobs:
         uses: actions/deploy-pages@v4
 
   newsletter:
+    # Only ever fires on a real push to main — never on a manual
+    # workflow_dispatch re-run. The "detect newly added post" step has no
+    # memory of whether a broadcast was already sent for that post, so
+    # re-running this job manually on the same commit re-sends a brand new
+    # broadcast to every subscriber each time. Manual re-runs are for
+    # testing the deploy job only; test the newsletter HTML locally with
+    # `node -e "require('./scripts/send-newsletter.js').buildEmailHtml(...)"`
+    # instead, which never touches the live Kit API.
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
