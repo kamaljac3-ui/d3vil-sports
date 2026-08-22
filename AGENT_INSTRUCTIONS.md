@@ -68,11 +68,29 @@ For each category:
    and timeline, not a recap of the original injury news from days/weeks
    back — search for "<player> injury update" to confirm you have the
    current state, not the initial report.
-4. Before finalizing, check the last 1-2 prior posts (read
+4. **Verify the year, not just the sourcing.** Cross-referencing a story
+   across 2-3 outlets confirms it's *real* — it does not confirm it's from
+   *this year*. A year-old article (last year's season-opener recap, last
+   year's tournament leaderboard, a recycled injury update) can be
+   reported identically by multiple genuine outlets and pass every
+   corroboration check while still being a full year stale. This has
+   actually happened: a real LSU-Clemson score and a real CPKC Women's
+   Open leaderboard were both pulled from 2025 and nearly published as
+   2026 news, purely because both were well-corroborated across sources —
+   the sourcing was never the problem. For any story built on a specific
+   date, score, leaderboard position, or result, explicitly confirm the
+   event date or article dateline falls within the current window before
+   including it — don't infer recency from search-result placement, a
+   snippet, or a title alone, since search results and cached pages can
+   resurface an old article verbatim with no obvious signal that it's
+   stale. If you can fetch the article, read its actual dateline. If a
+   story's date can't be confirmed as genuinely current, drop it or search
+   again for what actually happened most recently in that storyline.
+5. Before finalizing, check the last 1-2 prior posts (read
    `posts/latest.html` and, if it exists, the post before it) so you don't
    run the same story two nights in a row without a genuinely new
    development since then.
-5. CFB, NCAAM, and NCAAW are seasonal, but "offseason" doesn't mean
+6. CFB, NCAAM, and NCAAW are seasonal, but "offseason" doesn't mean
    "nothing to cover" — widen what counts:
    - Leadership/administrative moves are news year-round, not just head
      coaching changes: athletic director hires and firings are exactly as
@@ -83,7 +101,7 @@ For each category:
      wait for kickoff to start covering it like an in-season sport if
      camp is already generating real news.
    - Once CFB/NCAAM/NCAAW are actually in season, treat them like any
-     other in-season league under point 6 below: a ranked team getting
+     other in-season league under point 7 below: a ranked team getting
      upset by an unranked one, or a standout individual performance in a
      marquee game (e.g. a QB throwing for 400 yards to lead the No. 1
      team to a win), is exactly the kind of substantial, fresh story to
@@ -106,7 +124,7 @@ For each category:
    pullouts, contract disputes — regardless of whether an event is
    actually happening that day, so it should never come up thin just
    because there's no card this week.
-6. **For every category, first check whether that league/sport currently
+7. **For every category, first check whether that league/sport currently
    has games being played** — don't assume from a fixed list, since this
    changes throughout the year (as of this writing, MLB and WNBA are both
    in season with games most nights; NBA, NHL, and the college sports are
@@ -124,7 +142,7 @@ For each category:
    where real games were played end up covered only by roster moves —
    that applies to every in-season league equally, not just whichever one
    happened to have a big trade recently.
-7. From everything gathered, pick the 2-4 most *substantial and fresh*
+8. From everything gathered, pick the 2-4 most *substantial and fresh*
    stories for that category — the ones a genuinely engaged fan would want
    to know about today. Substantial means: trades, signings, injuries,
    suspensions, coaching/front-office/athletic-director moves, contract
@@ -134,7 +152,7 @@ For each category:
    tournament/stakes-race result or leaderboard swing, or a widely-covered
    off-field storyline. Skip minor transactions and routine recaps with
    no broader significance.
-8. If a category genuinely has nothing substantial and fresh that day,
+9. If a category genuinely has nothing substantial and fresh that day,
    it's fine to include just 1 story, or a single short "quiet day" line
    — don't pad with stale news just to fill space.
 
