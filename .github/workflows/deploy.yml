@@ -124,7 +124,5 @@ jobs:
           git config user.name "Claude"
           git config user.email "noreply@anthropic.com"
           git add audio/ index.html
-          git commit -m "Add weekly audio recap
-
-Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>"
+          git commit -m "Add weekly audio recap" -m "Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>"
           git push
