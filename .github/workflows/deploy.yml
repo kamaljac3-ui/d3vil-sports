@@ -72,3 +72,59 @@ jobs:
           KIT_API_KEY: ${{ secrets.KIT_API_KEY }}
           POST_FILE: ${{ steps.detect.outputs.file }}
         run: node scripts/send-newsletter.js
+
+  recap:
+    # Weekly 7-day audio recap. Only fires on a real push (same
+    # duplicate-prevention reasoning as the newsletter job above), only on
+    # Sundays, and only when that push actually added a new daily post —
+    # otherwise a mid-week fix pushed on a Sunday would trigger it too.
+    # Needs contents:write (unlike the other jobs) since it commits the
+    # generated audio file and updated homepage back to the repo.
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Detect recap day
+        id: detect
+        run: |
+          DOW=$(date -u +%u)
+          NEW_POST=$(git diff --name-only --diff-filter=A HEAD~1 HEAD -- 'posts/*.html' | grep -v '^posts/latest.html$' | head -n1)
+          if [ "$DOW" != "7" ]; then
+            echo "Not Sunday (day $DOW) — skipping recap."
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          elif [ -z "$NEW_POST" ]; then
+            echo "No new post in this push — skipping recap."
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Sunday and a new post landed — generating recap."
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Setup Node
+        if: steps.detect.outputs.run == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Generate recap audio
+        if: steps.detect.outputs.run == 'true'
+        env:
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+        run: node scripts/generate-recap-audio.js
+
+      - name: Commit and push recap
+        if: steps.detect.outputs.run == 'true'
+        run: |
+          git config user.name "Claude"
+          git config user.email "noreply@anthropic.com"
+          git add audio/ index.html
+          git commit -m "Add weekly audio recap
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>"
+          git push

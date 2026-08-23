@@ -74,6 +74,37 @@ function toggleTheme(){
       </details>
     </div>
 
+    
+    <div class="recap-box" id="recap-box">
+      <div class="recap-label">Weekly audio recap</div>
+      <div class="recap-sub">Seven days of headlines, updated August 23, 2026</div>
+      <audio id="recapPlayer" controls src="audio/latest-recap.mp3"></audio>
+      <div class="recap-speed-row">
+        <span class="recap-speed-label">Speed</span>
+        <div class="recap-speed-options">
+          <button class="recap-speed-btn" data-speed="0.75">0.75x</button>
+          <button class="recap-speed-btn active" data-speed="1">1x</button>
+          <button class="recap-speed-btn" data-speed="1.25">1.25x</button>
+          <button class="recap-speed-btn" data-speed="1.5">1.5x</button>
+          <button class="recap-speed-btn" data-speed="2">2x</button>
+        </div>
+      </div>
+    </div>
+    <script>
+      (function(){
+        var player = document.getElementById('recapPlayer');
+        var buttons = document.querySelectorAll('.recap-speed-btn');
+        buttons.forEach(function(btn){
+          btn.addEventListener('click', function(){
+            player.playbackRate = parseFloat(btn.dataset.speed);
+            buttons.forEach(function(b){ b.classList.remove('active'); });
+            btn.classList.add('active');
+          });
+        });
+      })();
+    </script>
+
+
     <div id="posts">
       <!-- POSTS:START -->
       <a class="post-card" href="posts/2026-08-23.html">
