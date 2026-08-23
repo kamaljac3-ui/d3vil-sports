@@ -222,7 +222,7 @@ In `index.html`, insert a new `.post-card` immediately after the
 ```
 
 Leave every earlier `.post-card` in place below it for now — pruning down
-to the last 5 happens in step 7, after the "latest" alias is updated.
+to the last 7 happens in step 7, after the "latest" alias is updated.
 
 ## 6. Update the "latest" alias
 
@@ -240,20 +240,22 @@ cp posts/<date>.html posts/latest.html
 -Force` instead.) Do this every day — it's the one file in `posts/` that
 *is* meant to be overwritten rather than appended to.
 
-## 7. Enforce 5-day retention
+## 7. Enforce 7-day retention
 
-The site keeps only the 5 most recent daily posts — a rolling window, not
-a permanent archive. After updating `posts/latest.html`:
+The site keeps only the 7 most recent daily posts — a rolling window, not
+a permanent archive. (This window is also the source for a separate,
+not-yet-automated 7-day audio recap — don't shrink it below 7 without
+checking that dependency first.) After updating `posts/latest.html`:
 
 1. List every dated post file (this excludes `latest.html`); since
    filenames are `YYYY-MM-DD.html`, sorting them sorts oldest to newest:
    ```
    ls posts/*.html | grep -v 'posts/latest.html' | sort
    ```
-2. If there are more than 5, everything except the last 5 lines of that
+2. If there are more than 7, everything except the last 7 lines of that
    output needs to go:
    ```
-   ls posts/*.html | grep -v 'posts/latest.html' | sort | head -n -5
+   ls posts/*.html | grep -v 'posts/latest.html' | sort | head -n -7
    ```
 3. For each file that comes back from that command:
    - Remove it: `git rm posts/<date>.html`
@@ -261,7 +263,7 @@ a permanent archive. After updating `posts/latest.html`:
      whole `<a class="post-card" href="posts/<date>.html">...</a>`
      element, including its `.date`, `<h2>`, and `<p>` — delete the full
      block, don't leave a broken/empty entry behind.
-4. If there are 5 or fewer dated posts total (true for the first several
+4. If there are 7 or fewer dated posts total (true for the first several
    days after this policy started), there's nothing to remove — skip this
    step.
 
