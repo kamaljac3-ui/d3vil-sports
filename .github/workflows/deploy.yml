@@ -88,6 +88,7 @@ jobs:
     # rather than relying on a second run — hence pages/id-token perms
     # and its own environment block, mirroring the `deploy` job above.
     if: github.event_name == 'push'
+    needs: deploy
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -142,12 +143,22 @@ jobs:
       # This job's own push above won't trigger the `deploy` job (see note
       # on the job itself), so deploy the updated site directly here —
       # the working tree already has the just-committed changes since we
-      # never re-checked-out after committing.
+      # never re-checked-out after committing. `needs: deploy` above plus
+      # a distinct artifact name here are both required: without them,
+      # this job's own upload-pages-artifact collides with the `deploy`
+      # job's identically-named "github-pages" artifact from the same
+      # workflow run, and deploy-pages fails with "Multiple artifacts
+      # named github-pages were unexpectedly found" — this happened for
+      # real on the first true unattended Sunday run (2026-09-13): the
+      # commit landed fine, but this step failed, so the live site kept
+      # serving the prior week's recap with no visible error anywhere
+      # except this job's own red X.
       - name: Upload artifact
         if: steps.detect.outputs.run == 'true'
         uses: actions/upload-pages-artifact@v3
         with:
           path: .
+          name: recap-pages
 
       - name: Setup Pages
         if: steps.detect.outputs.run == 'true'
@@ -157,3 +168,5 @@ jobs:
         if: steps.detect.outputs.run == 'true'
         id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          artifact_name: recap-pages
