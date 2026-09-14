@@ -187,6 +187,15 @@ async function main() {
       description: `Auto-sent for ${postFile}`,
       public: false,
       send_at: new Date().toISOString(),
+      // Scoped to the "sports-subscriber" tag only (id 23371585) — this
+      // account also holds D3vil World News subscribers under a separate
+      // "world-news-subscriber" tag (23371637), and the two lists must
+      // never cross-pollinate. Added 2026-09-14 after discovering this
+      // script had no filter at all and was defaulting to the whole
+      // account. See AGENT_INSTRUCTIONS.md's newsletter section.
+      subscriber_filter: [
+        { all: [{ type: "tag", ids: [23371585] }] },
+      ],
     }),
   });
 
