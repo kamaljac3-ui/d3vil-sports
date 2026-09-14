@@ -284,6 +284,19 @@ added file under `posts/`. This is fully automatic — do not send an email,
 call any newsletter API, or otherwise duplicate this. Just commit and push
 the post as normal and the workflow handles the rest.
 
+**Audience: sent to the whole Kit account, not just Sports subscribers
+(changed 2026-09-14, kamal's explicit choice).** The broadcast used to be
+scoped to the `sports-subscriber` tag (id 23371585) only via
+`subscriber_filter` in `scripts/send-newsletter.js`. That got dropped the
+same day D3vil World News' script made the identical change, because
+World News has no working auto-tag automation yet (Kit's plan caps Visual
+Automations at 1, already used here by Sports) and tag-scoping was
+silently excluding real World News subscribers. Until that's fixed, both
+sites' broadcasts go to everyone on the account. If the two audiences are
+ever meant to diverge again, restore the `subscriber_filter` block in
+**both** repos' scripts together (see git history around 2026-09-14) —
+not just one, or they'll disagree on scope.
+
 ## 9. If something fails
 
 If an RSS feed is unreachable or a search turns up nothing usable for a

@@ -187,15 +187,17 @@ async function main() {
       description: `Auto-sent for ${postFile}`,
       public: false,
       send_at: new Date().toISOString(),
-      // Scoped to the "sports-subscriber" tag only (id 23371585) — this
-      // account also holds D3vil World News subscribers under a separate
-      // "world-news-subscriber" tag (23371637), and the two lists must
-      // never cross-pollinate. Added 2026-09-14 after discovering this
-      // script had no filter at all and was defaulting to the whole
-      // account. See AGENT_INSTRUCTIONS.md's newsletter section.
-      subscriber_filter: [
-        { all: [{ type: "tag", ids: [23371585] }] },
-      ],
+      // DELIBERATELY UNSCOPED (whole account) as of 2026-09-14, by kamal's
+      // explicit choice — both D3vil Sports and D3vil World News now send
+      // their daily dispatch to every subscriber on the account, not just
+      // their own tag ("sports-subscriber" 23371585 / "world-news-subscriber"
+      // 23371637). Reason: World News still has no working auto-tag
+      // automation (Kit's 1-Visual-Automation plan cap), so scoping to tags
+      // was silently excluding real subscribers. Revert to the old
+      // tag-scoped subscriber_filter (see git history around this line, or
+      // World News' send-newsletter.js pre-2026-09-14) once auto-tagging is
+      // fixed or the two lists are meant to diverge again. See
+      // AGENT_INSTRUCTIONS.md's newsletter section.
     }),
   });
 
