@@ -169,6 +169,10 @@ function buildEmailHtml(postFile) {
 async function main() {
   const postFile = process.env.POST_FILE;
   const apiKey = process.env.KIT_API_KEY;
+  // Optional one-off override for test sends (see .github/workflows/
+  // test-send.yml) — scopes the broadcast to a single Kit tag instead of
+  // the whole account. Leave unset for the normal automated daily send.
+  const targetTagId = process.env.TARGET_TAG_ID;
   if (!postFile) throw new Error("POST_FILE not set");
   if (!apiKey) throw new Error("KIT_API_KEY not set");
 
@@ -198,6 +202,9 @@ async function main() {
       // World News' send-newsletter.js pre-2026-09-14) once auto-tagging is
       // fixed or the two lists are meant to diverge again. See
       // AGENT_INSTRUCTIONS.md's newsletter section.
+      ...(targetTagId
+        ? { subscriber_filter: [{ all: [{ type: "tag", ids: [Number(targetTagId)] }] }] }
+        : {}),
     }),
   });
 

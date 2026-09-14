@@ -1,0 +1,30 @@
+name: Send test newsletter (single tag/recipient)
+
+# Manual-only. Lets kamal preview a real Kit broadcast scoped to one tag
+# (e.g. the "owner-test-send" tag, id 23420871, applied to
+# kamaljac3@gmail.com) instead of the whole account. Added 2026-09-14.
+# Does NOT touch the normal push-triggered `newsletter` job in deploy.yml.
+
+on:
+  workflow_dispatch:
+    inputs:
+      post_file:
+        description: "Post to send, e.g. posts/2026-09-14.html"
+        required: true
+      target_tag_id:
+        description: "Kit tag ID to scope the send to (e.g. 23420871 for owner-test-send). Leave blank to send to the WHOLE account — be careful."
+        required: false
+
+jobs:
+  send-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Send test broadcast
+        env:
+          KIT_API_KEY: ${{ secrets.KIT_API_KEY }}
+          POST_FILE: ${{ inputs.post_file }}
+          TARGET_TAG_ID: ${{ inputs.target_tag_id }}
+        run: node scripts/send-newsletter.js
