@@ -1,4 +1,10 @@
-# D3vil Sports — daily update procedure
+# StateForty8 Sports — daily update procedure
+
+(Rebranded from "D3vil Sports" on 2026-09-15 — same repo, same site URL,
+same automation; just new name/logo. Masthead markup: `<img class="mascot"
+src="assets/stateforty8-mark.png" alt="StateForty8 Sports logo">` +
+`<span class="brand-text">STATE<span class="accent-char">FORTY8</span>
+SPORTS</span>`. Favicon: `assets/stateforty8-favicon.png`.)
 
 This file is the complete, self-contained procedure for producing one day's
 roundup. Follow it exactly so the site stays consistent day to day.
@@ -186,7 +192,7 @@ racing is `HorseRacing` — no space, no hyphen — while its id is
 
 For the new file `posts/<date>.html`:
 
-- Set `<title>` to `Month D, YYYY — D3vil Sports`.
+- Set `<title>` to `Month D, YYYY — StateForty8 Sports`.
 - Set the meta description to a one-sentence summary of the day's biggest
   headline across all categories.
 - Set `.post-header .date` to the human-readable date and `<h1>` to a short

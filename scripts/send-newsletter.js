@@ -102,13 +102,20 @@ function buildEmailHtml(postFile) {
         <!-- Masthead -->
         <tr>
           <td>
-            <table role="presentation" cellpadding="0" cellspacing="0">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
               <tr>
-                <td width="52" style="vertical-align:middle;">
-                  <img src="${SITE_URL}/assets/devil-mascot.png" width="44" alt="" style="display:block; border:0;">
+                <td align="center" style="padding-bottom:8px;">
+                  <img src="${SITE_URL}/assets/stateforty8-mark.png" width="90" alt="StateForty8 Sports" style="display:inline-block; border:0;">
                 </td>
-                <td style="vertical-align:middle; padding-left:10px;">
-                  <span style="font-family:Georgia,'Times New Roman',serif; font-size:30px; font-weight:bold; color:#f5ede9; letter-spacing:-0.5px;">D<span style="color:#ff5a3c;">3</span>vil Sports</span>
+              </tr>
+              <tr>
+                <td align="center">
+                  <span style="font-family:Impact,'Arial Narrow Bold',Arial,sans-serif; font-size:32px; font-weight:bold; color:#f5ede9; letter-spacing:0.5px;">STATE<span style="color:#ff5a3c;">FORTY8</span></span>
+                </td>
+              </tr>
+              <tr>
+                <td align="center" style="padding-top:2px;">
+                  <span style="font-family:Impact,'Arial Narrow Bold',Arial,sans-serif; font-size:16px; color:#b09a92; letter-spacing:6px;">SPORTS</span>
                 </td>
               </tr>
             </table>
@@ -154,7 +161,7 @@ function buildEmailHtml(postFile) {
         <!-- Footer -->
         <tr>
           <td align="center" style="font-family:Georgia,'Times New Roman',serif; font-size:11px; letter-spacing:0.5px; color:#7a655c; line-height:1.7;">
-            D3VIL SPORTS &mdash; NFL &middot; CFB &middot; NBA &middot; NCAAM &middot; WNBA &middot; NCAAW &middot; MLB &middot; NHL &middot; UFC &middot; BOXING &middot; GOLF &middot; HORSE RACING
+            STATEFORTY8 SPORTS &mdash; NFL &middot; CFB &middot; NBA &middot; NCAAM &middot; WNBA &middot; NCAAW &middot; MLB &middot; NHL &middot; UFC &middot; BOXING &middot; GOLF &middot; HORSE RACING
           </td>
         </tr>
 
@@ -185,7 +192,7 @@ async function main() {
       "X-Kit-Api-Key": apiKey,
     },
     body: JSON.stringify({
-      subject: `D3vil Sports — ${headline}`,
+      subject: `StateForty8 Sports — ${headline}`,
       preview_text: description.slice(0, 140),
       content: emailHtml,
       description: `Auto-sent for ${postFile}`,
