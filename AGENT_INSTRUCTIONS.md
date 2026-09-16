@@ -1,24 +1,58 @@
-# StateForty8 Sports — daily update procedure
+# 48th State Sports — daily update procedure
 
-(Rebranded from "D3vil Sports" on 2026-09-15 — same repo, same site URL,
-same automation; just new name/logo. Logo mark is a saguaro cactus inside
-an Arizona-state-outline border (not a plain shape — matches the brand
-name), with an orange sun ring accent. **Two colorways, both required —
-never use just one**: `stateforty8-mark-dark.png` (cream lines, for the
-default dark theme) and `stateforty8-mark-light.png` (charcoal lines,
-for the toggled light theme) — the cream variant is nearly invisible on
-the light theme's `--bg` (`#f5efe9` is almost the same color as the
-icon's `#f5ede9`), so both must always be present together, swapped via
-CSS (`.mascot-dark`/`.mascot-light`, same pattern as the existing sun/
-moon toggle icons) — never reference a single `stateforty8-mark.png`.
+(Renamed to "48th State Sports" on 2026-09-16 — same repo, same site URL,
+same automation. Previously "StateForty8 Sports" (2026-09-15) and "D3vil
+Sports" before that. The StateForty8 spelling was dropped because it is
+phonetically identical to STATE FORTY EIGHT, a registered trademark of a
+Phoenix apparel company; see portfolio/BRAND.md for the full reasoning.
+
 Masthead markup, stacked icon-over-wordmark:
-`<img class="mascot mascot-dark" src="assets/stateforty8-mark-dark.png" alt="StateForty8 Sports logo">`
-+ `<img class="mascot mascot-light" src="assets/stateforty8-mark-light.png" alt="StateForty8 Sports logo">`
-+ `<span class="brand-text">STATE<span class="accent-char">FORTY8</span></span>`
-+ `<span class="brand-sub">SPORTS</span>` — icon pair, then STATEFORTY8,
-then SPORTS. Newsletter emails have a fixed (non-toggleable) dark
-background, so `scripts/send-newsletter.js` always uses the dark variant
-only. Favicon: `assets/stateforty8-favicon.png`.)
+`<img class="mascot mascot-dark" src="assets/48th-state-mark-dark.png" alt="48th State Sports logo">`
++ `<img class="mascot mascot-light" src="assets/48th-state-mark-light.png" alt="48th State Sports logo">`
++ `<span class="brand-text"><span class="accent-char">48</span>TH STATE</span>`
++ `<span class="brand-sub">SPORTS</span>` — icon pair, then 48TH STATE,
+then SPORTS.
+
+**Two colorways, both required — never use just one**:
+`48th-state-mark-dark.png` (cream lines, for the default dark theme) and
+`48th-state-mark-light.png` (charcoal lines, for the toggled light theme)
+— the cream variant is nearly invisible on the light theme's `--bg`
+(`#f5efe9` is almost the same color as the icon's `#f5ede9`), so both must
+always be present together, swapped via CSS (`.mascot-dark`/`.mascot-light`,
+same pattern as the sun/moon toggle icons). Never reference a single
+`48th-state-mark.png`.
+
+**The mark files are cropped to the artwork. Do not replace them with
+padded exports.** The old `stateforty8-mark-*.png` files were 480x480
+canvases holding art that occupied only 200x236 at offset (140,64) — 180px
+of invisible transparent padding below the art. That padding is why every
+previous attempt to size the icon against the wordmark looked wrong: CSS was
+sizing the canvas, not the art. `48th-state-mark-*.png` are the same
+drawings cropped to their alpha bounds (200x236, 100% fill).
+
+The old `stateforty8-mark-*.png` files are kept in `assets/` on purpose and
+must not be deleted — newsletters already delivered to inboxes load their
+masthead from those exact URLs. Nothing in the repo references them any
+more. If the art is ever redrawn, export it trimmed, add it under a new
+name, and leave the old files alone.
+
+**Do not hardcode the masthead icon width.** `.brand .mascot` uses
+`width:0; min-width:100%` so the icon always matches the wordmark's rendered
+width automatically. Renaming the brand or changing the typeface needs no
+CSS change. The newsletter is the exception — email clients need a fixed px
+width, so `scripts/send-newsletter.js` carries one, with a comment saying
+how it was chosen.
+
+Newsletter emails have a fixed (non-toggleable) dark background, so
+`scripts/send-newsletter.js` always uses the dark variant only. Favicon:
+`assets/stateforty8-favicon.png`.
+
+**Open item — the logo art.** The mark is a saguaro inside an Arizona state
+outline. STATE FORTY EIGHT LLC's registered design mark (Reg. 4389052) is an
+Arizona outline with stylized text inside. The outline is used widely across
+Arizona and is not ownable on its own, but outline-as-container is the one
+structural overlap left. Redrawing without the outline would remove it. Not
+done.)
 
 This file is the complete, self-contained procedure for producing one day's
 roundup. Follow it exactly so the site stays consistent day to day.
@@ -206,7 +240,7 @@ racing is `HorseRacing` — no space, no hyphen — while its id is
 
 For the new file `posts/<date>.html`:
 
-- Set `<title>` to `Month D, YYYY — StateForty8 Sports`.
+- Set `<title>` to `Month D, YYYY — 48th State Sports`.
 - Set the meta description to a one-sentence summary of the day's biggest
   headline across all categories.
 - Set `.post-header .date` to the human-readable date and `<h1>` to a short

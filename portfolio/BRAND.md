@@ -1,64 +1,78 @@
 # Naming architecture
 
-Settled 2026-09-16. Recorded here because it took several passes and the
-reasoning matters more than the conclusion.
+Settled 2026-09-16, after two rejected candidates. Recorded because the
+reasoning matters more than the conclusion, and because this is the third
+rename in three days.
 
 ## Structure
 
 | Property | Name | Status |
 |---|---|---|
-| Parent / portfolio | **State 48 Studio** | this folder |
-| Spinoff | **StateForty8 Sports** | live, publishing daily |
-| Spinoff | **StateForty8 World News** | idea, not started |
+| Parent / portfolio | **48th State Studio** | this folder |
+| Spinoff | **48th State Sports** | live, publishing daily (this repo) |
+| Spinoff | **48th State World News** | live, separate repo |
 
-Spinoffs keep the StateForty8 spelling. The parent uses the numeral.
+One form across all three.
 
-## Why the parent and spinoffs are spelled differently
+## What was rejected and why
 
-They don't have to be — this is worth revisiting once, then leaving alone.
-The two forms sit in genuinely different positions:
+**"StateForty8"** — phonetically identical to STATE FORTY EIGHT, a
+registered trademark of State Forty Eight LLC, a Phoenix apparel company
+founded 2013 that also sells screen printing, embroidery, and art &
+branding services. Registrations 4389052 (Class 025, T-shirts — the mark is
+an Arizona outline with stylized text inside) and 5074682 (Class 035,
+online clothing retail). Swapping `8` for `Eight` is not a meaningful
+difference: confusion is judged on sound, appearance and meaning, and a
+numeral-for-word substitution is treated as equivalent.
 
-- **"State Forty Eight"** (spelled out) is a registered trademark of State
-  Forty Eight LLC, a Phoenix apparel company founded 2013 that also sells
-  screen printing, embroidery, and art & branding services. Registrations
-  4389052 (Class 025, T-shirts) and 5074682 (Class 035, online clothing
-  retail). "StateForty8" is phonetically identical to it.
-- **"State 48"** (numeral) is a geographic descriptor nobody owns. State 48
-  Brewery, State 48 Tavern, State 48 FC, State 48 Sporting FC, State 48 Air
-  Conditioning, The State 48 News, and others all coexist.
+**"State 48"** — clears the phonetic problem but is occupied in every
+vertical we wanted:
 
-The studio sells design and branding services, which overlaps what State
-Forty Eight LLC offers — so the studio is the property that most needed to
-move off the spelled-out form.
+| Vertical | Occupant |
+|---|---|
+| Sports | State 48 FC, State 48 Sporting FC (Phoenix soccer clubs, in active use) |
+| News | The State 48 News (thestate48news.com — Arizona Substack, thousands of subscribers) |
+| Domain | state48sports.com held by a third party, under construction |
+| Other | State 48 Brewery, State 48 Tavern, State 48 Motorsports, State 48 Air Conditioning |
 
-The spinoffs are publishing (Class 041), not apparel or branding services,
-so the name sits further from those registrations there.
+**"48th State"** — the formal construction rather than the colloquial one
+locals actually say, which is exactly why it is emptier. A search across
+sports media, news and design studios turned up nothing. The only Arizona
+business found is 48th State Automotive (Mesa used car dealer), which holds
+48thstate.com but is in an unrelated trade.
 
-## Known collisions to stay aware of
+## Known limitation
 
-- **The State 48 News** (thestate48news.com) — Arizona Substack newsletter
-  with a podcast. Directly occupies the news/newsletter lane under the
-  numeral form. This is why World News is NOT "State 48 News".
-- **State 48 FC / State 48 Sporting FC** — Phoenix soccer clubs, in active
-  use, with common-law rights in "State 48" for sports services.
-- **state48sports.com** — under construction, owned by a third party (not
-  us; confirmed 2026-09-16). A registered domain is not a trademark, so an
-  unlaunched site carries no enforceable rights — but the domain is gone,
-  and whoever is building it may launch into the same vertical. Keeping the
-  sports property on StateForty8 sidesteps this entirely.
+"48th State" is still a geographic descriptor, so it is a legally weak mark
+— it cannot stop others from using it and will never be fully ownable. It
+is less *occupied* today, but the ceiling is the same as State 48's. This
+was a knowing trade of distinctiveness for availability plus Arizona
+identity. If the studio ever becomes the main business, a distinctive,
+invented parent name would serve better.
 
-## Open item: the logo
+It also remains a conceptual synonym of "State Forty Eight". Trademark
+analysis weighs meaning alongside sound and appearance — but meaning
+overlap alone rarely carries a case when sound and appearance clearly
+differ and the classes differ (publishing and design services vs. apparel).
 
-The current StateForty8 Sports mark is a saguaro inside an Arizona state
-outline. State Forty Eight LLC's registered mark (4389052) is an Arizona
-outline with stylized text inside. The outline alone is used across the
-state and isn't ownable, but outline + a phonetically identical name is the
-closest point of contact between the two brands.
+## Open item: the logo art
 
-Changing the mark is independent of the name and removes most of the
-overlap on its own. Not done yet.
+The mark is a saguaro inside an Arizona state outline. State Forty Eight
+LLC's registered design mark is an Arizona outline with stylized text
+inside. The outline is used across Arizona and is not ownable on its own,
+but outline-as-container is the one structural overlap remaining, and it
+survives every rename. Redrawing without the outline removes it and costs
+no brand equity. Not done.
+
+## Asset filenames
+
+Logo files are still named `stateforty8-*.png` on purpose. Newsletters
+already delivered load their masthead from those exact URLs; renaming the
+files breaks the logo in every email already sent. Filenames are not
+user-visible. If the art is redrawn, add new files rather than renaming.
 
 ## Not legal advice
 
-No clearance search has been run. A trademark attorney can do one for
-roughly $300-600 before any money goes into an LLC, signage, or domains.
+No clearance search has been run. Web searches are not clearance searches.
+A trademark attorney can do a real one for roughly $300-600 before money
+goes into an LLC, signage, or domains. Still worth doing.

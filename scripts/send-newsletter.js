@@ -104,17 +104,23 @@ function buildEmailHtml(postFile) {
           <td>
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
               <tr>
-                <td align="center" style="padding-bottom:8px;">
-                  <img src="${SITE_URL}/assets/stateforty8-mark-dark.png" width="90" alt="StateForty8 Sports" style="display:inline-block; border:0;">
+                <td align="center" style="padding-bottom:12px;">
+                  <!-- Width is matched to the wordmark's rendered width. Impact renders
+                       "48TH STATE" at 32px around 158px; clients without Impact fall back
+                       wider (~190px). 165px sits between the two so the icon reads as a
+                       matched pair with the wordmark either way. Email needs a fixed px
+                       width here -- the site's CSS auto-matching trick does not survive
+                       Outlook. -->
+                  <img src="${SITE_URL}/assets/48th-state-mark-dark.png" width="165" alt="48th State Sports" style="display:block; margin:0 auto; border:0;">
                 </td>
               </tr>
               <tr>
                 <td align="center">
-                  <span style="font-family:Impact,'Arial Narrow Bold',Arial,sans-serif; font-size:32px; font-weight:bold; color:#f5ede9; letter-spacing:0.5px;">STATE<span style="color:#ff5a3c;">FORTY8</span></span>
+                  <span style="font-family:Impact,'Arial Narrow Bold',Arial,sans-serif; font-size:32px; font-weight:bold; color:#f5ede9; letter-spacing:0.5px;"><span style="color:#ff5a3c;">48</span>TH STATE</span>
                 </td>
               </tr>
               <tr>
-                <td align="center" style="padding-top:2px;">
+                <td align="center" style="padding-top:4px;">
                   <span style="font-family:Impact,'Arial Narrow Bold',Arial,sans-serif; font-size:16px; color:#b09a92; letter-spacing:6px;">SPORTS</span>
                 </td>
               </tr>
@@ -161,7 +167,7 @@ function buildEmailHtml(postFile) {
         <!-- Footer -->
         <tr>
           <td align="center" style="font-family:Georgia,'Times New Roman',serif; font-size:11px; letter-spacing:0.5px; color:#7a655c; line-height:1.7;">
-            STATEFORTY8 SPORTS &mdash; NFL &middot; CFB &middot; NBA &middot; NCAAM &middot; WNBA &middot; NCAAW &middot; MLB &middot; NHL &middot; UFC &middot; BOXING &middot; GOLF &middot; HORSE RACING
+            48TH STATE SPORTS &mdash; NFL &middot; CFB &middot; NBA &middot; NCAAM &middot; WNBA &middot; NCAAW &middot; MLB &middot; NHL &middot; UFC &middot; BOXING &middot; GOLF &middot; HORSE RACING
           </td>
         </tr>
 
@@ -192,21 +198,21 @@ async function main() {
       "X-Kit-Api-Key": apiKey,
     },
     body: JSON.stringify({
-      subject: `StateForty8 Sports — ${headline}`,
+      subject: `48th State Sports — ${headline}`,
       preview_text: description.slice(0, 140),
       content: emailHtml,
       description: `Auto-sent for ${postFile}`,
       public: false,
       send_at: new Date().toISOString(),
       // DELIBERATELY UNSCOPED (whole account) as of 2026-09-14, by kamal's
-      // explicit choice — both D3vil Sports and D3vil World News now send
+      // explicit choice — both 48th State Sports and 48th State World News now send
       // their daily dispatch to every subscriber on the account, not just
       // their own tag ("sports-subscriber" 23371585 / "world-news-subscriber"
       // 23371637). Reason: World News still has no working auto-tag
       // automation (Kit's 1-Visual-Automation plan cap), so scoping to tags
       // was silently excluding real subscribers. Revert to the old
       // tag-scoped subscriber_filter (see git history around this line, or
-      // World News' send-newsletter.js pre-2026-09-14) once auto-tagging is
+      // World News's send-newsletter.js pre-2026-09-14) once auto-tagging is
       // fixed or the two lists are meant to diverge again. See
       // AGENT_INSTRUCTIONS.md's newsletter section.
       ...(targetTagId

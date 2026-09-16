@@ -1,4 +1,4 @@
-name: Deploy D3vil Sports to GitHub Pages
+name: Deploy 48th State Sports to GitHub Pages
 
 on:
   push:

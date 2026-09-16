@@ -1,4 +1,4 @@
-/* D3vil Sports — shared styles */
+/* 48th State Sports — shared styles */
 
 :root {
   --bg: #0c0605;
@@ -130,13 +130,17 @@ header.site .wrap {
 }
 
 .brand .mascot {
-  /* Fixed width matching .brand-text's rendered width (~168px) -- the
-     text's font-size never changes with viewport, so the icon shouldn't
-     either, or the two drift out of proportion at narrow widths. */
-  width: 168px;
+  /* Width tracks the wordmark automatically instead of being hardcoded.
+     .brand is a centered flex column, so it sizes to its widest in-flow
+     child -- the wordmark. `width:0` keeps the icon's own intrinsic 480px
+     out of that calculation, then `min-width:100%` paints it at exactly
+     the resulting width. Rename the brand or swap the typeface and the
+     icon follows on its own; there is no magic number left to drift. */
+  width: 0;
+  min-width: 100%;
   height: auto;
   display: block;
-  margin-bottom: -8px;
+  margin-bottom: 10px;
 }
 
 /* Two colorways of the mark: cream-on-dark (default) and charcoal-on-light

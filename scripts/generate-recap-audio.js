@@ -52,7 +52,7 @@ function buildRecapScript() {
   }
 
   let script = [];
-  script.push(`D3vil Sports, seven day recap.`);
+  script.push(`48th State Sports, seven day recap.`);
   script.push(`Here's what happened across every league over the last seven days.`);
 
   for (const file of lastN) {
