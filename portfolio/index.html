@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>(function(){if(localStorage.getItem('pf-theme')==='light')document.documentElement.setAttribute('data-theme','light');})();</script>
+<title>StateForty8 — design, build, and ship</title>
+<meta name="description" content="Brand, front-end, and the automation that keeps a project running after launch. Portfolio of shipped work and working ideas.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" type="image/png" href="../assets/stateforty8-favicon.png">
+</head>
+<body>
+
+<button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle light/dark mode">
+  <span class="icon-moon">&#127769;</span>
+  <span class="icon-sun">&#9728;</span>
+</button>
+<script>
+function toggleTheme(){
+  var root = document.documentElement;
+  if (root.getAttribute('data-theme') === 'light') {
+    root.removeAttribute('data-theme');
+    localStorage.setItem('pf-theme', 'dark');
+  } else {
+    root.setAttribute('data-theme', 'light');
+    localStorage.setItem('pf-theme', 'light');
+  }
+}
+</script>
+
+<div class="spectrum-bar"></div>
+
+<header class="site">
+  <div class="wrap">
+    <a class="brand" href="./">
+      <span class="brand-text">STATE<span class="accent-char">FORTY8</span></span>
+      <!-- NAME SLOT: if you go with a suffix, it goes here. e.g. "STUDIO" / "WEB DESIGN" -->
+      <span class="brand-sub">STUDIO</span>
+    </a>
+    <nav class="site-nav">
+      <a href="#work">Work</a>
+      <a href="#ideas">Ideas</a>
+      <a href="#about">About</a>
+      <a href="#contact" class="nav-cta">Get in touch</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <!-- ===================== HERO ===================== -->
+  <section class="hero">
+    <div class="wrap">
+      <div class="eyebrow">Design &amp; build &middot; Phoenix, Arizona</div>
+      <h1>I don't pitch ideas.<br><span class="hl">I ship them.</span></h1>
+      <p class="lede">
+        A daily sports publication that writes and mails itself. A fitness app.
+        Newsletters people actually open. Sites for real businesses. Same person,
+        same habit: take the idea all the way to a live URL &mdash; brand, front-end,
+        and the machinery that keeps it running once I walk away.
+      </p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="#work">See the work</a>
+        <a class="btn btn-ghost" href="#ideas">See what's still cooking</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== THROUGH-LINE ===================== -->
+  <section class="band">
+    <div class="wrap">
+      <div class="band-grid">
+        <div class="band-lead">
+          <h2>Most portfolios stop at the mockup.</h2>
+          <p>
+            Mine start there. Every project below went from a sketch to something
+            live, with real content going out on a real schedule. The design is
+            half of it &mdash; the other half is the plumbing nobody sees.
+          </p>
+        </div>
+        <ul class="band-list">
+          <li><strong>Identity</strong><span>Marks, type, color systems, the whole voice.</span></li>
+          <li><strong>Front-end</strong><span>Fast, hand-built, responsive, light and dark.</span></li>
+          <li><strong>Editorial</strong><span>Newsletters, copy, and a publishing rhythm that holds.</span></li>
+          <li><strong>Automation</strong><span>The scripts that make it run daily without me.</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== WORK ===================== -->
+  <section id="work" class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Shipped</h2>
+        <p>Live projects, not concepts.</p>
+      </div>
+
+      <!-- ---------- CASE STUDY 1: real, filled in from the actual project ---------- -->
+      <article class="case case-feature">
+        <div class="case-media">
+          <img src="../assets/stateforty8-mark-dark.png" alt="StateForty8 Sports mark" class="case-mark mark-dark">
+          <img src="../assets/stateforty8-mark-light.png" alt="StateForty8 Sports mark" class="case-mark mark-light">
+        </div>
+        <div class="case-body">
+          <div class="case-kicker">Live &middot; publishing daily</div>
+          <h3>StateForty8 Sports</h3>
+          <p class="case-sum">
+            A daily roundup across twelve leagues &mdash; NFL, CFB, NBA, NCAAM, WNBA,
+            NCAAW, MLB, NHL, UFC, Boxing, Golf, and Horse Racing. One email a day,
+            no filler, every story linked back to its source.
+          </p>
+          <ul class="case-points">
+            <li>Designed the identity from scratch: a saguaro inside the Arizona
+                outline, with a sun-ring accent and two colorways that swap with the
+                site theme.</li>
+            <li>Built the front-end by hand &mdash; no framework, no build step.
+                Per-league color coding, dark/light toggle, sub-second loads.</li>
+            <li>Wrote the pipeline: multi-source news ingestion, a daily post
+                generator, and a newsletter send that goes out on its own.</li>
+            <li>Added a weekly audio recap with playback-speed controls, generated
+                from the week's headlines.</li>
+          </ul>
+          <div class="tags">
+            <span class="tag">Identity</span>
+            <span class="tag">Front-end</span>
+            <span class="tag">Editorial</span>
+            <span class="tag">Automation</span>
+          </div>
+          <a class="case-link" href="../index.html">Visit the site &rarr;</a>
+        </div>
+      </article>
+
+      <!-- ---------- SLOTS: swap in your real projects ---------- -->
+      <div class="case-grid">
+
+        <article class="case case-sm slot">
+          <div class="case-kicker">Product &middot; mobile</div>
+          <h3>The fitness app</h3>
+          <p class="case-sum">
+            <em>Slot &mdash; needs your screens and a two-line description.</em>
+            Lead with the problem it solves, then show three screens: the one
+            people open every day, the one that took the most design work, and
+            the one you're proudest of.
+          </p>
+          <div class="tags">
+            <span class="tag">Product design</span>
+            <span class="tag">UI</span>
+            <span class="tag">Mobile</span>
+          </div>
+        </article>
+
+        <article class="case case-sm slot">
+          <div class="case-kicker">Editorial &middot; email</div>
+          <h3>Newsletters</h3>
+          <p class="case-sum">
+            <em>Slot &mdash; pick your two or three best sends.</em> Email design
+            is its own craft: it has to survive Outlook, dark mode, and a
+            four-inch screen. Show a full-height render of one and say what the
+            open rate did.
+          </p>
+          <div class="tags">
+            <span class="tag">Email design</span>
+            <span class="tag">Copy</span>
+            <span class="tag">Templating</span>
+          </div>
+        </article>
+
+        <article class="case case-sm slot">
+          <div class="case-kicker">Client work</div>
+          <h3>Website designs</h3>
+          <p class="case-sum">
+            <em>Slot &mdash; the ones from your Downloads folder.</em> One card per
+            site, each with a full-page screenshot, who it was for, and the single
+            decision that made it work. Three strong ones beat eight okay ones.
+          </p>
+          <div class="tags">
+            <span class="tag">Web design</span>
+            <span class="tag">Branding</span>
+            <span class="tag">Build</span>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== IDEAS ===================== -->
+  <section id="ideas" class="section section-alt">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>In the sketchbook</h2>
+        <p>
+          Half the job is having more ideas than hours. These aren't finished, and
+          that's the point &mdash; this is where the next shipped thing comes from.
+        </p>
+      </div>
+
+      <div class="idea-grid">
+        <article class="idea slot">
+          <span class="idea-num">01</span>
+          <h3>Idea slot</h3>
+          <p>One concept, one sentence on why it should exist, one image or sketch. Unfinished is fine. Vague is not.</p>
+        </article>
+        <article class="idea slot">
+          <span class="idea-num">02</span>
+          <h3>Idea slot</h3>
+          <p>Good candidates: the thing you keep re-sketching, the tool you wish existed, the brand you'd build if a client asked.</p>
+        </article>
+        <article class="idea slot">
+          <span class="idea-num">03</span>
+          <h3>Idea slot</h3>
+          <p>Keep this section to three or four. It reads as range. Ten reads as a graveyard.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== ABOUT ===================== -->
+  <section id="about" class="section">
+    <div class="wrap">
+      <div class="about-grid">
+        <div>
+          <div class="section-head">
+            <h2>About</h2>
+          </div>
+          <p class="about-copy">
+            <!-- NAME SLOT: put your name here. -->
+            I'm a designer and builder in Phoenix. I work across brand, web, and
+            product &mdash; but the part I care about is the handoff that never
+            happens, because I build the thing myself.
+          </p>
+          <p class="about-copy">
+            That means a project doesn't die in a folder. It gets a name, a mark,
+            a site, and a reason to update itself tomorrow.
+          </p>
+        </div>
+        <div class="stat-stack">
+          <div class="stat"><strong>12</strong><span>leagues covered daily on StateForty8 Sports</span></div>
+          <div class="stat"><strong>0</strong><span>frameworks in the front-end &mdash; hand-built, on purpose</span></div>
+          <div class="stat"><strong>Daily</strong><span>publishing cadence, fully automated</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== CONTACT ===================== -->
+  <section id="contact" class="section contact">
+    <div class="wrap">
+      <h2>Got something you want built all the way?</h2>
+      <p class="lede">Brand, site, newsletter, or the whole stack. Tell me the idea.</p>
+      <!-- CONTACT SLOT: swap in the address you want public. -->
+      <a class="btn btn-primary btn-lg" href="mailto:hello@example.com">Start a conversation</a>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <span>&copy; <span id="yr"></span> StateForty8 Studio &middot; Phoenix, Arizona</span>
+    <span class="footer-note">Independent studio. Not affiliated with any other Arizona brand.</span>
+  </div>
+</footer>
+<script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
+
+</body>
+</html>

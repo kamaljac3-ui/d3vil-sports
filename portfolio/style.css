@@ -1,0 +1,229 @@
+/* StateForty8 Studio — portfolio styles.
+   Self-contained: shares the sports site's palette family so the two read as
+   one brand, but its own file so this folder can be split into its own repo
+   and domain without touching anything. */
+
+:root {
+  --bg: #0c0605;
+  --bg-elevated: #1c1210;
+  --bg-raised: #241713;
+  --border: #3a221c;
+  --text: #f5ede9;
+  --text-dim: #b09a92;
+  --accent: #ff5a3c;
+  --accent-soft: rgba(255, 90, 60, 0.12);
+  --sun: #e8a33d;
+  --radius: 14px;
+  --wrap: 1120px;
+}
+
+:root[data-theme="light"] {
+  --bg: #f5efe9;
+  --bg-elevated: #fffaf7;
+  --bg-raised: #fdf5f1;
+  --border: #e8ddd4;
+  --text: #1c1210;
+  --text-dim: #7a655c;
+  --accent-soft: rgba(255, 90, 60, 0.10);
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  color: var(--text);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  background:
+    radial-gradient(900px 500px at 100% 0%, rgba(255, 90, 60, 0.08), transparent 60%),
+    radial-gradient(900px 620px at 0% 100%, rgba(150, 20, 10, 0.12), transparent 60%),
+    var(--bg);
+}
+
+h1, h2, h3 { font-family: "Sora", "Inter", sans-serif; line-height: 1.12; margin: 0; }
+
+a { color: inherit; }
+
+.wrap { max-width: var(--wrap); margin: 0 auto; padding: 0 22px; }
+
+/* ---------- theme toggle (same pattern as the sports site) ---------- */
+.theme-toggle {
+  position: fixed; top: 14px; right: 14px; z-index: 50;
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--bg-elevated); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 16px; line-height: 1; padding: 0;
+}
+.theme-toggle:hover { border-color: var(--accent); }
+.theme-toggle .icon-sun { display: none; }
+:root[data-theme="light"] .theme-toggle .icon-moon { display: none; }
+:root[data-theme="light"] .theme-toggle .icon-sun { display: inline; }
+
+/* ---------- spectrum bar ---------- */
+.spectrum-bar {
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--sun), #9b8cff, #7fd0c9, var(--accent));
+}
+
+/* ---------- header ---------- */
+header.site { border-bottom: 1px solid var(--border); background: color-mix(in srgb, var(--bg) 85%, transparent); position: sticky; top: 0; z-index: 40; backdrop-filter: blur(10px); }
+header.site .wrap { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding-top: 14px; padding-bottom: 14px; }
+
+.brand { display: flex; align-items: baseline; gap: 9px; text-decoration: none; }
+.brand-text { font-family: "Sora", sans-serif; font-weight: 800; font-size: 19px; letter-spacing: 0.02em; }
+.accent-char { color: var(--accent); }
+.brand-sub { font-family: "Sora", sans-serif; font-weight: 600; font-size: 10px; letter-spacing: 0.22em; color: var(--text-dim); }
+
+.site-nav { display: flex; align-items: center; gap: 22px; }
+.site-nav a { text-decoration: none; font-size: 14px; font-weight: 500; color: var(--text-dim); }
+.site-nav a:hover { color: var(--text); }
+.site-nav .nav-cta {
+  color: var(--text); border: 1px solid var(--border);
+  padding: 7px 14px; border-radius: 999px;
+}
+.site-nav .nav-cta:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ---------- hero ---------- */
+.hero { padding: 96px 0 78px; }
+.eyebrow {
+  display: inline-block; font-size: 11px; font-weight: 600; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--accent);
+  background: var(--accent-soft); border: 1px solid var(--border);
+  padding: 6px 13px; border-radius: 999px; margin-bottom: 26px;
+}
+.hero h1 { font-size: clamp(38px, 7.2vw, 74px); font-weight: 800; letter-spacing: -0.025em; }
+.hero h1 .hl { color: var(--accent); }
+.lede { font-size: clamp(16px, 1.9vw, 19px); color: var(--text-dim); max-width: 60ch; margin: 26px 0 0; }
+
+.hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 34px; }
+.btn {
+  display: inline-block; text-decoration: none; font-weight: 600; font-size: 15px;
+  padding: 12px 22px; border-radius: 999px; border: 1px solid var(--border);
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+.btn:hover { transform: translateY(-2px); }
+.btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn-ghost { color: var(--text-dim); }
+.btn-ghost:hover { color: var(--text); border-color: var(--accent); }
+.btn-lg { padding: 15px 30px; font-size: 16px; }
+
+/* ---------- through-line band ---------- */
+.band { border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); background: var(--bg-elevated); padding: 66px 0; }
+.band-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 54px; align-items: start; }
+.band-lead h2 { font-size: clamp(24px, 3.4vw, 34px); font-weight: 700; letter-spacing: -0.02em; }
+.band-lead p { color: var(--text-dim); margin: 18px 0 0; }
+.band-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.band-list li {
+  display: grid; grid-template-columns: 116px 1fr; gap: 16px; align-items: baseline;
+  padding: 15px 0; border-bottom: 1px solid var(--border);
+}
+.band-list li:last-child { border-bottom: 0; }
+.band-list strong { font-family: "Sora", sans-serif; font-size: 14px; }
+.band-list span { color: var(--text-dim); font-size: 14px; }
+
+/* ---------- sections ---------- */
+.section { padding: 84px 0; }
+.section-alt { background: var(--bg-elevated); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.section-head { margin-bottom: 42px; }
+.section-head h2 { font-size: clamp(28px, 4.4vw, 42px); font-weight: 800; letter-spacing: -0.025em; }
+.section-head p { color: var(--text-dim); margin: 12px 0 0; max-width: 58ch; }
+
+/* ---------- case studies ---------- */
+.case {
+  background: var(--bg-raised); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 30px;
+}
+.case-feature {
+  display: grid; grid-template-columns: 300px 1fr; gap: 38px; align-items: center;
+  padding: 38px; margin-bottom: 26px;
+}
+.case-media {
+  display: flex; align-items: center; justify-content: center;
+  background: var(--bg-elevated); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 36px; min-height: 240px;
+}
+.case-mark { width: 100%; max-width: 172px; height: auto; display: block; }
+.mark-light { display: none; }
+:root[data-theme="light"] .mark-dark { display: none; }
+:root[data-theme="light"] .mark-light { display: block; }
+
+.case-kicker {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 11px;
+}
+.case h3 { font-size: clamp(22px, 2.8vw, 29px); font-weight: 700; letter-spacing: -0.02em; }
+.case-sum { color: var(--text-dim); margin: 14px 0 0; }
+.case-points { margin: 18px 0 0; padding-left: 20px; color: var(--text-dim); display: grid; gap: 8px; font-size: 15px; }
+.case-points li::marker { color: var(--accent); }
+
+.tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+.tag {
+  font-size: 12px; font-weight: 500; color: var(--text-dim);
+  border: 1px solid var(--border); border-radius: 999px; padding: 4px 11px;
+}
+.case-link { display: inline-block; margin-top: 20px; font-weight: 600; font-size: 15px; color: var(--accent); text-decoration: none; }
+.case-link:hover { text-decoration: underline; }
+
+.case-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.case-sm h3 { font-size: 21px; }
+
+/* A slot is unfilled content — dashed so you can see at a glance what's left. */
+.slot { border-style: dashed; }
+.slot .case-sum em { color: var(--sun); font-style: normal; font-weight: 600; }
+
+/* ---------- ideas ---------- */
+.idea-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.idea {
+  background: var(--bg-raised); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 28px; position: relative;
+}
+.idea-num {
+  font-family: "Sora", sans-serif; font-weight: 800; font-size: 13px;
+  color: var(--accent); letter-spacing: 0.1em;
+}
+.idea h3 { font-size: 19px; font-weight: 700; margin-top: 10px; }
+.idea p { color: var(--text-dim); font-size: 15px; margin: 10px 0 0; }
+
+/* ---------- about ---------- */
+.about-grid { display: grid; grid-template-columns: 1.3fr 1fr; gap: 54px; align-items: start; }
+.about-copy { color: var(--text-dim); margin: 0 0 16px; max-width: 56ch; }
+.stat-stack { display: grid; gap: 14px; }
+.stat {
+  background: var(--bg-raised); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px 22px;
+  display: grid; grid-template-columns: 92px 1fr; gap: 16px; align-items: center;
+}
+.stat strong { font-family: "Sora", sans-serif; font-size: 30px; font-weight: 800; color: var(--accent); line-height: 1; }
+.stat span { color: var(--text-dim); font-size: 14px; line-height: 1.45; }
+
+/* ---------- contact ---------- */
+.contact { text-align: center; border-top: 1px solid var(--border); }
+.contact h2 { font-size: clamp(26px, 4vw, 40px); font-weight: 800; letter-spacing: -0.025em; }
+.contact .lede { margin: 18px auto 32px; }
+
+/* ---------- footer ---------- */
+footer.site { border-top: 1px solid var(--border); padding: 30px 0; color: var(--text-dim); font-size: 13px; }
+footer.site .wrap { display: flex; justify-content: space-between; gap: 18px; flex-wrap: wrap; }
+
+/* ---------- responsive ---------- */
+@media (max-width: 900px) {
+  .band-grid, .about-grid { grid-template-columns: 1fr; gap: 34px; }
+  .case-feature { grid-template-columns: 1fr; gap: 26px; padding: 26px; }
+  .case-grid, .idea-grid { grid-template-columns: 1fr; }
+  .hero { padding: 62px 0 52px; }
+  .section { padding: 60px 0; }
+}
+
+@media (max-width: 560px) {
+  .site-nav a:not(.nav-cta) { display: none; }
+  .band-list li { grid-template-columns: 1fr; gap: 4px; }
+  .stat { grid-template-columns: 1fr; gap: 6px; }
+  footer.site .wrap { flex-direction: column; gap: 8px; }
+}
