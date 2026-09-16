@@ -1,10 +1,14 @@
 # StateForty8 Sports — daily update procedure
 
 (Rebranded from "D3vil Sports" on 2026-09-15 — same repo, same site URL,
-same automation; just new name/logo. Masthead markup: `<img class="mascot"
+same automation; just new name/logo. Logo mark is a saguaro cactus inside
+an Arizona-state-outline border (not a plain shape — matches the brand
+name). Masthead markup, stacked icon-over-wordmark: `<img class="mascot"
 src="assets/stateforty8-mark.png" alt="StateForty8 Sports logo">` +
-`<span class="brand-text">STATE<span class="accent-char">FORTY8</span>
-SPORTS</span>`. Favicon: `assets/stateforty8-favicon.png`.)
+`<span class="brand-text">STATE<span class="accent-char">FORTY8</span></span>`
++ `<span class="brand-sub">SPORTS</span>` — three stacked lines (icon,
+then STATEFORTY8, then SPORTS), not a single combined line. Favicon:
+`assets/stateforty8-favicon.png`.)
 
 This file is the complete, self-contained procedure for producing one day's
 roundup. Follow it exactly so the site stays consistent day to day.

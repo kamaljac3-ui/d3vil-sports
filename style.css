@@ -121,7 +121,7 @@ header.site .wrap {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
   font-size: 24px;
   font-weight: 800;
   letter-spacing: -0.02em;
@@ -133,6 +133,15 @@ header.site .wrap {
   height: 96px;
   width: auto;
   display: block;
+  margin-bottom: 4px;
+}
+
+.brand .brand-sub {
+  display: block;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.3em;
+  color: var(--text-dim);
 }
 
 @media (max-width: 520px) {
