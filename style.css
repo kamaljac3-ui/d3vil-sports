@@ -130,8 +130,11 @@ header.site .wrap {
 }
 
 .brand .mascot {
-  height: 140px;
-  width: auto;
+  /* Fixed width matching .brand-text's rendered width (~168px) -- the
+     text's font-size never changes with viewport, so the icon shouldn't
+     either, or the two drift out of proportion at narrow widths. */
+  width: 168px;
+  height: auto;
   display: block;
   margin-bottom: -8px;
 }
@@ -151,10 +154,6 @@ header.site .wrap {
   font-weight: 800;
   letter-spacing: 0.3em;
   color: var(--text-dim);
-}
-
-@media (max-width: 520px) {
-  .brand .mascot { height: 68px; }
 }
 
 .brand .accent-char { color: var(--accent); }
