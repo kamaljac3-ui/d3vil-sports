@@ -3,8 +3,12 @@
 (Rebranded from "D3vil Sports" on 2026-09-15 — same repo, same site URL,
 same automation; just new name/logo. Logo mark is a saguaro cactus inside
 an Arizona-state-outline border (not a plain shape — matches the brand
-name), with an orange sun ring accent. **Two colorways, both required —
-never use just one**: `stateforty8-mark-dark.png` (cream lines, for the
+name), with a red sun ring accent — changed 2026-09-16 from orange to
+match D3vil World News's accent exactly (`--accent` is `#e0554a` on the
+default dark theme, `#b3261e` on the toggled light theme; same two
+shades World News uses, not a coincidence — kamal wanted both sites on
+one shared accent color). **Two colorways, both required — never use
+just one**: `stateforty8-mark-dark.png` (cream lines, for the
 default dark theme) and `stateforty8-mark-light.png` (charcoal lines,
 for the toggled light theme) — the cream variant is nearly invisible on
 the light theme's `--bg` (`#f5efe9` is almost the same color as the
