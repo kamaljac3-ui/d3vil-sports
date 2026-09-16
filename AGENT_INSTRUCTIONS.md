@@ -3,12 +3,22 @@
 (Rebranded from "D3vil Sports" on 2026-09-15 — same repo, same site URL,
 same automation; just new name/logo. Logo mark is a saguaro cactus inside
 an Arizona-state-outline border (not a plain shape — matches the brand
-name). Masthead markup, stacked icon-over-wordmark: `<img class="mascot"
-src="assets/stateforty8-mark.png" alt="StateForty8 Sports logo">` +
-`<span class="brand-text">STATE<span class="accent-char">FORTY8</span></span>`
-+ `<span class="brand-sub">SPORTS</span>` — three stacked lines (icon,
-then STATEFORTY8, then SPORTS), not a single combined line. Favicon:
-`assets/stateforty8-favicon.png`.)
+name), with an orange sun ring accent. **Two colorways, both required —
+never use just one**: `stateforty8-mark-dark.png` (cream lines, for the
+default dark theme) and `stateforty8-mark-light.png` (charcoal lines,
+for the toggled light theme) — the cream variant is nearly invisible on
+the light theme's `--bg` (`#f5efe9` is almost the same color as the
+icon's `#f5ede9`), so both must always be present together, swapped via
+CSS (`.mascot-dark`/`.mascot-light`, same pattern as the existing sun/
+moon toggle icons) — never reference a single `stateforty8-mark.png`.
+Masthead markup, stacked icon-over-wordmark:
+`<img class="mascot mascot-dark" src="assets/stateforty8-mark-dark.png" alt="StateForty8 Sports logo">`
++ `<img class="mascot mascot-light" src="assets/stateforty8-mark-light.png" alt="StateForty8 Sports logo">`
++ `<span class="brand-text">STATE<span class="accent-char">FORTY8</span></span>`
++ `<span class="brand-sub">SPORTS</span>` — icon pair, then STATEFORTY8,
+then SPORTS. Newsletter emails have a fixed (non-toggleable) dark
+background, so `scripts/send-newsletter.js` always uses the dark variant
+only. Favicon: `assets/stateforty8-favicon.png`.)
 
 This file is the complete, self-contained procedure for producing one day's
 roundup. Follow it exactly so the site stays consistent day to day.

@@ -136,6 +136,15 @@ header.site .wrap {
   margin-bottom: 4px;
 }
 
+/* Two colorways of the mark: cream-on-dark (default) and charcoal-on-light
+   (toggled theme) -- the icon's own line color doesn't auto-adapt like text
+   does, so it needs a real second asset rather than a CSS filter (a filter
+   would also wreck the orange sun accent, which must stay #ff5a3c in both
+   themes). Swapped the same way the sun/moon toggle icons already are. */
+.brand .mascot-light { display: none; }
+:root[data-theme="light"] .brand .mascot-dark { display: none; }
+:root[data-theme="light"] .brand .mascot-light { display: block; }
+
 .brand .brand-sub {
   display: block;
   font-size: 13px;
