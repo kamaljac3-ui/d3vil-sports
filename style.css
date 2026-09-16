@@ -119,22 +119,24 @@ header.site .wrap {
 
 .brand {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 14px;
+  gap: 8px;
   font-size: 24px;
   font-weight: 800;
   letter-spacing: -0.02em;
   text-decoration: none;
+  text-align: center;
 }
 
 .brand .mascot {
-  height: 72px;
+  height: 96px;
   width: auto;
   display: block;
 }
 
 @media (max-width: 520px) {
-  .brand .mascot { height: 52px; }
+  .brand .mascot { height: 68px; }
 }
 
 .brand .accent-char { color: var(--accent); }
