@@ -1,28 +1,40 @@
-# StateForty8 Sports — daily update procedure
+# 48th State Sports — daily update procedure
 
-(Rebranded from "D3vil Sports" on 2026-09-15 — same repo, same site URL,
-same automation; just new name/logo. Logo mark is a saguaro cactus inside
-an Arizona-state-outline border (not a plain shape — matches the brand
-name), with a red sun ring accent — changed 2026-09-16 from orange to
-match D3vil World News's accent exactly (`--accent` is `#e0554a` on the
-default dark theme, `#b3261e` on the toggled light theme; same two
-shades World News uses, not a coincidence — kamal wanted both sites on
-one shared accent color). **Two colorways, both required — never use
-just one**: `stateforty8-mark-dark.png` (cream lines, for the
-default dark theme) and `stateforty8-mark-light.png` (charcoal lines,
-for the toggled light theme) — the cream variant is nearly invisible on
-the light theme's `--bg` (`#f5efe9` is almost the same color as the
-icon's `#f5ede9`), so both must always be present together, swapped via
-CSS (`.mascot-dark`/`.mascot-light`, same pattern as the existing sun/
-moon toggle icons) — never reference a single `stateforty8-mark.png`.
+(Rebranded from "D3vil Sports" to "StateForty8" on 2026-09-15, then
+again to "48th State" on 2026-09-16 — same repo, same site URL, same
+automation, same icon; just wordmark text and word order changed.
+**Asset filenames still say "stateforty8" on purpose** —
+`stateforty8-mark-dark.png`/`stateforty8-mark-light.png`/
+`stateforty8-favicon.png` are icon-only (no text baked in), so their
+pixel content didn't change in this second rebrand; renaming the files
+would just churn every reference across every post with zero visible
+benefit. Don't rename them without a reason. Logo mark is a saguaro
+cactus inside an Arizona-state-outline border (not a plain shape —
+matches the brand's "48th state" pun), with a red sun ring accent
+(`--accent` is `#e0554a` on the default dark theme, `#b3261e` on the
+toggled light theme — same two shades D3vil World News uses, not a
+coincidence, kamal wanted both sites on one shared accent color).
+**Two colorways, both required — never use just one**:
+`stateforty8-mark-dark.png` (cream lines, for the default dark theme)
+and `stateforty8-mark-light.png` (charcoal lines, for the toggled light
+theme) — the cream variant is nearly invisible on the light theme's
+`--bg` (`#f5efe9` is almost the same color as the icon's `#f5ede9`), so
+both must always be present together, swapped via CSS
+(`.mascot-dark`/`.mascot-light`, same pattern as the existing sun/moon
+toggle icons) — never reference a single `stateforty8-mark.png`.
 Masthead markup, stacked icon-over-wordmark:
-`<img class="mascot mascot-dark" src="assets/stateforty8-mark-dark.png" alt="StateForty8 Sports logo">`
-+ `<img class="mascot mascot-light" src="assets/stateforty8-mark-light.png" alt="StateForty8 Sports logo">`
-+ `<span class="brand-text">STATE<span class="accent-char">FORTY8</span></span>`
-+ `<span class="brand-sub">SPORTS</span>` — icon pair, then STATEFORTY8,
-then SPORTS. Newsletter emails have a fixed (non-toggleable) dark
-background, so `scripts/send-newsletter.js` always uses the dark variant
-only. Favicon: `assets/stateforty8-favicon.png`.)
+`<img class="mascot mascot-dark" src="assets/stateforty8-mark-dark.png" alt="48th State Sports logo">`
++ `<img class="mascot mascot-light" src="assets/stateforty8-mark-light.png" alt="48th State Sports logo">`
++ `<span class="brand-text"><span class="accent-char">48TH</span> STATE</span>`
++ `<span class="brand-sub">SPORTS</span>` — icon pair, then 48TH STATE
+(48TH in accent color, STATE in the normal ink color — the accent
+always goes on the distinctive/number word, which is why it moved from
+FORTY8 to 48TH when the word order flipped), then SPORTS. Newsletter
+emails have a fixed (non-toggleable) dark background, so
+`scripts/send-newsletter.js` always uses the dark variant only.
+Favicon: `assets/stateforty8-favicon.png`. Linktree (shared with World
+News) is already on the new name at `linktr.ee/48thState` — this repo
+was the last piece to catch up.)
 
 This file is the complete, self-contained procedure for producing one day's
 roundup. Follow it exactly so the site stays consistent day to day.
@@ -210,7 +222,7 @@ racing is `HorseRacing` — no space, no hyphen — while its id is
 
 For the new file `posts/<date>.html`:
 
-- Set `<title>` to `Month D, YYYY — StateForty8 Sports`.
+- Set `<title>` to `Month D, YYYY — 48th State Sports`.
 - Set the meta description to a one-sentence summary of the day's biggest
   headline across all categories.
 - Set `.post-header .date` to the human-readable date and `<h1>` to a short

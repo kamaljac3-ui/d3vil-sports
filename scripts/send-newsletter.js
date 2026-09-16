@@ -105,12 +105,12 @@ function buildEmailHtml(postFile) {
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
               <tr>
                 <td align="center" style="padding-bottom:8px;">
-                  <img src="${SITE_URL}/assets/stateforty8-mark-dark.png" width="90" alt="StateForty8 Sports" style="display:inline-block; border:0;">
+                  <img src="${SITE_URL}/assets/stateforty8-mark-dark.png" width="90" alt="48th State Sports" style="display:inline-block; border:0;">
                 </td>
               </tr>
               <tr>
                 <td align="center">
-                  <span style="font-family:Impact,'Arial Narrow Bold',Arial,sans-serif; font-size:32px; font-weight:bold; color:#f5ede9; letter-spacing:0.5px;">STATE<span style="color:#e0554a;">FORTY8</span></span>
+                  <span style="font-family:Impact,'Arial Narrow Bold',Arial,sans-serif; font-size:32px; font-weight:bold; color:#f5ede9; letter-spacing:0.5px;"><span style="color:#e0554a;">48TH</span> STATE</span>
                 </td>
               </tr>
               <tr>
@@ -161,7 +161,7 @@ function buildEmailHtml(postFile) {
         <!-- Footer -->
         <tr>
           <td align="center" style="font-family:Georgia,'Times New Roman',serif; font-size:11px; letter-spacing:0.5px; color:#7a655c; line-height:1.7;">
-            STATEFORTY8 SPORTS &mdash; NFL &middot; CFB &middot; NBA &middot; NCAAM &middot; WNBA &middot; NCAAW &middot; MLB &middot; NHL &middot; UFC &middot; BOXING &middot; GOLF &middot; HORSE RACING
+            48TH STATE SPORTS &mdash; NFL &middot; CFB &middot; NBA &middot; NCAAM &middot; WNBA &middot; NCAAW &middot; MLB &middot; NHL &middot; UFC &middot; BOXING &middot; GOLF &middot; HORSE RACING
           </td>
         </tr>
 
@@ -192,7 +192,7 @@ async function main() {
       "X-Kit-Api-Key": apiKey,
     },
     body: JSON.stringify({
-      subject: `StateForty8 Sports — ${headline}`,
+      subject: `48th State Sports — ${headline}`,
       preview_text: description.slice(0, 140),
       content: emailHtml,
       description: `Auto-sent for ${postFile}`,
