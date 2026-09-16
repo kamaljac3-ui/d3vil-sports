@@ -7,7 +7,7 @@
   --border: #3a221c;
   --text: #f5ede9;
   --text-dim: #b09a92;
-  --accent: #ff5a3c;
+  --accent: #e0554a;
 
   --nfl: #6f9de3;
   --nba: #e8a33d;
@@ -33,6 +33,7 @@
   --border: #e8ddd4;
   --text: #1c1210;
   --text-dim: #7a655c;
+  --accent: #b3261e;
 }
 
 .theme-toggle {
@@ -142,8 +143,10 @@ header.site .wrap {
 /* Two colorways of the mark: cream-on-dark (default) and charcoal-on-light
    (toggled theme) -- the icon's own line color doesn't auto-adapt like text
    does, so it needs a real second asset rather than a CSS filter (a filter
-   would also wreck the orange sun accent, which must stay #ff5a3c in both
-   themes). Swapped the same way the sun/moon toggle icons already are. */
+   would also wreck the red sun accent, which needs to switch between
+   #e0554a on dark and #b3261e on light -- same two shades --accent uses
+   per theme, matching D3vil World News). Swapped the same way the sun/moon
+   toggle icons already are. */
 .brand .mascot-light { display: none; }
 :root[data-theme="light"] .brand .mascot-dark { display: none; }
 :root[data-theme="light"] .brand .mascot-light { display: block; }

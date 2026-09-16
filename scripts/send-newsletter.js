@@ -110,7 +110,7 @@ function buildEmailHtml(postFile) {
               </tr>
               <tr>
                 <td align="center">
-                  <span style="font-family:Impact,'Arial Narrow Bold',Arial,sans-serif; font-size:32px; font-weight:bold; color:#f5ede9; letter-spacing:0.5px;">STATE<span style="color:#ff5a3c;">FORTY8</span></span>
+                  <span style="font-family:Impact,'Arial Narrow Bold',Arial,sans-serif; font-size:32px; font-weight:bold; color:#f5ede9; letter-spacing:0.5px;">STATE<span style="color:#e0554a;">FORTY8</span></span>
                 </td>
               </tr>
               <tr>
@@ -133,7 +133,7 @@ function buildEmailHtml(postFile) {
           <td>
             <div style="font-family:Georgia,'Times New Roman',serif; font-size:28px; line-height:1.25; font-weight:bold; color:#f5ede9; margin:0 0 12px;">${headline}</div>
             <div style="font-family:Georgia,'Times New Roman',serif; font-size:16px; line-height:1.6; color:#d8cec8; margin:0 0 18px;">${description}</div>
-            <a href="${postUrl}" style="display:inline-block; padding:11px 22px; background:#ff5a3c; color:#ffffff; text-decoration:none; font-family:Georgia,'Times New Roman',serif; font-weight:bold; font-size:14px; border-radius:4px;">Read the Full Edition &rarr;</a>
+            <a href="${postUrl}" style="display:inline-block; padding:11px 22px; background:#e0554a; color:#ffffff; text-decoration:none; font-family:Georgia,'Times New Roman',serif; font-weight:bold; font-size:14px; border-radius:4px;">Read the Full Edition &rarr;</a>
           </td>
         </tr>
 
