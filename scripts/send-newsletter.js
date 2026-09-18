@@ -104,8 +104,8 @@ function buildEmailHtml(postFile) {
           <td>
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
               <tr>
-                <td align="center" style="padding-bottom:8px;">
-                  <img src="${SITE_URL}/assets/stateforty8-mark-dark.png" width="90" alt="48th State Sports" style="display:inline-block; border:0;">
+                <td align="center" style="padding-bottom:4px;">
+                  <img src="${SITE_URL}/assets/stateforty8-mark-dark-tight.png" width="46" alt="48th State Sports" style="display:inline-block; border:0;">
                 </td>
               </tr>
               <tr>
