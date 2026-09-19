@@ -38,13 +38,22 @@ jobs:
 
   newsletter:
     # Only ever fires on a real push to main — never on a manual
-    # workflow_dispatch re-run. The "detect newly added post" step has no
-    # memory of whether a broadcast was already sent for that post, so
-    # re-running this job manually on the same commit re-sends a brand new
-    # broadcast to every subscriber each time. Manual re-runs are for
-    # testing the deploy job only; test the newsletter HTML locally with
+    # workflow_dispatch re-run. Manual re-runs are for testing the deploy
+    # job only; test the newsletter HTML locally with
     # `node -e "require('./scripts/send-newsletter.js').buildEmailHtml(...)"`
     # instead, which never touches the live Kit API.
+    #
+    # BUG FOUND AND FIXED 2026-09-19 (via d3vil-world-news, same shared
+    # workflow pattern): this used to only fire on a file the push
+    # *added* (--diff-filter=A) — correct for the routine's own first
+    # push each day, but it silently SKIPPED a same-day follow-up push
+    # that only *modified* that day's already-existing post (exactly
+    # what happens when a mistake in the day's edition gets caught and
+    # fixed after the routine's initial publish), so subscribers could
+    # get the stale first-draft version with no way to catch up. Now
+    # detects add-OR-modify, scoped specifically to *today's* dated post
+    # file, so a same-day correction re-sends the fixed version without
+    # risking a resend triggered by edits to older historical posts.
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
@@ -53,17 +62,18 @@ jobs:
         with:
           fetch-depth: 2
 
-      - name: Detect newly added post
+      - name: Detect today's post changing
         id: detect
         run: |
-          NEW_POST=$(git diff --name-only --diff-filter=A HEAD~1 HEAD -- 'posts/*.html' | grep -v '^posts/latest.html$' | head -n1)
-          if [ -z "$NEW_POST" ]; then
-            echo "No new post in this push — skipping newsletter send."
+          TODAY_POST="posts/$(date -u +%Y-%m-%d).html"
+          CHANGED=$(git diff --name-only HEAD~1 HEAD -- "$TODAY_POST")
+          if [ -z "$CHANGED" ]; then
+            echo "No change to today's post ($TODAY_POST) in this push — skipping newsletter send."
             echo "found=false" >> "$GITHUB_OUTPUT"
           else
-            echo "New post detected: $NEW_POST"
+            echo "Today's post changed: $CHANGED"
             echo "found=true" >> "$GITHUB_OUTPUT"
-            echo "file=$NEW_POST" >> "$GITHUB_OUTPUT"
+            echo "file=$CHANGED" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Send newsletter
