@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Commentary &mdash; 48th State Sports</title>
+<meta name="description" content="Long-form commentary and analysis from 48th State Sports — the stories the daily roundup can't slow down enough to tell.">
+<link rel="icon" type="image/png" href="../assets/stateforty8-favicon.png">
+<style>
+  :root{
+    --parchment:#e9ddc3;
+    --parchment-2:#e0d1ae;
+    --parchment-edge:#c9b489;
+    --ink:#3c2d1c;
+    --ink-soft:#6d5a41;
+    --red:#7c2c26;
+    --gold:#916a2f;
+    --wood:#3a2718;
+    --wood-hi:#6b4a2c;
+    --wood-lo:#241609;
+    --backdrop:#151009;
+    --backdrop-2:#0c0906;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(ellipse 120% 80% at 50% 0%, var(--backdrop-2) 0%, var(--backdrop) 60%);
+    background-color:var(--backdrop);
+    color:var(--ink);
+    font-family:"Source Serif 4","Iowan Old Style","Palatino Linotype",Georgia,serif;
+    padding-block:56px;
+  }
+  .stage{ max-width:760px; margin:0 auto; padding-inline:16px; }
+  .back-link{
+    display:block; text-align:center;
+    color:#c9b489; font-size:13px; letter-spacing:.15em;
+    text-transform:uppercase; text-decoration:none;
+    margin-bottom:22px; opacity:.85;
+  }
+  .back-link:hover{ opacity:1; text-decoration:underline; }
+
+  .rod{
+    height:30px; margin-inline:auto; max-width:720px; border-radius:15px;
+    position:relative;
+    background:linear-gradient(180deg, var(--wood-hi) 0%, var(--wood) 45%, var(--wood-lo) 100%);
+    box-shadow:0 3px 0 rgba(0,0,0,.35), 0 10px 22px rgba(0,0,0,.55);
+  }
+  .rod::before, .rod::after{
+    content:""; position:absolute; top:-5px; bottom:-5px; width:20px; border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, var(--wood-hi) 0%, var(--wood) 55%, var(--wood-lo) 100%);
+    box-shadow: inset 0 0 6px rgba(0,0,0,.5), 0 2px 6px rgba(0,0,0,.5);
+  }
+  .rod::before{ left:-10px; }
+  .rod::after{ right:-10px; }
+  .rod-top{ margin-bottom:-5px; }
+  .rod-bottom{ margin-top:-5px; }
+
+  .parchment{
+    position:relative;
+    background:
+      radial-gradient(ellipse at 15% 8%, rgba(255,255,255,.10), transparent 40%),
+      radial-gradient(ellipse at 85% 92%, rgba(0,0,0,.08), transparent 45%),
+      linear-gradient(180deg, var(--parchment) 0%, var(--parchment-2) 100%);
+    padding: 40px clamp(20px, 6vw, 60px) 48px;
+    box-shadow: inset 0 0 60px rgba(80,55,20,.24), inset 0 0 3px rgba(0,0,0,.35), 0 0 0 1px rgba(0,0,0,.15);
+  }
+
+  header{ text-align:center; margin-bottom:36px; }
+  .kicker{
+    font-size:12.5px; letter-spacing:.32em; text-transform:uppercase;
+    color:var(--red); font-weight:600;
+  }
+  h1{
+    font-size:clamp(26px, 5vw, 40px);
+    letter-spacing:.04em; text-transform:uppercase; font-weight:700;
+    margin:10px 0 12px; color:var(--ink);
+  }
+  .intro{
+    font-style:italic; color:var(--ink-soft); font-size:16px;
+    max-width:52ch; margin:0 auto; line-height:1.6;
+  }
+  .rule{
+    width:200px; height:2px; margin:24px auto 0;
+    background:linear-gradient(90deg, transparent, var(--gold), transparent);
+    position:relative;
+  }
+  .rule::before{
+    content:"❧"; position:absolute; left:50%; top:50%; transform:translate(-50%,-52%);
+    background:var(--parchment); padding:0 10px; color:var(--gold); font-size:15px;
+  }
+
+  .entries{ display:flex; flex-direction:column; gap:0; }
+  .entry{
+    display:block; text-decoration:none; color:inherit;
+    padding:22px 4px; border-bottom:1px solid var(--parchment-edge);
+  }
+  .entry:first-child{ padding-top:0; }
+  .entry-date{
+    font-size:12px; letter-spacing:.2em; text-transform:uppercase;
+    color:var(--gold); font-weight:600; margin-bottom:6px;
+  }
+  .entry-title{
+    font-size:24px; font-weight:700; color:var(--ink);
+    margin-bottom:8px; text-wrap:balance;
+  }
+  .entry-dek{ color:var(--ink-soft); font-size:15.5px; line-height:1.55; max-width:60ch; }
+  .entry:hover .entry-title{ color:var(--red); }
+
+  footer{
+    text-align:center; margin-top:40px; padding-top:20px;
+    border-top:1px solid var(--parchment-edge);
+    color:var(--ink-soft); font-style:italic; font-size:14px;
+  }
+
+  @media (max-width:520px){
+    .entry-title{ font-size:21px; }
+  }
+</style>
+</head>
+<body>
+<div class="stage">
+  <a class="back-link" href="../">&larr; Back to the front page</a>
+  <div class="rod rod-top"></div>
+  <div class="parchment">
+    <header>
+      <div class="kicker">48th State Sports</div>
+      <h1>Commentary</h1>
+      <p class="intro">Long-form analysis and opinion, published roughly every one to two weeks &mdash; the stories the daily roundup can't slow down enough to tell. Not part of the daily digest; these carry a point of view.</p>
+      <div class="rule"></div>
+    </header>
+
+    <div class="entries">
+      <a class="entry" href="the-clipper-curse.html">
+        <div class="entry-date">September 2026</div>
+        <div class="entry-title">The Clipper Curse</div>
+        <div class="entry-dek">Fifty-five years, two disgraced owners, and a curse no amount of money has ever managed to buy off.</div>
+      </a>
+    </div>
+
+    <footer>New installments arrive here first.</footer>
+  </div>
+  <div class="rod rod-bottom"></div>
+</div>
+</body>
+</html>

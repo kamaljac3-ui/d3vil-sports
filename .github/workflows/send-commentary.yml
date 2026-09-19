@@ -1,0 +1,43 @@
+name: Send commentary broadcast
+
+# Manual-only, workflow_dispatch. Sends a one-off Kit broadcast for a
+# Commentary piece (see commentary/ and scripts/send-commentary.js).
+# Never fires on push -- commentary pieces are published manually and
+# each send is a deliberate action, triggered here on purpose.
+#
+# Unlike the sibling workflow on D3vil World News, 48th State Sports
+# commentary sends default to the "sports-subscriber" tag (23371585)
+# rather than the whole shared Kit account -- kamal's explicit choice
+# for "The Clipper Curse" (2026-09-19), since Sports and World News
+# readers aren't assumed to be the same audience here. Leave
+# target_tag_id blank only if a future piece is meant to go out
+# account-wide; set it to 23420871 (owner-test-send, kamaljac3@gmail.com)
+# to test first.
+
+on:
+  workflow_dispatch:
+    inputs:
+      commentary_file:
+        description: "Path to the commentary HTML file, e.g. commentary/the-clipper-curse.html"
+        required: true
+      subject:
+        description: "Email subject line"
+        required: true
+      target_tag_id:
+        description: "Kit tag ID to scope the send to (e.g. 23371585 for sports-subscriber, 23420871 for owner-test-send). Leave blank to send to the WHOLE shared account -- be careful."
+        required: false
+
+jobs:
+  send-commentary:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Send commentary broadcast
+        env:
+          KIT_API_KEY: ${{ secrets.KIT_API_KEY }}
+          COMMENTARY_FILE: ${{ inputs.commentary_file }}
+          SUBJECT: ${{ inputs.subject }}
+          TARGET_TAG_ID: ${{ inputs.target_tag_id }}
+        run: node scripts/send-commentary.js

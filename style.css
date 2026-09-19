@@ -175,6 +175,23 @@ main { padding: 36px 0 80px; }
   margin: 4px 0 32px;
 }
 
+.notice-box {
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px 22px;
+  margin-bottom: 20px;
+}
+
+.notice-kicker {
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+
 .subscribe-box {
   background: var(--bg-raised);
   border: 1px solid var(--border);

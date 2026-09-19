@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Clipper Curse &mdash; 48th State Sports</title>
+<meta name="description" content="Fifty-five years, two disgraced owners, and a curse no amount of money has ever managed to buy off.">
+<link rel="icon" type="image/png" href="../assets/stateforty8-favicon.png">
+<style>
+  :root{
+    --parchment:#e9ddc3;
+    --parchment-2:#e0d1ae;
+    --parchment-edge:#c9b489;
+    --ink:#3c2d1c;
+    --ink-soft:#6d5a41;
+    --red:#7c2c26;
+    --gold:#916a2f;
+    --wood:#3a2718;
+    --wood-hi:#6b4a2c;
+    --wood-lo:#241609;
+    --backdrop:#151009;
+    --backdrop-2:#0c0906;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(ellipse 120% 80% at 50% 0%, var(--backdrop-2) 0%, var(--backdrop) 60%);
+    background-color:var(--backdrop);
+    color:var(--ink);
+    font-family:"Source Serif 4","Iowan Old Style","Palatino Linotype",Georgia,serif;
+    padding-block:56px;
+  }
+  .stage{
+    max-width:840px;
+    margin:0 auto;
+    padding-inline:16px;
+  }
+  .back-link{
+    display:block;
+    text-align:center;
+    color:#c9b489;
+    font-size:13px;
+    letter-spacing:.15em;
+    text-transform:uppercase;
+    text-decoration:none;
+    margin-bottom:22px;
+    opacity:.85;
+  }
+  .back-link:hover{ opacity:1; text-decoration:underline; }
+
+  /* ---- scroll rods ---- */
+  .rod{
+    height:34px;
+    margin-inline:auto;
+    max-width:800px;
+    border-radius:17px;
+    position:relative;
+    background:
+      linear-gradient(180deg, var(--wood-hi) 0%, var(--wood) 45%, var(--wood-lo) 100%);
+    box-shadow:
+      0 3px 0 rgba(0,0,0,.35),
+      0 10px 22px rgba(0,0,0,.55);
+  }
+  .rod::before, .rod::after{
+    content:"";
+    position:absolute;
+    top:-6px; bottom:-6px;
+    width:22px;
+    border-radius:50%;
+    background:
+      radial-gradient(circle at 35% 30%, var(--wood-hi) 0%, var(--wood) 55%, var(--wood-lo) 100%);
+    box-shadow: inset 0 0 6px rgba(0,0,0,.5), 0 2px 6px rgba(0,0,0,.5);
+  }
+  .rod::before{ left:-11px; }
+  .rod::after{ right:-11px; }
+  .rod-top{ margin-bottom:-6px; }
+  .rod-bottom{ margin-top:-6px; }
+
+  /* ---- parchment body ---- */
+  .parchment{
+    position:relative;
+    background:
+      radial-gradient(ellipse at 15% 8%, rgba(255,255,255,.10), transparent 40%),
+      radial-gradient(ellipse at 85% 92%, rgba(0,0,0,.08), transparent 45%),
+      repeating-linear-gradient(90deg, rgba(0,0,0,0.015) 0 2px, transparent 2px 5px),
+      linear-gradient(180deg, var(--parchment) 0%, var(--parchment-2) 100%);
+    padding: 30px clamp(20px, 6vw, 76px) 46px;
+    box-shadow:
+      inset 0 0 60px rgba(80,55,20,.28),
+      inset 0 0 3px rgba(0,0,0,.35),
+      0 0 0 1px rgba(0,0,0,.15);
+  }
+  .parchment::before{
+    content:"";
+    position:absolute; inset:0;
+    pointer-events:none;
+    background:
+      linear-gradient(90deg, var(--parchment-edge) 0%, transparent 3%, transparent 97%, var(--parchment-edge) 100%);
+    opacity:.55;
+    mix-blend-mode:multiply;
+  }
+  .grain{
+    position:absolute; inset:0;
+    pointer-events:none;
+    opacity:.5;
+    mix-blend-mode:multiply;
+  }
+  .crease{
+    position:absolute; top:0; bottom:0; left:50%;
+    width:1px;
+    background:linear-gradient(180deg, transparent, rgba(80,55,20,.22) 15%, rgba(80,55,20,.22) 85%, transparent);
+    pointer-events:none;
+  }
+
+  .content{ position:relative; }
+
+  header{ text-align:center; padding-top:8px; }
+  .kicker{
+    font-size:12.5px;
+    letter-spacing:.32em;
+    text-transform:uppercase;
+    color:var(--red);
+    font-weight:600;
+  }
+  h1{
+    font-size:clamp(30px, 5.6vw, 52px);
+    letter-spacing:.05em;
+    text-transform:uppercase;
+    font-weight:700;
+    margin: 10px 0 6px;
+    text-wrap:balance;
+    color:var(--ink);
+  }
+  .seal{
+    width:64px; height:64px;
+    margin: 14px auto 10px;
+    border-radius:50%;
+    background: radial-gradient(circle at 35% 30%, #9c433a, var(--red) 55%, #501712 100%);
+    box-shadow: 0 3px 8px rgba(0,0,0,.4), inset 0 0 0 2px rgba(255,235,205,.25);
+    display:flex; align-items:center; justify-content:center;
+    color:#f1dcb8;
+    font-size:22px;
+    font-weight:700;
+    letter-spacing:.02em;
+  }
+  .subtitle{
+    font-style:italic;
+    color:var(--ink-soft);
+    font-size:16px;
+    max-width:46ch;
+    margin:0 auto 4px;
+  }
+  .rule{
+    width:220px;
+    height:2px;
+    margin:22px auto 30px;
+    background:linear-gradient(90deg, transparent, var(--gold), transparent);
+    position:relative;
+  }
+  .rule::before{
+    content:"❧";
+    position:absolute; left:50%; top:50%;
+    transform:translate(-50%,-52%);
+    background:var(--parchment);
+    padding:0 10px;
+    color:var(--gold);
+    font-size:15px;
+  }
+
+  .part{ margin-top:44px; }
+  .part-label{
+    display:flex; align-items:center; gap:14px;
+    margin-bottom:18px;
+  }
+  .part-num{
+    font-size:26px;
+    color:var(--red);
+    font-weight:700;
+    letter-spacing:.04em;
+  }
+  .part-name{
+    font-size:13px;
+    letter-spacing:.28em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    font-weight:600;
+  }
+  .part-line{ flex:1; height:1px; background:linear-gradient(90deg, var(--parchment-edge), transparent); }
+
+  p{
+    font-size:17.5px;
+    line-height:1.72;
+    margin:0 0 20px;
+    color:var(--ink);
+    max-width:66ch;
+  }
+  .part > p:first-of-type::first-letter{
+    float:left;
+    font-size:64px;
+    line-height:.82;
+    padding:6px 8px 0 0;
+    font-weight:700;
+    color:var(--red);
+  }
+
+  .series-note{
+    text-align:center;
+    margin-top:50px;
+    padding-top:26px;
+    border-top:1px solid var(--parchment-edge);
+  }
+  .series-note .mark{
+    font-size:15px;
+    color:var(--gold);
+    letter-spacing:.3em;
+    margin-bottom:10px;
+  }
+  .series-note p{
+    max-width:46ch;
+    margin:0 auto;
+    color:var(--ink);
+    font-size:16px;
+    line-height:1.6;
+  }
+  .series-note .cadence{
+    color:var(--red);
+    font-weight:600;
+    font-style:normal;
+  }
+
+  footer{
+    text-align:center;
+    margin-top:22px;
+    padding-top:0;
+    border-top:none;
+    color:var(--ink-soft);
+    font-style:italic;
+    font-size:14px;
+    letter-spacing:.02em;
+  }
+
+  @media (max-width:520px){
+    p{ font-size:16.5px; }
+    .part > p:first-of-type::first-letter{ font-size:52px; }
+  }
+</style>
+</head>
+<body>
+<div class="stage">
+  <a class="back-link" href="./">&larr; Back to Commentary</a>
+  <div class="rod rod-top"></div>
+  <div class="parchment">
+    <svg class="grain" width="0" height="0">
+      <filter id="noise">
+        <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch" result="n"/>
+        <feColorMatrix in="n" type="matrix" values="0 0 0 0 0.25  0 0 0 0 0.18  0 0 0 0 0.08  0 0 0 0.05 0"/>
+      </filter>
+    </svg>
+    <div class="grain" style="filter:url(#noise);"></div>
+    <div class="crease"></div>
+
+    <div class="content">
+      <header>
+        <div class="kicker">A Commentary &middot; 48th State Sports</div>
+        <h1>The Clipper Curse</h1>
+        <div class="seal">LAC</div>
+        <p class="subtitle">Fifty-five years, two disgraced owners, and a curse no amount of money has ever managed to buy off.</p>
+        <div class="rule"></div>
+      </header>
+
+      <section class="part">
+        <div class="part-label">
+          <span class="part-num">I</span>
+          <span class="part-name">The Wandering Franchise</span>
+          <span class="part-line"></span>
+        </div>
+        <p>The franchise that would become the Los Angeles Clippers was born in 1970 as an NBA expansion team: the Buffalo Braves, awarded to a Buffalo, New York ownership group fronted by real-estate and food-industry businessman Paul Snyder. For a few years it looked like a normal expansion story. In the 1972 draft, Buffalo took forward Bob McAdoo second overall out of North Carolina, and McAdoo turned into one of the best scorers in basketball &mdash; he won three straight NBA scoring titles from 1974 to 1976 and the 1975 MVP award, playing alongside Hall of Famer Randy Smith on a roster that made the playoffs three years running. For a brief window, Buffalo actually had the foundation of something good.</p>
+        <p>Then the ownership churn started, and it never really stopped. Snyder sold the team in 1976 to John Y. Brown Jr., the Kentucky Fried Chicken magnate, who almost immediately began trading away the roster he'd inherited &mdash; McAdoo himself was dealt to the Knicks partway into that first season. Two years later, Brown and Boston Celtics owner Irv Levin did something the NBA had never seen before or since: rather than sell their teams on the open market, the two owners simply swapped franchises outright, with the league office signing off on it. Levin, who lived in Southern California and had no interest in running a team in upstate New York, took ownership of what had been the Braves and immediately relocated it to San Diego, rebranding it the San Diego Clippers in 1978 &mdash; a franchise-founding origin story that started with an owner trading it away sight-unseen, before it ever set foot in the city it's now identified with.</p>
+        <p>San Diego didn't fix anything; the Clippers kept losing and kept bleeding money, and in 1981 Levin sold the team to a Beverly Hills real-estate attorney and developer named Donald Sterling &mdash; the man whose name would come to define the franchise's next three decades. Sterling didn't even wait for the league's blessing: in 1984, over the NBA's formal objection and threat of a $25 million fine, he simply moved the team to Los Angeles on his own authority, and the league backed down. The Clippers arrived in LA the same way they'd arrived in San Diego six years earlier &mdash; via an owner's unilateral decision, not a plan.</p>
+      </section>
+
+      <section class="part">
+        <div class="part-label">
+          <span class="part-num">II</span>
+          <span class="part-name">Lob City</span>
+          <span class="part-line"></span>
+        </div>
+        <p>For the better part of three decades, Sterling ran the Clippers less like an NBA franchise and more like a tax write-off. The team carried the league's lowest payrolls year after year, cycled through head coaches and general managers with no continuity, and built almost nothing in the way of scouting or player development infrastructure. The dysfunction became a matter of public record in 2009, when longtime GM Elgin Baylor &mdash; who had run the franchise's basketball operations for 22 years &mdash; sued Sterling for age and racial discrimination after being pushed out, alleging in his complaint that Sterling wanted a roster of "poor black boys from the South" playing for a white head coach. A jury ultimately sided with Sterling in 2011, but the suit had already put language to what Clippers fans had lived through for years. On the court, the losing was almost comically consistent: from 1981 into the 2000s, the team made the playoffs only a handful of times and never advanced past the second round. Its low point came in the 1998 draft, when the Clippers used the first overall pick on Michael Olowokandi &mdash; a project center who never developed &mdash; passing on a class that included Vince Carter, Dirk Nowitzki, and Paul Pierce, still cited today as one of the worst draft decisions in league history.</p>
+        <p>The turnaround, when it finally came, arrived almost by accident. In 2009 the Clippers drafted Blake Griffin first overall, only to watch him miss his entire rookie season with a fractured kneecap &mdash; one more injury in a long line of Clippers bad luck. Griffin came back healthy in 2010-11, won Rookie of the Year, and became an instant highlight-reel phenomenon, most famously dunking over a Kia in the All-Star Weekend dunk contest. Then, in a piece of NBA history almost as strange as the Brown-Levin franchise swap three decades earlier, Commissioner David Stern &mdash; who at the time had direct control of the New Orleans Hornets after the league itself bought the team &mdash; vetoed a trade that would have sent star point guard Chris Paul to the Lakers, citing vague "basketball reasons." Days later, a revised deal sent Paul to the Clippers instead. Paired with Griffin and shot-blocking center DeAndre Jordan, Paul turned the Clippers into a genuine highlight machine overnight &mdash; the alley-oops came so fast and so often that fans and broadcasters started calling it Lob City, and for the first time in the franchise's history, the Clippers were a team people wanted to watch.</p>
+        <p>What followed was the strange, cruel shape the rest of the decade would take: the Clippers becoming genuinely great, and the losing finding new ways to happen anyway. From 2012 through 2015, the Clippers won 56, 57, and 56 games in three of four seasons &mdash; among the best records in the entire NBA, not just good-for-the-Clippers numbers. Under new head coach Doc Rivers, hired in 2013, they won their first-ever Pacific Division title and were routinely discussed as a legitimate championship contender. The first real heartbreak came in the spring of 2014: up 3-2 on Oklahoma City in the second round, the Clippers blew a 13-point lead in the final minutes of Game 5 at home and lost the series in six &mdash; a collapse that happened in the very same playoff run where, weeks earlier, the franchise's ownership was about to implode entirely.</p>
+      </section>
+
+      <section class="part">
+        <div class="part-label">
+          <span class="part-num">III</span>
+          <span class="part-name">The Fall of Sterling</span>
+          <span class="part-line"></span>
+        </div>
+        <p>The end of Sterling's ownership came almost overnight. In April 2014, in the middle of that year's playoffs, TMZ released a recorded phone call in which Sterling could be heard telling his then-girlfriend not to bring Black people &mdash; specifically naming Magic Johnson &mdash; to Clippers games or post photos with them on social media. New commissioner Adam Silver, barely two months into the job, moved with a speed the league had never shown before: within days he banned Sterling for life, fined him the maximum $2.5 million, and forced a sale. Sterling initially fought it, but his wife Shelly negotiated the exit on behalf of the family trust, and in August 2014 the team sold to former Microsoft CEO Steve Ballmer for $2 billion &mdash; at the time the highest price ever paid for a franchise in American sports history.</p>
+        <p>Ballmer arrived as almost the exact inverse of Sterling: an obscenely wealthy, hands-on, visibly obsessive fan rather than an absentee slumlord-owner. He'd made his fortune as one of Microsoft's earliest employees, joining the company in 1980 and eventually running it as CEO for 14 years before stepping down in early 2014 &mdash; practically the same moment he bought the Clippers &mdash; and he became instantly famous among NBA fans for courtside screaming and jumping that made him look more like a season-ticket superfan than a billionaire. But new ownership didn't break the curse; it just changed who was standing courtside for it. In 2015, up 3-1 on the Houston Rockets in the second round, the Clippers led Game 6 by 19 points in the third quarter &mdash; and lost it, then lost Game 7 at home, becoming just the ninth team in NBA history to blow a 3-1 series lead. A year later, Blake Griffin punched the team's own equipment manager in a hotel altercation, drew a suspension, then got hurt anyway, and the Clippers blew a 2-1 lead to Portland in the first round. By 2017, Chris Paul went down injured again in a first-round exit to Utah, and that summer the front office finally broke the core up, trading Paul to Houston. Lob City never won a single playoff series past the second round. It never even got that far.</p>
+      </section>
+
+      <section class="part">
+        <div class="part-label">
+          <span class="part-num">IV</span>
+          <span class="part-name">The Gamble</span>
+          <span class="part-line"></span>
+        </div>
+        <p>Ballmer's next swing for a title came in July 2019, when the Clippers landed Kawhi Leonard in free agency, fresh off winning Finals MVP for Toronto weeks earlier. Leonard's decision reportedly came with a condition: he wanted a co-star, and the front office understood that meant Paul George &mdash; even though the two weren't especially close personally &mdash; with the pairing explicitly built to answer the Lakers' own superteam that same summer, LeBron James and Anthony Davis, assembled across town. Getting George cost the Clippers what is now widely regarded as the steepest price ever paid for a single player in NBA history: Shai Gilgeous-Alexander, Danilo Gallinari, five future first-round picks, and two additional pick swaps, sent to Oklahoma City. George's actual tenure in LA was solid but star-crossed &mdash; multiple All-Star and All-NBA seasons, but chronically banged up, and the Clippers still, to this day, have never once reached a Western Conference Finals in franchise history, star power notwithstanding. His signature moment in a Clippers uniform was the wrong kind: the 2020 bubble playoffs, where the Clippers blew a 3-1 series lead to Denver &mdash; yet another 3-1 collapse layered onto the franchise's history &mdash; with George shooting poorly enough in the closeout games to earn the mocking nickname "Pandemic P." Meanwhile, the return Oklahoma City got for letting George go turned into the best asset haul in the league: Shai Gilgeous-Alexander developed into an MVP-caliber franchise cornerstone, and the Thunder used the extra draft capital from this same trade to build one of the deepest, youngest rosters in basketball &mdash; a genuine juggernaut, built substantially on assets the Clippers handed over to get a star who never got them past the second round.</p>
+        <p>Ballmer didn't stop chasing a title after that. In 2023 the Clippers traded for James Harden, who'd forced his way out of Philadelphia, pairing him with an aging, chronically injured Leonard in one more attempt to build a contender around whatever star talent was still available. But Ballmer's most lasting mark on the franchise wasn't a trade &mdash; it was Intuit Dome, the $2 billion arena he opened in Inglewood in the summer of 2024, built entirely with his own money rather than public financing, and marketed from day one as "the most fan-friendly arena in the world." It largely lived up to the pitch: a 360-degree, four-sided video board called the Halo Board wrapping the entire lower bowl; "The Wall," a dedicated, deliberately cheap standing-room section behind one basket built for the loudest fans, modeled on European soccer supporter culture; fully cashless, near-frictionless concessions and biometric entry designed to eliminate lines; a training facility built directly into the building; and a steep, intimate bowl seating fewer fans than most NBA arenas by design, purely for better sightlines. For a franchise defined for fifty years by absentee ownership and threadbare facilities, it was the single largest investment any Clippers owner had ever made in the fan experience.</p>
+        <p>And then it curdled into the franchise's ugliest chapter yet. Reporting surfaced that Leonard had been paid roughly $28 million through an endorsement deal with Aspiration &mdash; a company Ballmer himself had backed &mdash; for promotional work that, by every account uncovered, never actually happened: no ads, no appearances, nothing. The implication was as serious as it gets in professional sports: that the deal functioned as a hidden, off-the-books payment used to lure Leonard to sign with the Clippers back in 2019, a direct workaround of the salary cap that every other team in the league has to live inside. The league's investigation concluded with real consequences: five additional forfeited first-round picks on top of the five already surrendered in the George trade, a $30 million fine, and suspensions for Ballmer himself, team president Lawrence Frank, and COO Gillian Zucker &mdash; Commissioner Silver later confirming the penalties were final and explaining why the league leaned on stripped draft picks over fines as the real competitive deterrent. Leonard was traded back to Toronto, the only city where he'd ever actually won a championship, in a deal that sent Brandon Ingram, Gradey Dick, two more unprotected first-round picks, a pick swap, and two second-rounders back to Los Angeles &mdash; and he's expected to sign a two-year, $123.7 million extension with the Raptors once he reports to camp. Fifty-five years after an owner traded the franchise away before it ever played a game, the Clippers closed this chapter the same way: a superstar gone, an owner in disgrace, and a decade of draft picks mortgaged to a division rival for a title that never came.</p>
+      </section>
+
+      <div class="series-note">
+        <div class="mark">&#10087;</div>
+        <p>This is the first scroll in an ongoing commentary series from 48th State &mdash; new installments <span class="cadence">roughly every one to two weeks</span>, each one unrolling a story the daily wire can't slow down enough to tell.</p>
+      </div>
+
+      <footer>Written &amp; researched September 2026 &middot; 48th State Sports</footer>
+    </div>
+  </div>
+  <div class="rod rod-bottom"></div>
+</div>
+</body>
+</html>
