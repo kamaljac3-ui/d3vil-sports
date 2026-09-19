@@ -222,6 +222,23 @@ For each category:
 
 ## 4. Build today's post page
 
+**Every page on this site must keep the Google Analytics snippet in
+`<head>`, added 2026-09-19** (Measurement ID `G-3MEW79QSEC`, property
+"48th State Sports" under the "48th State" GA account):
+```html
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-3MEW79QSEC"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-3MEW79QSEC');
+</script>
+```
+If the file used as this day's structural template already has it (it
+should, since it's copied from yesterday's post), it carries over
+automatically — just don't strip it out. If it's ever missing from
+whatever file gets copied, add it back before publishing.
+
 Copy `posts/2026-08-17.html` as a structural template: same HTML shell,
 same Google Fonts `<link>` tags, same theme-toggle `<script>` in `<head>`
 and the `<button class="theme-toggle">` + its `toggleTheme()` `<script>`
