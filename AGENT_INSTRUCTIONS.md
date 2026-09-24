@@ -47,6 +47,22 @@ Newsletter emails have a fixed (non-toggleable) dark background, so
 `scripts/send-newsletter.js` always uses the dark variant only. Favicon:
 `assets/stateforty8-favicon.png`.
 
+**Shared external links across the 48th State properties.** All three
+appear in every page footer and in `scripts/send-newsletter.js`:
+
+- YouTube: `https://www.youtube.com/@48THStateSports`
+- Linktree: `https://linktr.ee/48thState` (shared with World News)
+- Sister publication: `https://kamaljac3-ui.github.io/d3vil-world-news`
+
+There is no templating layer here, so each URL is repeated per page. Grep
+for `48THStateSports`, `linktr.ee` or `d3vil-world-news` to change every
+copy at once.
+
+**Wordmark accent goes on the number word**: `<span class="accent-char">48TH</span> STATE`
+— 48TH in the accent color, STATE in the normal ink. This matches World
+News. The accent follows the distinctive/number word, which is why it moved
+from FORTY8 to 48TH when the word order flipped.
+
 **Open item — the logo art.** The mark is a saguaro inside an Arizona state
 outline. STATE FORTY EIGHT LLC's registered design mark (Reg. 4389052) is an
 Arizona outline with stylized text inside. The outline is used widely across

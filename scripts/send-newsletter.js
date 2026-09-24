@@ -166,11 +166,16 @@ function buildEmailHtml(postFile) {
 
         <!-- Footer -->
         <tr>
-          <td align="center" style="padding-bottom:10px;">
-            <!-- YOUTUBE: replace this URL everywhere it appears (grep for youtube.com/@).
-                 Plain styled anchor rather than an icon: an <svg> is stripped by Outlook
-                 and Gmail, and a remote PNG icon is blocked until images are loaded. -->
-            <a href="https://www.youtube.com/@48THStateSports" style="font-family:Georgia,'Times New Roman',serif; font-size:12px; font-weight:bold; letter-spacing:1px; color:#ff5a3c; text-decoration:none;">WATCH ON YOUTUBE &rarr;</a>
+          <td align="center" style="padding-bottom:10px; font-family:Georgia,'Times New Roman',serif; font-size:12px; font-weight:bold; letter-spacing:1px; line-height:2;">
+            <!-- Plain styled anchors rather than icons: an <svg> is stripped by Outlook
+                 and Gmail, and a remote PNG icon stays blank until the reader loads
+                 images. Same three links as the site footer -- grep for
+                 "48THStateSports", "linktr.ee" or "d3vil-world-news" to change all copies. -->
+            <a href="https://www.youtube.com/@48THStateSports" style="color:#ff5a3c; text-decoration:none;">YOUTUBE</a>
+            <span style="color:#3a221c;">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
+            <a href="https://kamaljac3-ui.github.io/d3vil-world-news" style="color:#ff5a3c; text-decoration:none;">WORLD NEWS</a>
+            <span style="color:#3a221c;">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
+            <a href="https://linktr.ee/48thState" style="color:#ff5a3c; text-decoration:none;">ALL LINKS</a>
           </td>
         </tr>
         <tr>
