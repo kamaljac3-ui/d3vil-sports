@@ -544,3 +544,56 @@ footer.site {
   color: var(--text-dim);
   font-size: 13px;
 }
+
+/* ---------- social / YouTube ----------
+   The channel URL appears in every page footer and in
+   scripts/send-newsletter.js. It is written as a single literal string so
+   `grep -rn "youtube.com/@" .` finds every copy at once -- there is no
+   templating layer on this site to hold it in one place. */
+
+footer.site .wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+footer.site .footer-note { flex: 1 1 340px; min-width: 0; }
+
+.social-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-dim);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 8px 15px;
+  white-space: nowrap;
+}
+
+.social-link:hover { color: var(--text); border-color: var(--accent); }
+.social-link svg { width: 19px; height: auto; flex: 0 0 auto; }
+.social-link:hover svg { color: var(--accent); }
+
+/* Inline variant used beside the weekly audio recap. */
+.recap-watch {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 14px;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent);
+}
+.recap-watch:hover { text-decoration: underline; }
+.recap-watch svg { width: 18px; height: auto; }
+
+@media (max-width: 560px) {
+  footer.site .wrap { flex-direction: column; align-items: flex-start; }
+}

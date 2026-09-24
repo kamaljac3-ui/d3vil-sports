@@ -166,6 +166,14 @@ function buildEmailHtml(postFile) {
 
         <!-- Footer -->
         <tr>
+          <td align="center" style="padding-bottom:10px;">
+            <!-- YOUTUBE: replace this URL everywhere it appears (grep for youtube.com/@).
+                 Plain styled anchor rather than an icon: an <svg> is stripped by Outlook
+                 and Gmail, and a remote PNG icon is blocked until images are loaded. -->
+            <a href="https://www.youtube.com/@48THStateSports" style="font-family:Georgia,'Times New Roman',serif; font-size:12px; font-weight:bold; letter-spacing:1px; color:#ff5a3c; text-decoration:none;">WATCH ON YOUTUBE &rarr;</a>
+          </td>
+        </tr>
+        <tr>
           <td align="center" style="font-family:Georgia,'Times New Roman',serif; font-size:11px; letter-spacing:0.5px; color:#7a655c; line-height:1.7;">
             48TH STATE SPORTS &mdash; NFL &middot; CFB &middot; NBA &middot; NCAAM &middot; WNBA &middot; NCAAW &middot; MLB &middot; NHL &middot; UFC &middot; BOXING &middot; GOLF &middot; HORSE RACING
           </td>
