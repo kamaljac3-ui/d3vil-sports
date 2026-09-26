@@ -1,6 +1,8 @@
 // NBA Edges: daily slate scan + ntfy alerts.
 // MODE=morning  -> whole slate, one push with the top shot-zone and projection edges
 // MODE=pregame  -> games tipping within PREGAME_MIN minutes: fresh injuries (+ prop lines if ODDS_API_KEY), one push per game (sent once)
+// MODE=snapshot -> save stats.nba.com data to data/nba-stats.json (run on a PC; GitHub runners can't reach nba.com)
+// MODE=probe    -> report which data sources this machine can reach
 const fs=require("fs"),path=require("path");
 const M=require("./model");
 
@@ -19,9 +21,9 @@ const PREGAME_MIN=+(process.env.PREGAME_MIN||90);
 const ABS_MIN={pts:2,reb:1,ast:1,fg3m:0.5};
 const STATS=["pts","reb","ast","fg3m"],AVG={pts:"PTS",reb:"REB",ast:"AST",fg3m:"FG3M"},LABEL={pts:"PTS",reb:"REB",ast:"AST",fg3m:"3PM"};
 const CACHE=path.join(__dirname,".cache");fs.mkdirSync(CACHE,{recursive:true});
-// ESPN 403s non-browser user agents
-const UA={"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36"};
-const NBA_H={...UA,"Referer":"https://www.nba.com/","Origin":"https://www.nba.com","Accept":"application/json, text/plain, */*","x-nba-stats-origin":"stats","x-nba-stats-token":"true"};
+// ESPN 403s custom "bot" agents everywhere and a spoofed Chrome agent from GitHub runners; Node's default agent passes both.
+const UA={};
+const NBA_H={"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36","Referer":"https://www.nba.com/","Origin":"https://www.nba.com","Accept":"application/json, text/plain, */*","x-nba-stats-origin":"stats","x-nba-stats-token":"true"};
 const ESPN="https://site.api.espn.com/apis/site/v2/sports/basketball/nba";
 const ESPN_TO_NBA={GS:"GSW",NY:"NYK",SA:"SAS",NO:"NOP",UTAH:"UTA",WSH:"WAS"};
 
@@ -112,22 +114,43 @@ function blend(cur,prev){
   out.league={pace:avg("pace"),ppg:avg("ppg"),oppReb:avg("oppReb"),oppAst:avg("oppAst"),zones:zt.length>=20?M.leagueZones(zt):null};
   return out;
 }
+async function fromNbaCom(){
+  const cur=await nbaSeason(CUR.nba),prev=await nbaSeason(PREV.nba);
+  if(cur){const l10=await nba("leaguedashplayerstats",CUR.nba,"MeasureType=Base&LastNGames=10");
+    for(const p of l10.objs){const x=cur.players[nk(p.PLAYER_NAME)];if(x&&x.GP>=3)x.MIN10=p.MIN;}}
+  if(!cur&&!prev)throw new Error("stats.nba.com returned no players");
+  return blend(cur,prev);
+}
+// stats.nba.com times out from GitHub runners, so a machine that can reach it (MODE=snapshot)
+// commits data/nba-stats.json and the Action reads that instead.
+const SNAP=path.join(__dirname,"data","nba-stats.json");
+function readSnap(maxAgeH){
+  try{const s=JSON.parse(fs.readFileSync(SNAP,"utf8"));const age=(Date.now()-s.at)/36e5;
+    if(s.season===CUR.nba&&age<=maxAgeH){log(`using snapshot from ${Math.round(age)}h ago`);return {...s.data,src:"nba.com snapshot"};}}catch(e){}
+  return null;
+}
 async function loadData(){
   const hit=cached(`data-${CUR.nba}.json`,12);if(hit)return hit;
-  let cur=null,prev=null;
-  try{
-    if(process.env.FORCE_ESPN==="1")throw new Error("FORCE_ESPN=1");
-    cur=await nbaSeason(CUR.nba);prev=await nbaSeason(PREV.nba);
-    if(cur){const l10=await nba("leaguedashplayerstats",CUR.nba,"MeasureType=Base&LastNGames=10");
-      for(const p of l10.objs){const x=cur.players[nk(p.PLAYER_NAME)];if(x&&x.GP>=3)x.MIN10=p.MIN;}}
-  }catch(e){
-    log(e.message,"- falling back to ESPN (no shot zones or opponent adjustments)");
-    cur=await espnSeason(CUR.espn);prev=await espnSeason(PREV.espn);
+  let D=readSnap(36);
+  if(!D&&process.env.FORCE_ESPN!=="1"){try{D=await fromNbaCom();}catch(e){log(e.message);}}
+  if(!D)D=readSnap(24*7);
+  if(!D){
+    log("falling back to ESPN (no shot zones or opponent adjustments)");
+    const cur=await espnSeason(CUR.espn),prev=await espnSeason(PREV.espn);
+    if(!cur&&!prev)throw new Error("No NBA player stats from stats.nba.com, the snapshot, or ESPN.");
+    D=blend(cur,prev);
   }
-  if(!cur&&!prev)throw new Error("No NBA player stats from stats.nba.com or ESPN.");
-  const D=blend(cur,prev);
   log(`stats: ${Object.keys(D.players).length} players, ${Object.keys(D.teams).length} teams via ${D.src}${D.league.zones?"":" (no zone data)"}`);
   return store(`data-${CUR.nba}.json`,D);
+}
+async function snapshot(){
+  const D=await fromNbaCom();
+  // keep rotation-ish players only and trim decimals so the daily commit stays small
+  for(const k in D.players)if(!(D.players[k].MIN>=8))delete D.players[k];
+  const round=(k,v)=>typeof v==="number"?Math.round(v*1000)/1000:v;
+  fs.mkdirSync(path.dirname(SNAP),{recursive:true});
+  fs.writeFileSync(SNAP,JSON.stringify({season:CUR.nba,at:Date.now(),data:D},round));
+  log(`snapshot: ${Object.keys(D.players).length} players, ${Object.keys(D.teams).length} teams -> ${path.relative(process.cwd(),SNAP)} (${Math.round(fs.statSync(SNAP).size/1024)} KB)`);
 }
 
 // ---------- ESPN slate / rosters / injuries ----------
@@ -242,6 +265,7 @@ async function probe(){
 }
 (async()=>{
   if(MODE==="probe")return probe();
+  if(MODE==="snapshot")return snapshot();
   const games=await slate();log(`${TODAY}: ${games.length} upcoming games, mode=${MODE}`);
   if(!games.length)return;
   const D=await loadData();
