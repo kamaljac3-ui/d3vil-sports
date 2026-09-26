@@ -223,7 +223,25 @@ async function gameRows(g,D,withLines){
   const out=await injuries(g),lines=withLines?await propLines(g):null;
   return [...await sideRows(g,"home",D,out,lines),...await sideRows(g,"away",D,out,lines)];
 }
+// MODE=probe: report which data sources this machine can reach (GitHub runners get blocked by some)
+async function probe(){
+  const d=TODAY.replace(/-/g,"");
+  const tests=[
+    ["espn scoreboard (browser UA)",`${ESPN}/scoreboard?dates=${d}`,UA],
+    ["espn scoreboard (no UA)",`${ESPN}/scoreboard?dates=${d}`,{}],
+    ["espn cdn scoreboard",`https://cdn.espn.com/core/nba/scoreboard?xhr=1&dates=${d}`,UA],
+    ["espn core api events",`https://sports.core.api.espn.com/v2/sports/basketball/leagues/nba/events?dates=${d}`,UA],
+    ["espn byathlete",`https://site.web.api.espn.com/apis/common/v3/sports/basketball/nba/statistics/byathlete?season=${CUR.espn}&seasontype=2&limit=5`,UA],
+    ["stats.nba.com player stats",`https://stats.nba.com/stats/leaguedashplayerstats?Season=${CUR.nba}&MeasureType=Base&LastNGames=0&${NBA_Q}`,NBA_H],
+    ["stats.nba.com scoreboardv3",`https://stats.nba.com/stats/scoreboardv3?GameDate=${TODAY}&LeagueID=00`,NBA_H],
+    ["nba cdn today scoreboard","https://cdn.nba.com/static/json/liveData/scoreboard/todaysScoreboard_00.json",UA],
+  ];
+  for(const [n,u,h] of tests){const t=Date.now();
+    try{const r=await fetch(u,{headers:h,signal:AbortSignal.timeout(25000)});const b=await r.text();log(`${r.status} ${n} (${b.length}b, ${Date.now()-t}ms)`);}
+    catch(e){log(`FAIL ${n}: ${e.message}`);}}
+}
 (async()=>{
+  if(MODE==="probe")return probe();
   const games=await slate();log(`${TODAY}: ${games.length} upcoming games, mode=${MODE}`);
   if(!games.length)return;
   const D=await loadData();
