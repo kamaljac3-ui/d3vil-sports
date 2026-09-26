@@ -117,7 +117,7 @@ async function sideRows(game,side,H,useLineup){
     const noSP=games.filter(g=>!g.teams.home.probablePitcher||!g.teams.away.probablePitcher).length;
     const msg=edges.length?edges.map((r,i)=>`${i+1}. ${line(r)}`).join("\n"):"No hitters clear the edge bar today.";
     await ntfy(`Launch Angle Edges ${TODAY}`,msg+(noSP?`\n\n${noSP} game(s) still missing a probable starter.`:""),edges.length?4:2,["baseball","chart_with_upwards_trend"]);
-    store(sentKey,true);
+    if(!DRY&&NTFY_TOPIC)store(sentKey,true);
   }else{
     const sent=cached(`lineups-${TODAY}.json`,30)||{};
     for(const g of games){
@@ -131,6 +131,6 @@ async function sideRows(game,side,H,useLineup){
       else log(`${matchup}: lineups in, no edges`);
       sent[g.gamePk]=true;
     }
-    store(`lineups-${TODAY}.json`,sent);
+    if(!DRY&&NTFY_TOPIC)store(`lineups-${TODAY}.json`,sent);
   }
 })().catch(async e=>{console.error(e);await ntfy("Launch Angle bot error",String(e.message||e),2,["warning"]).catch(()=>{});process.exit(1);});
