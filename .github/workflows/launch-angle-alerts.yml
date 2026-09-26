@@ -1,0 +1,42 @@
+name: Launch Angle Edges
+
+on:
+  schedule:
+    - cron: "0 14 * * *"              # morning slate scan (10 AM ET)
+    - cron: "*/30 15-23,0-2 * * *"    # lineup checks every 30 min, 11 AM – 10 PM ET
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "morning or lineups"
+        default: morning
+      dry_run:
+        description: "1 = print instead of sending"
+        default: "0"
+
+concurrency:
+  group: launch-angle
+  cancel-in-progress: false
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Restore data cache
+        uses: actions/cache@v4
+        with:
+          path: launch-angle/.cache
+          key: la-cache-${{ github.run_id }}
+          restore-keys: la-cache-
+      - name: Run scan
+        env:
+          MODE: ${{ github.event.inputs.mode || (github.event.schedule == '0 14 * * *' && 'morning' || 'lineups') }}
+          DRY_RUN: ${{ github.event.inputs.dry_run || '0' }}
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          NTFY_SERVER: ${{ secrets.NTFY_SERVER }}
+          NTFY_TOKEN: ${{ secrets.NTFY_TOKEN }}
+        run: node launch-angle/run.js
