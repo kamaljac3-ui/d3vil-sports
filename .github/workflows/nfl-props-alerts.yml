@@ -1,0 +1,80 @@
+name: NFL Props Edges
+
+on:
+  schedule:
+    # Every 15 min, 11:00-01:59 UTC, every day. The script works out Eastern time itself
+    # (Wednesday 11 AM, Friday 5 PM, and 75-110 min before each kickoff) and exits in seconds
+    # when nothing is due, so this covers both EDT and EST without editing crons on Nov 1.
+    # Off-the-hour minutes avoid GitHub's busiest (most delayed) scheduling slots.
+    - cron: "7,22,37,52 11-23,0-1 * * *"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "auto, wed, fri, gameday, or backtest"
+        default: auto
+      dry_run:
+        description: "1 = print alerts to the log instead of sending (and mark nothing as sent)"
+        default: "1"
+      game:
+        description: "gameday mode only: nflverse game_id, e.g. 2026_04_TEN_BAL (blank = next game)"
+        default: ""
+
+concurrency:
+  group: nfl-props
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      # Small state only (sent markers, Wed/Fri snapshots, trimmed Sleeper, odds usage).
+      # Restore the newest entry; save a new one only when this run changed something,
+      # so 60+ quiet runs a day don't churn the repo's cache quota.
+      - name: Restore state
+        uses: actions/cache/restore@v4
+        with:
+          path: nfl-props/.cache
+          key: np-state-${{ github.run_id }}
+          restore-keys: np-state-
+      - name: Run
+        id: run
+        env:
+          MODE: ${{ github.event.inputs.mode || 'auto' }}
+          DRY_RUN: ${{ github.event.inputs.dry_run || '0' }}
+          GAME: ${{ github.event.inputs.game }}
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          NTFY_SERVER: ${{ secrets.NTFY_SERVER }}
+          NTFY_TOKEN: ${{ secrets.NTFY_TOKEN }}
+          ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+          # Optional tuning via repo Settings > Secrets and variables > Actions > Variables.
+          # Unset variables fall back to the defaults in the code (see nfl-props/README.md).
+          MIN_PROB: ${{ vars.NP_MIN_PROB }}
+          MIN_EDGE_PCT: ${{ vars.NP_MIN_EDGE_PCT }}
+          MIN_BASE_GAMES: ${{ vars.NP_MIN_BASE_GAMES }}
+          MIN_EDGE_RECYDS: ${{ vars.NP_MIN_EDGE_RECYDS }}
+          MIN_EDGE_REC: ${{ vars.NP_MIN_EDGE_REC }}
+          MIN_EDGE_RUSHYDS: ${{ vars.NP_MIN_EDGE_RUSHYDS }}
+          MIN_EDGE_PASSYDS: ${{ vars.NP_MIN_EDGE_PASSYDS }}
+          TOP_N: ${{ vars.NP_TOP_N }}
+          WED_HOUR: ${{ vars.NP_WED_HOUR }}
+          FRI_HOUR: ${{ vars.NP_FRI_HOUR }}
+          GD_MIN: ${{ vars.NP_GD_MIN }}
+          GD_MAX: ${{ vars.NP_GD_MAX }}
+          GD_ALWAYS: ${{ vars.NP_GD_ALWAYS }}
+          ODDS_MONTHLY_BUDGET: ${{ vars.NP_ODDS_MONTHLY_BUDGET }}
+          ODDS_MAX_EVENTS: ${{ vars.NP_ODDS_MAX_EVENTS }}
+          ODDS_ON_GAMEDAY: ${{ vars.NP_ODDS_ON_GAMEDAY }}
+          ODDS_BOOKMAKERS: ${{ vars.NP_ODDS_BOOKMAKERS }}
+        run: |
+          if [ "$MODE" = "backtest" ]; then node nfl-props/backtest.js; else node nfl-props/run.js; fi
+      - name: Save state
+        if: always() && steps.run.outputs.state_changed == 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: nfl-props/.cache
+          key: np-state-${{ github.run_id }}
