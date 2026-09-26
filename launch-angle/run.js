@@ -104,7 +104,13 @@ async function sideRows(game,side,H,useLineup){
   const team=game.teams[side].team.abbreviation||game.teams[side].team.name;
   const lu=game.lineups&&game.lineups[side+"Players"];
   const hitters=useLineup&&lu&&lu.length?lu.map(p=>({id:String(p.id),name:p.fullName})):await rosterHitters(game.teams[side].team.id);
-  return hitters.filter(h=>H[h.id]).map(h=>score(H[h.id],P,h.name,team,pp.fullName));
+  return hitters.filter(h=>H[h.id]).map(h=>({...score(H[h.id],P,h.name,team,pp.fullName),hitterId:h.id,pitcherId:String(pp.id),gamePk:game.gamePk}));
+}
+// picks results/track.js grades later; only alerts that were really sent (same rule as the sent markers)
+function logPicks(mode,rows){
+  if(DRY||!NTFY_TOPIC||!rows.length)return;
+  const key=`picks-${TODAY}.json`,at=new Date().toISOString();
+  store(key,(cached(key,24*30)||[]).concat(rows.map(r=>({sport:"mlb",date:TODAY,mode,at,...r}))));
 }
 (async()=>{
   const games=await schedule();log(`${TODAY}: ${games.length} upcoming games, mode=${MODE}`);
@@ -117,6 +123,7 @@ async function sideRows(game,side,H,useLineup){
     const noSP=games.filter(g=>!g.teams.home.probablePitcher||!g.teams.away.probablePitcher).length;
     const msg=edges.length?edges.map((r,i)=>`${i+1}. ${line(r)}`).join("\n"):"No hitters clear the edge bar today.";
     await ntfy(`Launch Angle Edges ${TODAY}`,msg+(noSP?`\n\n${noSP} game(s) still missing a probable starter.`:""),edges.length?4:2,["baseball","chart_with_upwards_trend"]);
+    logPicks("morning",edges);
     if(!DRY&&NTFY_TOPIC)store(sentKey,true);
   }else{
     const sent=cached(`lineups-${TODAY}.json`,30)||{};
@@ -127,7 +134,7 @@ async function sideRows(game,side,H,useLineup){
       const edges=rows.filter(isEdge).sort((a,b)=>b.hr-a.hr);
       const matchup=`${g.teams.away.team.abbreviation||g.teams.away.team.name} @ ${g.teams.home.team.abbreviation||g.teams.home.team.name}`;
       const t=new Date(g.gameDate).toLocaleTimeString("en-US",{timeZone:"America/New_York",hour:"numeric",minute:"2-digit"});
-      if(edges.length) await ntfy(`${matchup} ${t} ET: ${edges.length} edge${edges.length>1?"s":""}`,edges.map(line).join("\n"),4,["baseball"]);
+      if(edges.length){await ntfy(`${matchup} ${t} ET: ${edges.length} edge${edges.length>1?"s":""}`,edges.map(line).join("\n"),4,["baseball"]);logPicks("lineups",edges);}
       else log(`${matchup}: lineups in, no edges`);
       sent[g.gamePk]=true;
     }

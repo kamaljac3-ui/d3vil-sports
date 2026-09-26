@@ -210,8 +210,8 @@ async function sideRows(g,side,D,outKeys,lines){
     if(outKeys.has(p.key)||p.MIN<20)continue;
     const zone=p.zones&&O.oppZones&&lg.zones?M.zoneMatchup(p.zones,p.gpEff||p.GP,O.oppZones,lg.zones):null;
     const pr=M.project(p,{zone,env,oppReb,oppAst,blowout,boost});
-    const base={name:p.name,team:me.abbr,opp:op.abbr,tags};
-    if(zone&&zone.delta>=ZONE_MIN&&p.PTS>=10)rows.push({kind:"zone",...base,delta:zone.delta,best:zone.best});
+    const base={name:p.name,key:p.key,team:me.abbr,opp:op.abbr,tags};
+    if(zone&&zone.delta>=ZONE_MIN&&p.PTS>=10)rows.push({kind:"zone",...base,stat:"pts",delta:zone.delta,best:zone.best,proj:pr.pts,avg:p.PTS});
     for(const s of STATS){
       const proj=pr[s],avg=p[AVG[s]],line=lines&&lines[p.key]&&lines[p.key][s];
       if(line!=null){const po=M.pOver(proj,line,s);if((po>=P_MIN||po<=1-P_MIN)&&Math.abs(proj-line)>=ABS_MIN[s])rows.push({kind:"prop",...base,stat:s,proj,line,po});}
@@ -228,11 +228,16 @@ const LINE={
   boost:r=>`${r.name} (${r.team}) vs ${r.opp}: ${LABEL[r.stat]} proj ${f1(r.proj)} vs ${f1(r.avg)} avg (+${pct(r.proj/r.avg-1)})${tagStr(r)}`,
   prop:r=>`${r.name} (${r.team}) ${LABEL[r.stat]} ${r.po>=0.5?"o":"u"}${r.line}: proj ${f1(r.proj)}, ${pct(r.po>=0.5?r.po:1-r.po)} ${r.po>=0.5?"over":"under"}${tagStr(r)}`};
 const rank={zone:r=>r.delta,boost:r=>r.proj/r.avg-1,prop:r=>Math.abs(r.po-0.5)};
-function section(title,rows,kind,n){
-  const list=rows.filter(r=>r.kind===kind).sort((a,b)=>rank[kind](b)-rank[kind](a)).slice(0,n);
-  return list.length?`${title}\n`+list.map((r,i)=>`${i+1}. ${LINE[kind](r)}`).join("\n"):"";
+// the rows that make it into an alert: top n of each section
+const SECTIONS=[["Shot-zone edges","zone"],["Prop lines","prop"],["Projection boosts","boost"]];
+const shown=(rows,n)=>SECTIONS.map(([t,k])=>[t,k,rows.filter(r=>r.kind===k).sort((a,b)=>rank[k](b)-rank[k](a)).slice(0,n)]).filter(s=>s[2].length);
+const message=secs=>secs.map(([t,k,l])=>`${t}\n`+l.map((r,i)=>`${i+1}. ${LINE[k](r)}`).join("\n")).join("\n\n");
+// picks results/track.js grades later; only alerts that were really sent (same rule as the sent markers)
+function logPicks(mode,secs){
+  const rows=secs.flatMap(s=>s[2]);if(DRY||!NTFY_TOPIC||!rows.length)return;
+  const key=`picks-${TODAY}.json`,at=new Date().toISOString();
+  store(key,(cached(key,24*30)||[]).concat(rows.map(({tags,...r})=>({sport:"nba",date:TODAY,mode,at,...r}))));
 }
-const message=(rows,n)=>[section("Shot-zone edges",rows,"zone",n),section("Prop lines",rows,"prop",n),section("Projection boosts",rows,"boost",n)].filter(Boolean).join("\n\n");
 
 async function ntfy(title,message,priority=3,tags=["basketball"]){
   if(DRY||!NTFY_TOPIC){log("DRY ntfy:",title,"\n"+message);return;}
@@ -244,7 +249,7 @@ const label=g=>`${g.away.abbr} @ ${g.home.abbr}`;
 const tip=g=>new Date(g.date).toLocaleTimeString("en-US",{timeZone:"America/New_York",hour:"numeric",minute:"2-digit"});
 async function gameRows(g,D,withLines){
   const out=await injuries(g),lines=withLines?await propLines(g):null;
-  return [...await sideRows(g,"home",D,out,lines),...await sideRows(g,"away",D,out,lines)];
+  return [...await sideRows(g,"home",D,out,lines),...await sideRows(g,"away",D,out,lines)].map(r=>({...r,gameId:g.id,tip:g.date}));
 }
 // MODE=probe: report which data sources this machine can reach (GitHub runners get blocked by some)
 async function probe(){
@@ -272,16 +277,17 @@ async function probe(){
   if(MODE==="morning"){
     const sentKey=`morning-${TODAY}.json`;if(cached(sentKey,30)&&!DRY){log("morning already sent");return;}
     let all=[];for(const g of games)all=all.concat(await gameRows(g,D,ODDS_IN_MORNING));
-    const msg=message(all,TOP_N)||"No edges clear the bar today.";
+    const secs=shown(all,TOP_N),msg=message(secs)||"No edges clear the bar today.";
     await ntfy(`NBA Edges ${TODAY} (${games.length} games)`,msg,all.length?4:2,["basketball","chart_with_upwards_trend"]);
+    logPicks("morning",secs);
     if(!DRY&&NTFY_TOPIC)store(sentKey,true);
   }else{
     const sent=cached(`pregame-${TODAY}.json`,30)||{};
     for(const g of games){
       const mins=(new Date(g.date)-Date.now())/6e4;
       if(sent[g.id]||mins>PREGAME_MIN||mins<-10)continue;
-      const rows=await gameRows(g,D,true),msg=message(rows,4);
-      if(msg)await ntfy(`${label(g)} ${tip(g)} ET: NBA edges`,msg,4,["basketball"]);else log(`${label(g)}: no edges`);
+      const secs=shown(await gameRows(g,D,true),4),msg=message(secs);
+      if(msg){await ntfy(`${label(g)} ${tip(g)} ET: NBA edges`,msg,4,["basketball"]);logPicks("pregame",secs);}else log(`${label(g)}: no edges`);
       sent[g.id]=true;
     }
     if(!DRY&&NTFY_TOPIC)store(`pregame-${TODAY}.json`,sent);

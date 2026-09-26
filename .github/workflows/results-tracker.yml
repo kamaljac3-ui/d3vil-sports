@@ -1,0 +1,70 @@
+name: Bot Results Tracker
+
+on:
+  schedule:
+    - cron: "0 11 * * *"   # 7 AM EDT / 6 AM EST, after last night's late games are final
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "1 = grade and print, don't save the ledger or send"
+        default: "0"
+      send_summary:
+        description: "1 = send the ntfy scorecard now (default: Mondays only)"
+        default: ""
+
+permissions:
+  contents: write   # pushes the ledger to the bot-results branch (not main, so no Pages deploy)
+
+concurrency:
+  group: results-tracker
+  cancel-in-progress: false
+
+jobs:
+  track:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      # the bots write picks-<date>.json into their caches; restore (read-only) the latest of each
+      - name: Restore MLB bot cache
+        uses: actions/cache/restore@v4
+        with:
+          path: launch-angle/.cache
+          key: la-cache-tracker-${{ github.run_id }}
+          restore-keys: la-cache-
+      - name: Restore NBA bot cache
+        uses: actions/cache/restore@v4
+        with:
+          path: nba-edges/.cache
+          key: nba-cache-tracker-${{ github.run_id }}
+          restore-keys: nba-cache-
+      - name: Check out ledger (bot-results branch)
+        run: |
+          if git ls-remote --exit-code --heads origin bot-results >/dev/null; then
+            git fetch -q origin bot-results:bot-results
+            git worktree add -q ledger bot-results
+          else
+            git worktree add -q --orphan -b bot-results ledger
+          fi
+      - name: Grade picks
+        env:
+          DRY_RUN: ${{ github.event.inputs.dry_run || '0' }}
+          SEND_SUMMARY: ${{ github.event.inputs.send_summary }}
+          LEDGER_DIR: ledger
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          NTFY_SERVER: ${{ secrets.NTFY_SERVER }}
+          NTFY_TOKEN: ${{ secrets.NTFY_TOKEN }}
+        run: node results/track.js
+      - name: Save ledger
+        if: ${{ (github.event.inputs.dry_run || '0') != '1' }}
+        working-directory: ledger
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet && { echo "no changes"; exit 0; }
+          git commit -q -m "results: $(TZ=America/New_York date +%F)"
+          git push -q origin bot-results
