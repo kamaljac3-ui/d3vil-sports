@@ -9,7 +9,9 @@ const ord=(season,week)=>season*100+week;
 
 // ---------- schedule (with spread/total lines, roof, stadium) ----------
 const GAME_COLS=["game_id","season","game_type","week","gameday","gametime","away_team","home_team","away_score","home_score",
-  "result","spread_line","total_line","roof","temp","wind","stadium_id","stadium"];
+  "result","spread_line","total_line","roof","temp","wind","stadium_id","stadium",
+  // used by nfl-lines
+  "location","div_game","home_rest","away_rest","home_moneyline","away_moneyline","home_qb_id","away_qb_id","home_qb_name","away_qb_name"];
 async function schedule(seasons){
   const t=await getText(GAMES_URL);if(!t)throw new Error("Could not download the nflverse schedule (games.csv).");
   return parseCSV(t,GAME_COLS).filter(g=>seasons.includes(+g.season)).map(g=>({...g,season:+g.season,week:+g.week}));

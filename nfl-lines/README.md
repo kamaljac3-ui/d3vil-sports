@@ -1,0 +1,90 @@
+# NFL Lines
+
+A game-day ntfy alert per kickoff slot (for example "Sun 1:00 PM ET"), sent about **75–110 minutes before kickoff**,
+after inactives. For every game in the slot it shows:
+
+- the current **spread, total and moneyline**
+- the model's spread, total and win probability
+- ✅ on any edge that clears the thresholds
+- QB availability and bad weather
+
+It's the game-day replacement for `nfl-edge-finder`'s line alerts. It's separate from the props alerts
+(`nfl-props/`) and never goes to the Kit newsletter.
+
+**Not betting advice, and the model isn't proven.** See the backtest below before acting on a ✅.
+
+## Lines
+
+| Source | Cost | Notes |
+|---|---|---|
+| **ESPN scoreboard** (default) | free, no key | DraftKings' current spread, total and moneyline. Unofficial endpoint: it rejects a spoofed browser User-Agent, so the bot sends none |
+| The Odds API (`LINES=odds`, needs `ODDS_API_KEY`) | 3 credits per slot | Median across US books. Also used automatically if ESPN is missing a game. Own budget, `ODDS_MONTHLY_BUDGET` = 100 |
+| nflverse schedule | free | Last resort. Updated about daily |
+
+## The model
+
+A port of `nfl-edge-finder`, with the same defaults:
+
+- **Team rating** = average scoring margin this season, weighted toward recent weeks (`DECAY` 0.90 per week).
+  Last season's rating is blended in and fades out over the first 4 games (`BLEND_WEEKS`).
+  `RATING=srs` swaps in a strength-of-schedule-adjusted version.
+- **Predicted margin** = rating gap + home field (2.0, 0 at neutral sites, 1.0 less in division games)
+  + rest (0.5 per day of advantage, capped at 4). The starting QB out costs his team 6 points (doubtful: 3).
+  - The starter is whoever started most of the team's last 3 games.
+  - His status comes from Sleeper and the nflverse injury report.
+  - If nflverse lists a different starter for this game, the alert mentions it but doesn't change the rating
+    (that listing is sometimes stale).
+- **Win probability** = normal CDF of margin / 13.5.
+- **Total** = each team's (points scored + opponent's points allowed) / 2, weighted the same way.
+  - Wind ≥ 15 mph: −3. Rain: −2. Capped at −5.
+  - Weather applies at outdoor stadiums only, via Open-Meteo.
+
+**Edges:**
+- Spread: model vs. line ≥ `MIN_SPREAD` (3 pts).
+- Moneyline: model win % minus the market's no-vig % ≥ `MIN_ML` (6 pts).
+- Totals: **off** (`TOTAL_EDGES=0`). If turned on, ≥ `MIN_TOTAL` (4 pts).
+- No ✅ before week 4 (`MIN_WEEK`), because ratings built on 1–3 games swing wildly.
+
+## Backtest: read this before trusting a ✅
+
+Run `node nfl-lines/backtest.js`, or trigger the workflow with `mode=backtest` to run all three seasons.
+It covers weeks 4–18 against nflverse **closing** lines. QB changes use the game's actual starter.
+
+| Season | Spread, cushion ≥ 3 | Moneyline, edge ≥ 6 pts | Total, cushion ≥ 4 |
+|---|---|---|---|
+| 2023 | 66-69 (48.9%) | 82-74, −6.0% ROI | 26-36 (41.9%) |
+| 2024 | 80-67 (54.4%) | 102-68, +0.4% ROI | 18-38 (32.1%) |
+| 2025 | 67-66 (50.4%) | 87-54, +19.6% ROI | 22-25 (46.8%) |
+
+- **Spread:** about 51% over three seasons. Break-even at −110 is 52.4%.
+- **Moneyline:** one good year, one flat year and one losing year. Inconsistent.
+- **Totals:** lose clearly. The model runs about a point above the market every season, and its big "over" calls miss.
+  That's why totals edges are off by default.
+- **Predicted margin:** off by about 11 points per game, against about 10 for the closing spread.
+- **`RATING=srs`** wasn't better: spread 50.0% / 51.3% / 50.8%.
+
+So the ✅ marks are "this model disagrees with the market," not a proven edge. The alert's real value today is the
+current line, QB news and weather in one place at the right time. Improving the model means efficiency-based ratings
+(EPA per play from play-by-play), market-aware totals, and grading picks against the lines the bot actually saw.
+
+## Settings
+
+Every setting is an env var. You can also set them as repo **Variables** named `NL_<SETTING>`:
+- `MIN_SPREAD`, `MIN_ML`, `MIN_TOTAL`, `TOTAL_EDGES`, `MIN_WEEK`
+- `GD_MIN`, `GD_MAX`
+- `LINES`, `ODDS_MONTHLY_BUDGET`
+- `RATING`
+
+Model constants (`DECAY`, `HFA`, `QB_OUT`, `WIND_*`, and so on) are at the top of `model.js`.
+
+**State:** `nfl-lines/.cache/` holds sent markers per kickoff slot, the schedule and trimmed Sleeper data.
+Only a live send (not `DRY_RUN=1`, `NTFY_TOPIC` set) marks a slot as sent.
+
+**Code:** shares its helpers with `nfl-props/` (`lib.js`, `data.js`, `weather.js`, `odds.js`). The workflow sets
+`NP_CACHE=nfl-lines/.cache` so the two bots never share state.
+
+Run by hand: Actions → **NFL Lines** → Run workflow (`mode=slate`, `dry_run=1` shows the next slot).
+Or locally:
+```
+MODE=slate DRY_RUN=1 node nfl-lines/run.js
+```

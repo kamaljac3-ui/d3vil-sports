@@ -8,7 +8,8 @@ const KEY=process.env.ODDS_API_KEY||"";
 const BASE="https://api.the-odds-api.com/v4/sports/americanfootball_nfl";
 const MARKET={recYds:"player_reception_yds",rec:"player_receptions",rushYds:"player_rush_yds",passYds:"player_pass_yds"};
 const STAT_OF=Object.fromEntries(Object.entries(MARKET).map(([k,v])=>[v,k]));
-const BUDGET=env("ODDS_MONTHLY_BUDGET",450);   // credits we allow ourselves per calendar month
+const BUDGET=env("ODDS_MONTHLY_BUDGET",350);   // credits this bot allows itself per month (nfl-lines has its own budget;
+                                               // both stop when the API's own remaining count nears ODDS_RESERVE)
 const RESERVE=env("ODDS_RESERVE",25);          // never go below this many remaining credits
 const BOOKS=process.env.ODDS_BOOKMAKERS||"";   // optional comma list, e.g. draftkings,fanduel
 
@@ -77,5 +78,24 @@ async function eventLines(eventId,stats){
 }
 const storedLines=eventId=>readState(`lines-${eventId}.json`,4*24);
 
+// Game lines (moneyline/spread/total) for every NFL game in one call: 3 credits.
+// Returns {"AWAY@HOME": {spread (home margin, + = home favored), total, homeML, awayML, books}} or null.
+async function gameLines(){
+  const cost=3,u=usage();
+  if(u.used+cost>BUDGET||(u.remaining!=null&&u.remaining-cost<RESERVE)){log(`Odds API budget: skipping game lines (used ${u.used}/${BUDGET})`);return null;}
+  const q=BOOKS?`bookmakers=${BOOKS}`:"regions=us";
+  const j=await call(`${BASE}/odds?apiKey=${KEY}&${q}&markets=h2h,spreads,totals&oddsFormat=american`);if(!j)return null;
+  const abbr=Object.fromEntries(Object.entries(TEAM).map(([k,v])=>[v,k])),med=a=>{const s=a.slice().sort((x,y)=>x-y);return s.length?s[Math.floor(s.length/2)]:null;};
+  const out={};
+  for(const e of j){const h=abbr[e.home_team],a=abbr[e.away_team];if(!h||!a)continue;
+    const sp=[],tot=[],hm=[],am=[];
+    for(const b of e.bookmakers||[])for(const m of b.markets||[])for(const o of m.outcomes||[]){
+      if(m.key==="spreads"&&o.name===e.home_team)sp.push(-o.point);
+      if(m.key==="totals"&&o.name==="Over")tot.push(o.point);
+      if(m.key==="h2h")(o.name===e.home_team?hm:am).push(o.price);}
+    out[`${a}@${h}`]={spread:med(sp),total:med(tot),homeML:med(hm),awayML:med(am),books:(e.bookmakers||[]).length,src:"Odds API consensus"};}
+  return out;
+}
+
 const fmtPrice=p=>p==null?"":(p>0?"+":"")+p;
-module.exports={enabled,eventIds,eventLines,storedLines,usage,fmtPrice,TEAM};
+module.exports={enabled,eventIds,eventLines,storedLines,gameLines,usage,fmtPrice,TEAM};

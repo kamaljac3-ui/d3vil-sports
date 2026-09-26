@@ -1,0 +1,67 @@
+name: NFL Lines
+
+on:
+  schedule:
+    # Every 15 min, 11:00-01:59 UTC. The script sends each kickoff slot once, 75-110 min
+    # before kickoff (Eastern time via Intl, so DST needs no cron changes), and exits fast otherwise.
+    - cron: "4,19,34,49 11-23,0-1 * * *"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "auto, slate (force the next kickoff slot now), or backtest"
+        default: slate
+      dry_run:
+        description: "1 = print instead of sending (and mark nothing as sent)"
+        default: "1"
+
+concurrency:
+  group: nfl-lines
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Restore state
+        uses: actions/cache/restore@v4
+        with:
+          path: nfl-lines/.cache
+          key: nl-state-${{ github.run_id }}
+          restore-keys: nl-state-
+      - name: Run
+        id: run
+        env:
+          NP_CACHE: nfl-lines/.cache
+          MODE: ${{ github.event.inputs.mode || 'auto' }}
+          DRY_RUN: ${{ github.event.inputs.dry_run || '0' }}
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          NTFY_SERVER: ${{ secrets.NTFY_SERVER }}
+          NTFY_TOKEN: ${{ secrets.NTFY_TOKEN }}
+          ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+          ODDS_MONTHLY_BUDGET: ${{ vars.NL_ODDS_MONTHLY_BUDGET || '100' }}
+          LINES: ${{ vars.NL_LINES }}
+          MIN_SPREAD: ${{ vars.NL_MIN_SPREAD }}
+          MIN_ML: ${{ vars.NL_MIN_ML }}
+          MIN_TOTAL: ${{ vars.NL_MIN_TOTAL }}
+          TOTAL_EDGES: ${{ vars.NL_TOTAL_EDGES }}
+          MIN_WEEK: ${{ vars.NL_MIN_WEEK }}
+          GD_MIN: ${{ vars.NL_GD_MIN }}
+          GD_MAX: ${{ vars.NL_GD_MAX }}
+          RATING: ${{ vars.NL_RATING }}
+        run: |
+          if [ "$MODE" = "backtest" ]; then
+            for y in 2023 2024 2025; do BT_SEASON=$y node nfl-lines/backtest.js; done
+          else
+            node nfl-lines/run.js
+          fi
+      - name: Save state
+        if: always() && steps.run.outputs.state_changed == 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: nfl-lines/.cache
+          key: nl-state-${{ github.run_id }}

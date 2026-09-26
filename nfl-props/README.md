@@ -108,7 +108,7 @@ That's why the optional Odds API mode exists.
 - Friday only.
 - Only the games holding the top `ODDS_TOP_PLAYERS` (20) candidates, at most `ODDS_MAX_EVENTS` (8) games.
 - Only the markets those candidates need.
-- The bot stops at `ODDS_MONTHLY_BUDGET` (450) credits used, or when fewer than `ODDS_RESERVE` (25) remain,
+- The bot stops at `ODDS_MONTHLY_BUDGET` (350) credits used (`nfl-lines` keeps its own 100), or when fewer than `ODDS_RESERVE` (25) remain,
   reading the API's own remaining-credits header.
 - Friday's lines are stored and reused by the game-day alerts. Set `ODDS_ON_GAMEDAY=1` to re-pull on game day,
   which costs more credits.

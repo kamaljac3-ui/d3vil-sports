@@ -24,7 +24,8 @@ It's served by GitHub Pages from `main`.
 | `test-send.yml` | | manual | Newsletter test send. |
 | `launch-angle-alerts.yml` | Launch Angle Edges | cron + manual | MLB bot, ntfy only. |
 | `nba-edges-alerts.yml` | NBA Edges | cron (Oct–Jun) + manual | NBA bot, ntfy only. |
-| `nfl-props-alerts.yml` | NFL Props Edges | cron every 15 min + manual | NFL bot, ntfy only. |
+| `nfl-props-alerts.yml` | NFL Props Edges | cron every 15 min + manual | NFL props bot, ntfy only. |
+| `nfl-lines-alerts.yml` | NFL Lines | cron every 15 min + manual | NFL game-lines bot, ntfy only. |
 
 **Consequences of every push to `main`:**
 - The Pages deploy re-runs.
@@ -91,6 +92,17 @@ It's served by GitHub Pages from `main`.
   - 75–110 min before each kickoff: one alert per game
 - **State:** only small files, saved only when a run changes state (`state_changed` output + `actions/cache/save`).
   Raw data is re-downloaded each run.
+
+## NFL game lines: `nfl-lines/` ("NFL Lines")
+
+One ntfy alert per kickoff slot, 75–110 min out. It shows the current spread, total and moneyline (free from ESPN's
+scoreboard, i.e. DraftKings; optionally The Odds API) next to a port of `nfl-edge-finder`'s rating model. See
+`nfl-lines/README.md`.
+- **The backtest is not profitable:** about 51% ATS over 2023–25, and totals lose, so totals edges are off by default.
+  Say so if Kamal asks whether it's an edge.
+- **It reuses `nfl-props/` helpers** (`lib`, `data`, `weather`, `odds`), with its state in `nfl-lines/.cache`
+  via `NP_CACHE`. Changes to those shared files must keep both bots working.
+- **ESPN returns 403 to the custom browser User-Agent**, so ESPN requests go out with no custom User-Agent.
 
 ## Conventions and lessons (apply to every bot here)
 
