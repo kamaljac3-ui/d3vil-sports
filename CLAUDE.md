@@ -87,6 +87,11 @@ It's served by GitHub Pages from `main`.
   - `r-<team>-<date>.json`: 12 h
   - `morning-<date>.json` / `lineups-<date>.json`: the sent markers
 - **Errors.** The bot sends an ntfy "Launch Angle bot error" at priority 2 and exits 1.
+- **Backtest: no demonstrated edge.** `node launch-angle/backtest.js` covers 2025 and 2026 with prior-season profiles and
+  about 157k PA; results are in `launch-angle/BACKTEST.md`. The bot's picks homered 1.05x as often as expected from
+  hitter and pitcher HR rates (z +0.6), and the live-bot rule came in at 1.03x. HR-contact deciles show no trend.
+  Say so if Kamal asks whether it's an edge. The pitch data is cached in `launch-angle/.cache/bt`, so re-testing
+  a model change takes minutes.
 
 ## NFL bot: `nfl-props/` ("NFL Props Edges")
 
