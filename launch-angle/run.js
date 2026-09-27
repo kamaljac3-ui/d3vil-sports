@@ -10,6 +10,7 @@ const NTFY_SERVER=(process.env.NTFY_SERVER||"https://ntfy.sh").replace(/\/$/,"")
 const NTFY_TOPIC=process.env.NTFY_TOPIC;
 const NTFY_TOKEN=process.env.NTFY_TOKEN||"";
 const FENCE=+(process.env.FENCE||380);
+const MIN_HITTERS=+(process.env.MIN_HITTERS||100); // current-season hitters needed before skipping last season's fill-in
 const MIN_EDGE=+(process.env.MIN_EDGE||0.03);   // window % above hitter's own baseline
 const GAP_LO=+(process.env.GAP_LO||5), GAP_HI=+(process.env.GAP_HI||12);
 const TOP_N=+(process.env.TOP_N||8);
@@ -43,22 +44,27 @@ async function get(url,asText){
   return null;
 }
 // ---------- Savant ----------
+// NB: the bat-tracking leaderboards ignore ?year= and always return the current season; seasonStart/seasonEnd works.
 const LB=y=>[
-  `https://baseballsavant.mlb.com/leaderboard/bat-tracking?year=${y}&csv=true`,
-  `https://baseballsavant.mlb.com/leaderboard/bat-tracking/swing-path-attack-angle?year=${y}&csv=true`,
+  `https://baseballsavant.mlb.com/leaderboard/bat-tracking?gameType=Regular&minSwings=q&seasonStart=${y}&seasonEnd=${y}&csv=true`,
+  `https://baseballsavant.mlb.com/leaderboard/bat-tracking/swing-path-attack-angle?gameType=Regular&minSwings=q&seasonStart=${y}&seasonEnd=${y}&csv=true`,
   `https://baseballsavant.mlb.com/leaderboard/statcast?type=batter&year=${y}&position=&team=&min=25&csv=true`];
 async function hitterProfiles(){
   const hit=cached("hitters.json",24*7);if(hit)return hit;
+  // Current season first. Early in the year (few qualified hitters) fill in anyone missing from last season.
+  const out={};
   for(const y of [YEAR,YEAR-1]){
     const files=[];
     for(const u of LB(y)){const t=await get(u,true);if(t&&t.includes(","))files.push(parseCSV(t));}
-    // optional manual drop-ins: launch-angle/data/*.csv
+    // optional manual drop-ins: launch-angle/data/*.csv (merged into the current season)
     const dd=path.join(__dirname,"data");
-    if(fs.existsSync(dd))for(const f of fs.readdirSync(dd))if(f.endsWith(".csv"))files.push(parseCSV(fs.readFileSync(path.join(dd,f),"utf8")));
-    const r=M.hittersFrom(files);log(`hitters ${y}: ${r.list.length}`);
-    if(r.list.length>=100)return store("hitters.json",Object.fromEntries(r.list.map(h=>[h.id,h])));
+    if(y===YEAR&&fs.existsSync(dd))for(const f of fs.readdirSync(dd))if(f.endsWith(".csv"))files.push(parseCSV(fs.readFileSync(path.join(dd,f),"utf8")));
+    const r=M.hittersFrom(files);let added=0;
+    for(const h of r.list)if(!out[h.id]){out[h.id]={...h,season:y};added++;}
+    log(`hitters ${y}: ${r.list.length} (${added} used, ${Object.keys(out).length} total)`);
+    if(Object.keys(out).length>=MIN_HITTERS)return store("hitters.json",out);
   }
-  throw new Error("Could not build hitter profiles from Savant. Drop leaderboard CSVs into launch-angle/data/.");
+  throw new Error(`Could not build hitter profiles from Savant. Drop leaderboard CSVs into launch-angle/data/. (${Object.keys(out).length} hitters, need ${MIN_HITTERS})`);
 }
 const SEARCH=(id,y)=>"https://baseballsavant.mlb.com/statcast_search/csv?all=true&hfPT=&hfAB=&hfGT=R%7CF%7CD%7CL%7CW%7C&hfPR=&hfZ=&hfStadium=&hfBBL=&hfNewZones=&hfPull=&hfC=&hfSea="+y+"%7C&hfSit=&player_type=pitcher&hfOuts=&hfOpponent=&pitcher_throws=&batter_stands=&hfSA=&game_date_gt=&game_date_lt=&hfMo=&hfTeam=&home_road=&hfRO=&position=&hfInfield=&hfOutfield=&hfInn=&hfBBT=&hfFlag=&pitchers_lookup%5B%5D="+id+"&metric_1=&group_by=name&min_pitches=0&min_results=0&min_pas=0&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&type=details";
 async function pitcherProfile(id,name){
