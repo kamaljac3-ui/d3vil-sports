@@ -4,7 +4,7 @@
 // MODE=wed|fri  -> force that weekly alert now.   MODE=gameday -> force the game-day check
 //                  (GAME=<nflverse game_id>, else games in the window, else the next game).
 const {env,envs,log,etParts,etToUtc,etClock,readState,writeState,ntfy,summary,normName,LIVE,DRY}=require("./lib");
-const data=require("./data"),M=require("./model"),W=require("./weather"),odds=require("./odds");
+const data=require("./data"),M=require("./model"),W=require("./weather"),odds=require("./odds"),SH=require("./sharp");
 
 const MODE=envs("MODE","auto");
 const CFG={
@@ -20,6 +20,9 @@ const CFG={
   GD_DELTA_PCT:env("GD_DELTA_PCT",0.12),GD_WIND_DELTA:env("GD_WIND_DELTA",6),GD_ALWAYS:env("GD_ALWAYS",0),
   GD_DELTA_ABS:{recYds:env("GD_DELTA_RECYDS",8),rec:env("GD_DELTA_REC",0.7),rushYds:env("GD_DELTA_RUSHYDS",8),passYds:env("GD_DELTA_PASSYDS",15)},
   DOUBTFUL_OUT:env("DOUBTFUL_OUT",1),
+  // stale props (needs ODDS_API_KEY): your books' prices vs the sharp book's no-vig price
+  MIN_EV:env("MIN_EV_PROPS",0.03),STALE_N:env("STALE_N",6),
+  STALE_GAP:{recYds:env("STALE_GAP_RECYDS",8),rec:env("STALE_GAP_REC",1),rushYds:env("STALE_GAP_RUSHYDS",8),passYds:env("STALE_GAP_PASSYDS",15)},
   ODDS_TOP:env("ODDS_TOP_PLAYERS",20),ODDS_MAX_EVENTS:env("ODDS_MAX_EVENTS",8),ODDS_ON_GAMEDAY:env("ODDS_ON_GAMEDAY",0),
 };
 const LABEL={recYds:"rec yds",rec:"rec",rushYds:"rush yds",passYds:"pass yds"};
@@ -98,8 +101,10 @@ function tableMd(title,games){
 }
 
 // Pull lines for the games holding our strongest candidates (Friday / optional game day).
+// Returns stale prop offers found in freshly pulled events (every priced player, not just our projections).
 async function attachLines(games,fresh){
-  if(!odds.enabled())return;
+  if(!odds.enabled())return [];
+  const stale=[];
   const ids=await odds.eventIds(games.map(G=>G.g));
   const score=[];
   for(const G of games)for(const p of G.players)for(const s in p.stats){const e=evaluate(p,s,null);if(e)score.push([e.prob,G,p,s]);}
@@ -110,15 +115,30 @@ async function attachLines(games,fresh){
   for(const G of games){
     const ev=ids[G.g.game_id];if(!ev)continue;
     let lines=fresh&&want.has(G.g.game_id)?await odds.eventLines(ev,[...want.get(G.g.game_id)]):null;
+    if(lines)for(const st of Object.values(lines))for(const [stat,l] of Object.entries(st)){
+      for(const x of SH.bestPerSide(SH.staleTwoWay(l.offers||[],{sigma:M.sdOf(stat,l.line),maxGap:CFG.STALE_GAP[stat],minEV:CFG.MIN_EV})).slice(0,1))
+        stale.push({...x,stat,name:l.name,game:`${G.g.away_team}@${G.g.home_team}`,gid:G.g.game_id});}
     if(!lines)lines=odds.storedLines(ev);if(!lines)continue;
     for(const p of G.players){const l=lines[normName(p.name)];if(l)p.lines=l;}
   }
+  return stale.sort((a,b)=>b.ev-a.ev);
+}
+const staleLine=x=>{const side=x.side==="A"?"Over":"Under",ss=x.side==="A"?x.sharp.A:x.sharp.B;
+  return `💰 ${x.name} (${x.game}) ${side} ${x.L} ${LABEL[x.stat]} at ${x.title} ${SH.fmt(x.price)}: fair ${(x.fair*100).toFixed(1)}%, +${(x.ev*100).toFixed(1)}% EV vs ${x.sharp.title} ${side} ${ss.L} ${SH.fmt(ss.price)}`;};
+// what a live alert contained, for grading / closing-line value later (results tracker format: sport + date)
+function logPicks(ctx,kind,evals,stale){
+  const date=etParts().date,key=`picks-${date}.json`,at=new Date().toISOString();
+  const rows=[...evals.filter(e=>e.refKind==="line").map(e=>({kind:"model",market:e.stat,player:e.p.name,playerId:e.p.id,game:e.p.gid,
+      side:e.over?"Over":"Under",point:e.ref,price:e.price?e.price.price:null,book:e.price?e.price.book:null,proj:e.proj,prob:e.prob})),
+    ...stale.map(x=>({kind:"stale",market:x.stat,player:x.name,game:x.gid,side:x.side==="A"?"Over":"Under",point:x.L,price:x.price,book:x.key,fair:x.fair,ev:x.ev,
+      sharp:`${x.sharp.key} ${(x.side==="A"?x.sharp.A:x.sharp.B).L} ${(x.side==="A"?x.sharp.A:x.sharp.B).price}`}))];
+  if(rows.length)writeState(key,(readState(key)||[]).concat(rows.map(r=>({sport:"nfl",bot:"nfl-props",date,at,alert:kind,week:ctx.week,...r}))));
 }
 
 // ---------- weekly alert (Wednesday / Friday) ----------
 async function weekly(ctx,kind,games){
   const G=[];for(const g of games)G.push(await projectGame(ctx,g));
-  if(kind==="fri")await attachLines(G,true);
+  const stale=kind==="fri"?await attachLines(G,true):[];
   const evals=[];
   for(const x of G)for(const p of x.players)for(const s in p.stats){const e=evaluate(p,s,p.lines);if(e&&e.ok)evals.push(e);}
   evals.sort((a,b)=>b.prob-a.prob);
@@ -131,11 +151,13 @@ async function weekly(ctx,kind,games){
   if(bumps.length)msg+=`\n\nUsage bumps:\n${bumps.join("\n")}`;
   if(qb.length)msg+=`\n\nQB changes: ${qb.join("; ")}`;
   if(wind.length)msg+=`\n\nWind: ${wind.join("; ")}`;
+  if(stale.length)msg+=`\n\nStale prices at your books:\n${stale.slice(0,CFG.STALE_N).map(staleLine).join("\n")}`;
   const hasLines=top.some(e=>e.refKind==="line");
   msg+=hasLines?"":"\n\n(\"avg\" = his last-4-game average; compare with your book's line.)";
-  const ok=await ntfy(`NFL props W${ctx.week}: ${label} (${top.length})`,msg+(RUN_URL?"\n\nTap for every projection.":""),top.length?4:2,["football","chart_with_upwards_trend"],RUN_URL);
+  const ok=await ntfy(`NFL props W${ctx.week}: ${label} (${top.length}${stale.length?`, ${stale.length} stale`:""})`,msg+(RUN_URL?"\n\nTap for every projection.":""),top.length?4:2,["football","chart_with_upwards_trend"],RUN_URL);
   summary(tableMd(`NFL week ${ctx.week} projections (${label})`,G));
   if(LIVE&&ok){
+    logPicks(ctx,kind,top,stale.slice(0,CFG.STALE_N));
     const snap={kind,games:{}};
     for(const x of G)snap.games[x.g.game_id]={wx:x.wx,qb:x.sides.map(s=>s.qb),
       out:x.sides.flatMap(s=>s.out.map(o=>o.id)),players:Object.fromEntries(x.players.map(p=>[p.id,{name:p.name,stats:p.stats,status:p.status}]))};
@@ -146,10 +168,10 @@ async function weekly(ctx,kind,games){
 
 // ---------- game-day alert (~90 min before kickoff, when inactives post) ----------
 async function gameday(ctx,g){
-  const x=await projectGame(ctx,g);
+  const x=await projectGame(ctx,g);let stale=[];
   const snap=((readState(`proj-${ctx.S}-w${g.week}.json`)||{}).games||{})[g.game_id];
   if(odds.enabled()){
-    if(CFG.ODDS_ON_GAMEDAY)await attachLines([x],true);else await attachLines([x],false);
+    if(CFG.ODDS_ON_GAMEDAY)stale=await attachLines([x],true);else await attachLines([x],false);   // Friday's prices are too old to call stale
   }
   const notes=[];
   // who is out now that wasn't when the weekly projections went out, and who gains
@@ -177,12 +199,15 @@ async function gameday(ctx,g){
   const evals=[];for(const p of x.players)for(const s in p.stats){const e=evaluate(p,s,p.lines);if(e&&e.ok)evals.push(e);}
   evals.sort((a,b)=>b.prob-a.prob);
   const matchup=`${g.away_team} @ ${g.home_team}`,t=etClock(x.kick);
-  if(!notes.length&&!evals.length&&!CFG.GD_ALWAYS){log(`${matchup}: no changes since the weekly projections`);return true;}
+  if(!notes.length&&!evals.length&&!stale.length&&!CFG.GD_ALWAYS){log(`${matchup}: no changes since the weekly projections`);return true;}
   let msg=notes.join("\n\n");
   if(evals.length)msg+=(msg?"\n\n":"")+`Edges:\n${evals.slice(0,6).map(pickLine).join("\n")}`;
+  if(stale.length)msg+=(msg?"\n\n":"")+`Stale prices at your books:\n${stale.slice(0,CFG.STALE_N).map(staleLine).join("\n")}`;
   if(!snap)msg+="\n\n(no Wed/Fri snapshot for this game - showing current projections only)";
   summary(tableMd(`${matchup} game-day projections`,[x]));
-  return ntfy(`${matchup} ${t} ET: inactives check`,msg||"No changes.",notes.length?4:3,["football"],RUN_URL);
+  const ok=await ntfy(`${matchup} ${t} ET: inactives check`,msg||"No changes.",notes.length||stale.length?4:3,["football"],RUN_URL);
+  if(LIVE&&ok)logPicks({...ctx,week:g.week},"gameday",evals,stale.slice(0,CFG.STALE_N));
+  return ok;
 }
 
 // ---------- main ----------

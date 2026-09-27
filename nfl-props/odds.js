@@ -1,8 +1,9 @@
-// Optional prop lines from The Odds API (the-odds-api.com). Only used when ODDS_API_KEY is set.
-// Credit math: listing events is free; each event's odds call costs (markets x regions) credits.
-// We pull one region (us), only the markets our candidates need, only for a handful of games,
-// and stop well before the monthly allowance runs out.
+// Optional lines from The Odds API (the-odds-api.com). Only used when ODDS_API_KEY is set.
+// Credit math: listing events is free; an odds call costs (markets x regions) credits, and a
+// bookmakers= list is billed as one region per 10 books. We always ask for the sharp book plus
+// your books (<= 10, see sharp.js), only the markets needed, and stop before the budget runs out.
 const {env,log,readState,writeState,normName}=require("./lib");
+const {BOOKMAKERS}=require("./sharp");
 
 const KEY=process.env.ODDS_API_KEY||"";
 const BASE="https://api.the-odds-api.com/v4/sports/americanfootball_nfl";
@@ -11,7 +12,7 @@ const STAT_OF=Object.fromEntries(Object.entries(MARKET).map(([k,v])=>[v,k]));
 const BUDGET=env("ODDS_MONTHLY_BUDGET",350);   // credits this bot allows itself per month (nfl-lines has its own budget;
                                                // both stop when the API's own remaining count nears ODDS_RESERVE)
 const RESERVE=env("ODDS_RESERVE",25);          // never go below this many remaining credits
-const BOOKS=process.env.ODDS_BOOKMAKERS||"";   // optional comma list, e.g. draftkings,fanduel
+const REGIONS=Math.max(1,Math.ceil(BOOKMAKERS.split(",").length/10));
 
 const TEAM={ARI:"Arizona Cardinals",ATL:"Atlanta Falcons",BAL:"Baltimore Ravens",BUF:"Buffalo Bills",CAR:"Carolina Panthers",
   CHI:"Chicago Bears",CIN:"Cincinnati Bengals",CLE:"Cleveland Browns",DAL:"Dallas Cowboys",DEN:"Denver Broncos",DET:"Detroit Lions",
@@ -24,6 +25,10 @@ const TEAM={ARI:"Arizona Cardinals",ATL:"Atlanta Falcons",BAL:"Baltimore Ravens"
 const enabled=()=>!!KEY;
 const month=()=>new Date().toISOString().slice(0,7);
 function usage(){const u=readState("odds-usage.json")||{};return u.month===month()?u:{month:month(),used:0,remaining:null};}
+function affordable(cost,what){const u=usage();
+  if(u.used+cost>BUDGET||(u.remaining!=null&&u.remaining-cost<RESERVE)){
+    log(`Odds API budget: skipping ${what} (used ${u.used}/${BUDGET} this month, ${u.remaining??"?"} remaining)`);return false;}
+  return true;}
 
 async function call(url){
   const r=await fetch(url).catch(e=>{log("odds fetch error",e.message);return null;});
@@ -45,32 +50,31 @@ async function eventIds(games){
   return out;
 }
 
-// Consensus (median) line per player per stat, with the best price on each side at that number.
+// Per player per stat: consensus (median) line, best price each side at that number, and every
+// book's individual offer (for the stale-line check).
 function parse(j){
   const acc={};
   for(const b of j.bookmakers||[])for(const m of b.markets||[]){
     const stat=STAT_OF[m.key];if(!stat)continue;
     for(const o of m.outcomes||[]){if(o.point==null||!o.description)continue;
-      const k=normName(o.description),e=(acc[k]||(acc[k]={}))[stat]||(acc[k][stat]={pts:[],o:{},u:{}});
+      const k=normName(o.description),e=(acc[k]||(acc[k]={}))[stat]||(acc[k][stat]={pts:[],o:{},u:{},offers:[],name:o.description});
+      e.offers.push({key:b.key,title:b.title,side:o.name==="Over"?"A":"B",L:o.point,price:o.price});
       if(o.name==="Over"){e.pts.push(o.point);const c=e.o[o.point];if(c==null||o.price>c.price)e.o[o.point]={price:o.price,book:b.title};}
       if(o.name==="Under"){const c=e.u[o.point];if(c==null||o.price>c.price)e.u[o.point]={price:o.price,book:b.title};}}
   }
   const out={};
   for(const [k,st] of Object.entries(acc))for(const [stat,e] of Object.entries(st)){
     if(!e.pts.length)continue;const s=e.pts.slice().sort((a,b)=>a-b),line=s[Math.floor(s.length/2)];
-    (out[k]||(out[k]={}))[stat]={line,over:e.o[line]||null,under:e.u[line]||null,books:e.pts.length};
+    (out[k]||(out[k]={}))[stat]={line,over:e.o[line]||null,under:e.u[line]||null,books:e.pts.length,offers:e.offers,name:e.name};
   }
   return out;
 }
 
-// stats = which of our stats to request for this event. Returns {normName: {stat: {line,...}}} or null.
+// stats = which of our stats to request for this event. Returns {normName: {stat: {line,...,offers}}} or null.
 async function eventLines(eventId,stats){
   const markets=[...new Set(stats)].map(s=>MARKET[s]).filter(Boolean);if(!markets.length)return null;
-  const cost=markets.length*(BOOKS?Math.ceil(BOOKS.split(",").length/10):1),u=usage();
-  if(u.used+cost>BUDGET||(u.remaining!=null&&u.remaining-cost<RESERVE)){
-    log(`Odds API budget: skipping (used ${u.used}/${BUDGET} this month, ${u.remaining??"?"} remaining)`);return null;}
-  const q=BOOKS?`bookmakers=${BOOKS}`:"regions=us";
-  const j=await call(`${BASE}/events/${eventId}/odds?apiKey=${KEY}&${q}&markets=${markets.join(",")}&oddsFormat=american`);
+  const cost=markets.length*REGIONS;if(!affordable(cost,"props"))return null;
+  const j=await call(`${BASE}/events/${eventId}/odds?apiKey=${KEY}&bookmakers=${BOOKMAKERS}&markets=${markets.join(",")}&oddsFormat=american`);
   if(!j)return null;
   const lines=parse(j);writeState(`lines-${eventId}.json`,lines);
   log(`Odds API: ${Object.keys(lines).length} players priced for event ${eventId} (${cost} credits)`);
@@ -78,22 +82,23 @@ async function eventLines(eventId,stats){
 }
 const storedLines=eventId=>readState(`lines-${eventId}.json`,4*24);
 
-// Game lines (moneyline/spread/total) for every NFL game in one call: 3 credits.
-// Returns {"AWAY@HOME": {spread (home margin, + = home favored), total, homeML, awayML, books}} or null.
+// Game lines for every NFL game in one call (3 markets x 1 region = 3 credits).
+// Returns {"AWAY@HOME": {spread (home margin, + = home favored), total, homeML, awayML, offers:{spreads,totals,h2h}}}.
 async function gameLines(){
-  const cost=3,u=usage();
-  if(u.used+cost>BUDGET||(u.remaining!=null&&u.remaining-cost<RESERVE)){log(`Odds API budget: skipping game lines (used ${u.used}/${BUDGET})`);return null;}
-  const q=BOOKS?`bookmakers=${BOOKS}`:"regions=us";
-  const j=await call(`${BASE}/odds?apiKey=${KEY}&${q}&markets=h2h,spreads,totals&oddsFormat=american`);if(!j)return null;
+  if(!affordable(3*REGIONS,"game lines"))return null;
+  const j=await call(`${BASE}/odds?apiKey=${KEY}&bookmakers=${BOOKMAKERS}&markets=h2h,spreads,totals&oddsFormat=american`);if(!j)return null;
   const abbr=Object.fromEntries(Object.entries(TEAM).map(([k,v])=>[v,k])),med=a=>{const s=a.slice().sort((x,y)=>x-y);return s.length?s[Math.floor(s.length/2)]:null;};
   const out={};
   for(const e of j){const h=abbr[e.home_team],a=abbr[e.away_team];if(!h||!a)continue;
-    const sp=[],tot=[],hm=[],am=[];
+    const sp=[],tot=[],hm=[],am=[],offers={spreads:[],totals:[],h2h:[]};
     for(const b of e.bookmakers||[])for(const m of b.markets||[])for(const o of m.outcomes||[]){
-      if(m.key==="spreads"&&o.name===e.home_team)sp.push(-o.point);
-      if(m.key==="totals"&&o.name==="Over")tot.push(o.point);
-      if(m.key==="h2h")(o.name===e.home_team?hm:am).push(o.price);}
-    out[`${a}@${h}`]={spread:med(sp),total:med(tot),homeML:med(hm),awayML:med(am),books:(e.bookmakers||[]).length,src:"Odds API consensus"};}
+      const home=o.name===e.home_team,base={key:b.key,title:b.title,price:o.price};
+      if(m.key==="spreads"){if(home)sp.push(-o.point);
+        // one scale: side A = home covers when margin > L, with L = -(home point) = (away point)
+        offers.spreads.push({...base,side:home?"A":"B",L:home?-o.point:o.point,team:home?h:a,point:o.point});}
+      if(m.key==="totals"){if(o.name==="Over")tot.push(o.point);offers.totals.push({...base,side:o.name==="Over"?"A":"B",L:o.point});}
+      if(m.key==="h2h"){(home?hm:am).push(o.price);offers.h2h.push({...base,side:home?"A":"B",team:home?h:a});}}
+    out[`${a}@${h}`]={spread:med(sp),total:med(tot),homeML:med(hm),awayML:med(am),books:(e.bookmakers||[]).length,src:"Odds API consensus",offers};}
   return out;
 }
 

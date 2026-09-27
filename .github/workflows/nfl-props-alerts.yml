@@ -70,6 +70,10 @@ jobs:
           ODDS_MAX_EVENTS: ${{ vars.NP_ODDS_MAX_EVENTS }}
           ODDS_ON_GAMEDAY: ${{ vars.NP_ODDS_ON_GAMEDAY }}
           ODDS_BOOKMAKERS: ${{ vars.NP_ODDS_BOOKMAKERS }}
+          MIN_EV_PROPS: ${{ vars.NP_MIN_EV_PROPS }}
+          # which books to check for stale prices, and the sharp reference (the-odds-api bookmaker keys)
+          MY_BOOKS: ${{ vars.MY_BOOKS }}
+          ODDS_SHARP: ${{ vars.ODDS_SHARP }}
         run: |
           if [ "$MODE" = "backtest" ]; then node nfl-props/backtest.js; else node nfl-props/run.js; fi
       - name: Save state

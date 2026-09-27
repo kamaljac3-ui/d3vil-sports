@@ -53,6 +53,10 @@ jobs:
           GD_MIN: ${{ vars.NL_GD_MIN }}
           GD_MAX: ${{ vars.NL_GD_MAX }}
           RATING: ${{ vars.NL_RATING }}
+          MIN_EV_LINES: ${{ vars.NL_MIN_EV_LINES }}
+          # which books to check for stale prices, and the sharp reference (the-odds-api bookmaker keys)
+          MY_BOOKS: ${{ vars.MY_BOOKS }}
+          ODDS_SHARP: ${{ vars.ODDS_SHARP }}
         run: |
           if [ "$MODE" = "backtest" ]; then
             for y in 2023 2024 2025; do BT_SEASON=$y node nfl-lines/backtest.js; done

@@ -118,6 +118,30 @@ That's why the optional Odds API mode exists.
 **Not yet verified:** whether the free tier includes player-prop markets. The first Friday run will log either the
 lines or the API's error message.
 
+## Stale prices: your books vs. the sharp book (needs `ODDS_API_KEY`)
+
+The most reliable edge for a regular bettor isn't out-modeling the market. It's catching a book that hasn't moved yet.
+Each Odds API pull asks for the sharp book plus your books in one request (up to 10 books, billed as one region).
+
+- **Fair price:** the sharp book's two-way price with its margin removed. The sharp book is `ODDS_SHARP`, default
+  `pinnacle`, falling back to `lowvig`, then `betonlineag`.
+- **Different numbers:** if your book has a different number than the sharp book, the fair probability is shifted to
+  your number with a normal approximation.
+  - Spread σ is 13.5 and total σ is 13; for props it's the model's fitted spread for that stat.
+  - This is conservative at the key numbers 3 and 7.
+  - It's only done within a small gap (`STALE_GAP`), never extrapolated far.
+- **Flagging:** any price at your books (`MY_BOOKS`) worth at least `MIN_EV_PROPS` (3%) is flagged with 💰, for example:
+  "DraftKings LAC +7.5 (-110): fair 54.0%, +3.2% EV vs Pinnacle LAC +6.5 -115".
+- **Your books:** `MY_BOOKS` defaults to `draftkings,fanduel,betmgm,williamhill_us,espnbet,fanatics,betrivers`
+  (`williamhill_us` = Caesars). Set the repo Variable `MY_BOOKS` to just the books you have accounts at.
+- **Pick log:** only live alerts are logged. Each flagged pick is written to `.cache/picks-<date>.json` with the
+  price, fair probability, EV and the sharp line at the time (`sport:"nfl"`). That's the raw material for grading
+  and closing-line value. `results/track.js` doesn't grade NFL yet.
+- **Caveat:** Pinnacle's props are sharper than US books' but not perfect, and a thinly traded prop can be off
+  at Pinnacle too. Game-line flags are the more trustworthy of the two.
+
+Stale props come from the Friday pull, covering every priced player in those games, not just the model's picks, with at most `STALE_N` (6) per alert. Game-day alerts only show stale props when `ODDS_ON_GAMEDAY=1`, since Friday's prices are too old by Sunday.
+
 ## Settings
 
 Every threshold is an env var with a default in code. To change one without touching code, add a repo **Variable**
