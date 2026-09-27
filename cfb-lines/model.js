@@ -27,13 +27,13 @@ const DEF={
   REST:0.15,REST_CAP:7,         // per day of rest advantage (bye weeks included), capped
   // altitude, in both directions, per km of elevation change above ALT_FLOOR m (where thinner air starts to matter)
   ALT_UP:1.5,                   // home pts per km the visitor CLIMBED to get here (lowland team at Wyoming, Air Force...)
-  ALT_DOWN:0,                   // home pts per km the visitor DESCENDED (altitude team at sea level; "train high, play low")
+  ALT_DOWN:0,                   // home pts per km the visitor DESCENDED (altitude team at sea level). 0: no evidence (README)
   ALT_FLOOR:1000,
   // humidity: a visitor from a drier climate in muggy air. Per 10°F of kickoff dew point above what the
   // visitor is used to at home (Sep-Nov average), counted only when the kickoff dew point is >= HUMID_DEW.
-  HUMID:0.5,HUMID_DEW:60,
+  HUMID:0,HUMID_DEW:60,         // 0: 2021-25 shows no effect (-0.3 ± 0.7 pts per 10°F); kept so the backtest keeps testing it
   // heat: same idea with temperature: per 10°F above the visitor's usual home temp, only when kickoff is >= HEAT_F
-  HEAT:0.5,HEAT_F:80,
+  HEAT:0,HEAT_F:80,             // 0: 2021-25 effect runs the wrong way (-1.8 ± 1.1), likely confounded
   // totals
   WIND_MPH:15,WIND:-0.35,WIND_CAP:-8,RAIN_IN:0.1,RAIN:-2.5,COLD_F:25,COLD:-1.0,
   // availability

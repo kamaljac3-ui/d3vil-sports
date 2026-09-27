@@ -133,7 +133,9 @@ async function fit(ctxs){
   const K=["MARGIN_SCALE","HFA","HFA_CAP","TRAVEL","TZ","REST","ALT_UP","ALT_DOWN","HUMID","HEAT","QB_OUT"];
   const MX=rows.map(p=>{const f=p.P.f;return [p.P.margin,f.home,f.capZ,f.travel,f.tz,f.rest,f.climb,f.descend,f.humid,f.heat,p.qA-p.qH];});
   const b0=K.map(k=>k==="MARGIN_SCALE"?1:M.DEF[k]);
-  const lam=[0,50,200,300,300,300,30,30,30,30,20];   // how hard each coefficient is pulled to its default
+  // how hard each coefficient is pulled to its default. Altitude/humidity/heat are pinned (1e9): too few games for a
+  // stable fit, so they stay at their evidence-based defaults and are judged by the evidence table instead.
+  const lam=[0,50,200,300,300,300,1e9,1e9,1e9,1e9,20];
   const b=ridge(MX,rows.map(p=>p.am),b0,lam);
   K.forEach((k,i)=>{F[k]=+b[i].toFixed(3);C[k]=F[k];});
   // (d) totals: bias + weather + QB, ridge toward defaults
