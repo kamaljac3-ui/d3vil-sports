@@ -176,7 +176,7 @@ async function sleeper(maxAgeH){
     // DB/CB/S) and most have no gsis id, so key them by name + team as well
     if(NON_SKILL.has(p.position)&&row[0]){if(p.gsis_id)out[String(p.gsis_id).trim()]=row;out["n:"+normName(p.full_name)+"|"+row[0]]=row;}
   }
-  log(`Sleeper: ${Object.keys(out).length} skill players refreshed`);
+  log(`Sleeper: ${Object.keys(out).length} player entries refreshed`);
   return writeState("sleeper.json",out);
 }
 
