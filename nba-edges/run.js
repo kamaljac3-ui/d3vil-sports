@@ -48,28 +48,30 @@ async function get(url,headers=UA,tries=3){
 }
 
 // ---------- stats.nba.com (shot zones, pace, opponent stats) ----------
-const NBA_Q="SeasonType=Regular%20Season&PerMode=PerGame&LeagueID=00&Conference=&DateFrom=&DateTo=&Division=&GameScope=&GameSegment=&Location=&Month=0&OpponentTeamID=0&Outcome=&PORound=0&PaceAdjust=N&Period=0&PlayerExperience=&PlayerPosition=&PlusMinus=N&Rank=N&SeasonSegment=&ShotClockRange=&StarterBench=&TeamID=0&VsConference=&VsDivision=";
+const NBA_Q="SeasonType=Regular%20Season&PerMode=PerGame&LeagueID=00&Conference=&DateFrom=&Division=&GameScope=&GameSegment=&Location=&Month=0&OpponentTeamID=0&Outcome=&PORound=0&PaceAdjust=N&Period=0&PlayerExperience=&PlayerPosition=&PlusMinus=N&Rank=N&SeasonSegment=&ShotClockRange=&StarterBench=&TeamID=0&VsConference=&VsDivision=";
+// params may include LastNGames=N and DateTo=MM%2FDD%2FYYYY (season-to-date as of that day; the backtest uses it)
 async function nba(ep,season,params){
   await sleep(700);
-  const j=await get(`https://stats.nba.com/stats/${ep}?Season=${season}&${NBA_Q}&${params.includes("LastNGames")?"":"LastNGames=0&"}${params}`,NBA_H,2);
+  const def=(params.includes("LastNGames")?"":"LastNGames=0&")+(params.includes("DateTo")?"":"DateTo=&");
+  const j=await get(`https://stats.nba.com/stats/${ep}?Season=${season}&${NBA_Q}&${def}${params}`,NBA_H,2);
   if(!j)throw new Error(`stats.nba.com unreachable (${ep})`);
   const rs=Array.isArray(j.resultSets)?j.resultSets[0]:j.resultSets;
   const h=typeof rs.headers[0]==="string"?rs.headers:null;
   return {rows:rs.rowSet,objs:h?rs.rowSet.map(r=>Object.fromEntries(h.map((k,i)=>[k,r[i]]))):null};
 }
-async function nbaSeason(s){
-  const base=await nba("leaguedashplayerstats",s,"MeasureType=Base");
+async function nbaSeason(s,x=""){   // x: extra params, e.g. "&DateTo=..."
+  const base=await nba("leaguedashplayerstats",s,"MeasureType=Base"+x);
   if(!base.rows.length)return null;
-  const zones=await nba("leaguedashplayershotlocations",s,"DistanceRange=By%20Zone&MeasureType=Base");
-  const tz=await nba("leaguedashteamshotlocations",s,"DistanceRange=By%20Zone&MeasureType=Opponent");
-  const adv=await nba("leaguedashteamstats",s,"MeasureType=Advanced");
-  const opp=await nba("leaguedashteamstats",s,"MeasureType=Opponent");
-  const tb=await nba("leaguedashteamstats",s,"MeasureType=Base");
+  const zones=await nba("leaguedashplayershotlocations",s,"DistanceRange=By%20Zone&MeasureType=Base"+x);
+  const tz=await nba("leaguedashteamshotlocations",s,"DistanceRange=By%20Zone&MeasureType=Opponent"+x);
+  const adv=await nba("leaguedashteamstats",s,"MeasureType=Advanced"+x);
+  const opp=await nba("leaguedashteamstats",s,"MeasureType=Opponent"+x);
+  const tb=await nba("leaguedashteamstats",s,"MeasureType=Base"+x);
   const abbr={};for(const p of base.objs)abbr[p.TEAM_ID]=p.TEAM_ABBREVIATION;
   const zByPlayer={};for(const r of zones.rows)zByPlayer[r[0]]=M.zonesFromRow(r,6);
   const players={};
   for(const p of base.objs){const k=nk(p.PLAYER_NAME);
-    players[k]={key:k,name:p.PLAYER_NAME,GP:p.GP,MIN:p.MIN,PTS:p.PTS,REB:p.REB,AST:p.AST,FG3M:p.FG3M,FTM:p.FTM,zones:zByPlayer[p.PLAYER_ID]||null};}
+    players[k]={key:k,name:p.PLAYER_NAME,team:p.TEAM_ABBREVIATION,GP:p.GP,MIN:p.MIN,PTS:p.PTS,REB:p.REB,AST:p.AST,FG3M:p.FG3M,FTM:p.FTM,zones:zByPlayer[p.PLAYER_ID]||null};}
   const teams={};
   for(const t of tb.objs)teams[abbr[t.TEAM_ID]||t.TEAM_ID]={gp:t.GP,ppg:t.PTS};
   const T=id=>teams[abbr[id]||id]||(teams[abbr[id]||id]={});
@@ -195,8 +197,13 @@ async function propLines(g){
 
 // ---------- scoring ----------
 async function sideRows(g,side,D,outKeys,lines){
+  const team=(await roster(g[side].espnId)).map(n=>D.players[nk(n)]).filter(Boolean);
+  return flagRows(projectSide(team,g,side,D,outKeys),lines);
+}
+// Pure scoring (also used by backtest.js): project every rotation player on one side of a game.
+// team: stat objects for that side's roster; g: {home,away:{abbr},total,homeSpread}; outKeys: Set of ruled-out name keys.
+function projectSide(team,g,side,D,outKeys){
   const me=g[side],op=g[side==="home"?"away":"home"],T=D.teams[me.abbr]||{},O=D.teams[op.abbr]||{},lg=D.league;
-  const team=(await roster(me.espnId)).map(n=>D.players[nk(n)]).filter(Boolean);
   const boost=M.outBoost(team,outKeys,Math.max(0,...team.map(p=>p.gpCur||0)));
   let env=1;
   if(g.total&&g.homeSpread!=null&&T.ppg){const implied=g.total/2+(side==="home"?-1:1)*g.homeSpread/2;env=M.clamp(implied/T.ppg,0.88,1.12);}
@@ -205,12 +212,19 @@ async function sideRows(g,side,D,outKeys,lines){
   const oppAst=O.oppAst&&lg.oppAst?M.clamp(O.oppAst/lg.oppAst,0.9,1.1):1;
   const blowout=g.homeSpread!=null&&Math.abs(g.homeSpread)>=12;
   const tags=[...(boost.out.length?[`w/o ${boost.out.map(n=>n.split(" ").slice(-1)[0]).join(", ")}`]:[]),...(env>=1.04?["high team total"]:[]),...(blowout?["blowout risk"]:[])];
-  const rows=[];
+  const players=[];
   for(const p of team){
     if(outKeys.has(p.key)||p.MIN<20)continue;
     const zone=p.zones&&O.oppZones&&lg.zones?M.zoneMatchup(p.zones,p.gpEff||p.GP,O.oppZones,lg.zones):null;
-    const pr=M.project(p,{zone,env,oppReb,oppAst,blowout,boost});
-    const base={name:p.name,key:p.key,team:me.abbr,opp:op.abbr,tags};
+    players.push({p,zone,pr:M.project(p,{zone,env,oppReb,oppAst,blowout,boost})});
+  }
+  return {me:me.abbr,opp:op.abbr,tags,ctx:{env,oppReb,oppAst,blowout,boost},players};
+}
+// the alert rows: shot-zone edges, prop-line edges (with lines) or projection boosts (without)
+function flagRows(side,lines){
+  const rows=[];
+  for(const {p,zone,pr} of side.players){
+    const base={name:p.name,key:p.key,team:side.me,opp:side.opp,tags:side.tags};
     if(zone&&zone.delta>=ZONE_MIN&&p.PTS>=10)rows.push({kind:"zone",...base,stat:"pts",delta:zone.delta,best:zone.best,proj:pr.pts,avg:p.PTS});
     for(const s of STATS){
       const proj=pr[s],avg=p[AVG[s]],line=lines&&lines[p.key]&&lines[p.key][s];
@@ -260,7 +274,7 @@ async function probe(){
     ["espn cdn scoreboard",`https://cdn.espn.com/core/nba/scoreboard?xhr=1&dates=${d}`,UA],
     ["espn core api events",`https://sports.core.api.espn.com/v2/sports/basketball/leagues/nba/events?dates=${d}`,UA],
     ["espn byathlete",`https://site.web.api.espn.com/apis/common/v3/sports/basketball/nba/statistics/byathlete?season=${CUR.espn}&seasontype=2&limit=5`,UA],
-    ["stats.nba.com player stats",`https://stats.nba.com/stats/leaguedashplayerstats?Season=${CUR.nba}&MeasureType=Base&LastNGames=0&${NBA_Q}`,NBA_H],
+    ["stats.nba.com player stats",`https://stats.nba.com/stats/leaguedashplayerstats?Season=${CUR.nba}&MeasureType=Base&LastNGames=0&DateTo=&${NBA_Q}`,NBA_H],
     ["stats.nba.com scoreboardv3",`https://stats.nba.com/stats/scoreboardv3?GameDate=${TODAY}&LeagueID=00`,NBA_H],
     ["nba cdn today scoreboard","https://cdn.nba.com/static/json/liveData/scoreboard/todaysScoreboard_00.json",UA],
   ];
@@ -268,7 +282,9 @@ async function probe(){
     try{const r=await fetch(u,{headers:h,signal:AbortSignal.timeout(25000)});const b=await r.text();log(`${r.status} ${n} (${b.length}b, ${Date.now()-t}ms)`);}
     catch(e){log(`FAIL ${n}: ${e.message}`);}}
 }
-(async()=>{
+// require()d by backtest.js for the stats fetch and the scoring; only runs the bot when started directly
+module.exports={nba,nbaSeason,blend,projectSide,flagRows,nk,ESPN_TO_NBA,SETTINGS:{ZONE_MIN,BOOST_MIN,ABS_MIN,STATS,AVG}};
+if(require.main===module)(async()=>{
   if(MODE==="probe")return probe();
   if(MODE==="snapshot")return snapshot();
   const games=await slate();log(`${TODAY}: ${games.length} upcoming games, mode=${MODE}`);
