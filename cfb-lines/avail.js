@@ -56,15 +56,30 @@ async function kickoffWeather(venue,kick){
   const hoursOut=(kick-Date.now())/36e5;if(hoursOut>15*24||hoursOut<-4)return null;
   const day=d=>new Date(d).toISOString().slice(0,10);
   const j=await getJSON(`https://api.open-meteo.com/v1/forecast?latitude=${venue.lat}&longitude=${venue.lon}`+
-    `&hourly=temperature_2m,precipitation,wind_speed_10m,wind_gusts_10m&wind_speed_unit=mph&temperature_unit=fahrenheit`+
+    `&hourly=temperature_2m,precipitation,wind_speed_10m,wind_gusts_10m,dew_point_2m&wind_speed_unit=mph&temperature_unit=fahrenheit`+
     `&precipitation_unit=inch&timezone=GMT&start_date=${day(kick)}&end_date=${day(kick+4*36e5)}`);
   if(!j||!j.hourly)return null;
   const H=j.hourly,t0=Math.floor(kick/36e5)*36e5,pick=[];
   H.time.forEach((t,i)=>{const ms=Date.parse(t+"Z");if(ms>=t0&&ms<t0+3*36e5)pick.push(i);});
   if(!pick.length)return null;
   const avg=k=>pick.reduce((a,i)=>a+(+H[k][i]||0),0)/pick.length,max=k=>Math.max(...pick.map(i=>+H[k][i]||0));
-  return {indoor:false,wind:+avg("wind_speed_10m").toFixed(1),gust:Math.round(max("wind_gusts_10m")),precip:+avg("precipitation").toFixed(2),temp:Math.round(avg("temperature_2m"))};
+  return {indoor:false,wind:+avg("wind_speed_10m").toFixed(1),gust:Math.round(max("wind_gusts_10m")),precip:+avg("precipitation").toFixed(2),temp:Math.round(avg("temperature_2m")),dew:Math.round(avg("dew_point_2m"))};
+}
+
+// A team's usual air: last season's Sep-Nov afternoon/evening average temp and dew point at its home stadium
+// (Open-Meteo archive, same definition the backtest fitted on). Cached 30 days per team.
+async function homeClimate(team,loc,S){
+  if(!loc||loc.lat==null)return null;
+  const all=readState("climate.json",24*30)||{};if(all[team])return all[team];
+  const j=await getJSON(`https://archive-api.open-meteo.com/v1/archive?latitude=${loc.lat}&longitude=${loc.lon}&start_date=${S-1}-09-01&end_date=${S-1}-11-30`+
+    `&hourly=temperature_2m,dew_point_2m&temperature_unit=fahrenheit&timezone=GMT`);
+  if(!j||!j.hourly)return null;
+  let ds=0,ts=0,n=0;j.hourly.time.forEach((t,i)=>{const h=+t.slice(11,13);
+    if((h>=17||h<=2)&&j.hourly.dew_point_2m[i]!=null){ds+=+j.hourly.dew_point_2m[i];ts+=+j.hourly.temperature_2m[i];n++;}});
+  if(n<100)return null;
+  all[team]={dew:+(ds/n).toFixed(1),temp:+(ts/n).toFixed(1)};writeState("climate.json",all);
+  return all[team];
 }
 const wxText=w=>!w?"":w.indoor?"indoors":`wind ${Math.round(w.wind)} mph${w.gust>w.wind+8?` (gusts ${w.gust})`:""}${w.precip>=0.04?`, rain ${w.precip}"/hr`:""}, ${w.temp}°F`;
 
-module.exports={reports,kickoffWeather,wxText,CONF,teamKey};
+module.exports={reports,kickoffWeather,homeClimate,wxText,CONF,teamKey};

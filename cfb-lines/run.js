@@ -100,7 +100,11 @@ async function evaluate(ctx,games,{espn=false,avail=true,lineH=1}={}){
       qbFlags[t]=a.notes.filter(n=>n.startsWith("QB")).join(",");
       if(qb&&!a.qbListed)notes.push(`${ctx.teams[t]?.abbr||t} QB ${qb.name} not on the ${rep.type||"availability"} report`);
     }
-    const P=M.predict(R,MC,g,{wx,inj}),line=L[g.id];
+    // home climates only matter on a hot or muggy day at an outdoor stadium
+    const norm={};
+    if(wx&&!wx.indoor&&(wx.dew>=M.C.HUMID_DEW||wx.temp>=M.C.HEAT_F))
+      for(const t of [g.home,g.away]){const T=ctx.teams[t];norm[t]=await A.homeClimate(t,T&&T.venueId!=null&&ctx.venues[T.venueId]||T,S);}
+    const P=M.predict(R,MC,g,{wx,inj,norm}),line=L[g.id];
     out.push({g,P,line,wx,notes,qbFlags,avail:{home:!!reps[g.home],away:!!reps[g.away]},...edges(g,P,line)});
   }
   return out;
@@ -122,7 +126,7 @@ function reasons(ctx,x){
   const g=x.g,out=[];
   for(const p of x.P.parts){if(Math.abs(p.pts)<0.5||p.label.endsWith("availability"))continue;
     out.push(p.kind==="m"?`${p.label==="crowd size"&&p.f<0?"small crowd":p.label} ${p.pts>0?ab(ctx,g.home):ab(ctx,g.away)} +${f1(Math.abs(p.pts))}`:`${p.label} ${p.pts>0?"+":""}${f1(p.pts)} total`);}
-  if(x.wx&&!x.wx.indoor&&(x.wx.wind>M.C.WIND_MPH||x.wx.precip>=M.C.RAIN_IN||x.wx.temp<M.C.COLD_F))out.push(A.wxText(x.wx));
+  if(x.wx&&!x.wx.indoor&&(x.wx.wind>M.C.WIND_MPH||x.wx.precip>=M.C.RAIN_IN||x.wx.temp<M.C.COLD_F||x.P.f.humid||x.P.f.heat))out.push(A.wxText(x.wx)+(x.wx.dew>=M.C.HUMID_DEW?`, dew point ${x.wx.dew}°F`:""));
   out.push(...x.notes);
   return out;
 }

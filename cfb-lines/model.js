@@ -25,7 +25,15 @@ const DEF={
   TRAVEL:0.3,                   // home pts per 1,000 more miles the visitor travelled than the home team
   TZ:0.3,                       // home pts per extra time zone the visitor crossed
   REST:0.15,REST_CAP:7,         // per day of rest advantage (bye weeks included), capped
-  ALT:1.5,ALT_M:1500,           // home team at >1,500 m vs a visitor from low ground
+  // altitude, in both directions, per km of elevation change above ALT_FLOOR m (where thinner air starts to matter)
+  ALT_UP:1.5,                   // home pts per km the visitor CLIMBED to get here (lowland team at Wyoming, Air Force...)
+  ALT_DOWN:0,                   // home pts per km the visitor DESCENDED (altitude team at sea level; "train high, play low")
+  ALT_FLOOR:1000,
+  // humidity: a visitor from a drier climate in muggy air. Per 10°F of kickoff dew point above what the
+  // visitor is used to at home (Sep-Nov average), counted only when the kickoff dew point is >= HUMID_DEW.
+  HUMID:0.5,HUMID_DEW:60,
+  // heat: same idea with temperature: per 10°F above the visitor's usual home temp, only when kickoff is >= HEAT_F
+  HEAT:0.5,HEAT_F:80,
   // totals
   WIND_MPH:15,WIND:-0.35,WIND_CAP:-8,RAIN_IN:0.1,RAIN:-2.5,COLD_F:25,COLD:-1.0,
   // availability
@@ -144,7 +152,7 @@ function restDays(games,team,g){
 }
 
 // ctx: {teams (fbs info), venues, games}. Returns the features the margin model uses.
-function features(ctx,g){
+function features(ctx,g,extra={}){
   const V=ctx.venues[g.venueId]||null,H=ctx.teams[g.home],A=ctx.teams[g.away];
   const site=V&&V.lat!=null?V:(H&&!g.neutral?H:null);
   const tzAt=t=>tzOffset(t,g.start);
@@ -158,17 +166,36 @@ function features(ctx,g){
     capZ:g.neutral?0:clamp((cap-50000)/25000,-1.5,2)*(atHome?1:C.HFA_AWAY_VENUE),
     travel:trav(A)-trav(H),tz:tzs(A)-tzs(H),
     rest:clamp(restDays(ctx.games,g.home,g)-restDays(ctx.games,g.away,g),-C.REST_CAP,C.REST_CAP),
-    alt:!g.neutral&&site&&site.elev>=C.ALT_M&&A&&A.elev<C.ALT_M*0.6?1:0,
+    climb:elevGap(A,site,1)-elevGap(H,site,1),
+    descend:elevGap(A,site,-1)-elevGap(H,site,-1),
+    humid:climGap(g.away,extra,"dew",C.HUMID_DEW,50)-climGap(g.home,extra,"dew",C.HUMID_DEW,50),
+    heat:climGap(g.away,extra,"temp",C.HEAT_F,70)-climGap(g.home,extra,"temp",C.HEAT_F,70),
     dome:!!(V&&V.dome),
   };
   return f;
 }
-const MARGIN_KEYS=[["home","HFA","home field"],["capZ","HFA_CAP","crowd size"],["travel","TRAVEL","travel"],["tz","TZ","time zones"],["rest","REST","rest"],["alt","ALT","altitude"]];
+// Elevation change (km) above the floor, for a team going from its home to this site. dir 1 = climbing, -1 = descending.
+// CFBD stores a missing elevation as 0, so 0 counts as unknown.
+function elevGap(T,site,dir){
+  if(!T||!site||!(T.elev>0)||!(site.elev>0))return 0;
+  const [from,to]=dir>0?[T.elev,site.elev]:[site.elev,T.elev];
+  return Math.max(0,to-Math.max(from,C.ALT_FLOOR))/1000;
+}
+// How much muggier (k="dew") or hotter (k="temp") kickoff is than the team's usual home air, in 10°F steps.
+// Counts only when kickoff reaches `min`; a home normal below `floor` is treated as `floor`.
+// extra.norm[team] = {dew, temp}: Sep-Nov afternoon averages at the team's home stadium.
+function climGap(team,extra,k,min,floor){
+  const w=extra.wx,n=extra.norm&&extra.norm[team]&&extra.norm[team][k];
+  if(!w||w.indoor||w[k]==null||n==null||w[k]<min)return 0;
+  return Math.max(0,w[k]-Math.max(n,floor))/10;
+}
+const MARGIN_KEYS=[["home","HFA","home field"],["capZ","HFA_CAP","crowd size"],["travel","TRAVEL","travel"],["tz","TZ","time zones"],["rest","REST","rest"],
+  ["climb","ALT_UP","altitude climb"],["descend","ALT_DOWN","coming down from altitude"],["humid","HUMID","humidity"],["heat","HEAT","heat"]];
 
 // ---------- prediction ----------
 // extra: {wx, inj: {home:{pts,total,notes[]}, away:{...}}}
 function predict(R,ctx,g,extra={}){
-  const f=features(ctx,g),parts=[];
+  const f=features(ctx,g,extra),parts=[];
   const hp=sidePts(R,g.home,g.away),ap=sidePts(R,g.away,g.home);
   let margin=(hp-ap)*C.MARGIN_SCALE,total=hp+ap+C.TOTAL_BIAS;
   for(const [k,c,label] of MARGIN_KEYS){const v=f[k]*C[c];if(v){margin+=v;parts.push({kind:"m",label,pts:v,f:f[k]});}}

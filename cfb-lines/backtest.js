@@ -27,7 +27,9 @@ async function loadSeason(S,venues){
   const lines=await D.lines(S,CUR);
   const ctx={S,games,adv,fbs,teams,talent,ret,prevFinal,venues,lines,qb:{},wx:{}};
   if(USE_QB)ctx.qb=await qbChanges(S,games);
-  if(USE_WX)ctx.wx=await seasonWeather(S,games,venues);
+  if(USE_WX){const W=await seasonWeather(S,games,venues);ctx.wx=W.games;
+    // each team's usual air: the Sep-Nov kickoff-hours average dew point at its home stadium
+    ctx.norm={};for(const [t,x] of Object.entries(teams))if(W.norm[x.venueId])ctx.norm[t]=W.norm[x.venueId];}
   log(`${S}: ${games.length} games, ${adv.length} team-game rows, ${Object.keys(lines).length} with lines, CFBD calls this month ${cfbd.usage().calls}`);
   return ctx;
 }
@@ -49,26 +51,31 @@ async function qbChanges(S,games){
 
 // Game-window weather from the Open-Meteo archive: one call per venue per season, trimmed and cached.
 async function seasonWeather(S,games,venues){
-  const file=path.join(CACHE,`wx-${S}.json`);
+  const file=path.join(CACHE,`wx2-${S}.json`);
   if(fs.existsSync(file))return JSON.parse(fs.readFileSync(file,"utf8"));
-  const out={},byV={};
-  for(const g of games)if(g.wk<D.POST&&venues[g.venueId]&&!venues[g.venueId].dome&&venues[g.venueId].lat!=null)(byV[g.venueId]||(byV[g.venueId]=[])).push(g);
+  const out={},norm={},byV={};
+  for(const g of games)if(g.wk<D.POST&&g.homeFBS&&venues[g.venueId]&&venues[g.venueId].lat!=null)(byV[g.venueId]||(byV[g.venueId]=[])).push(g);
   let n=0;
   for(const [vid,gs] of Object.entries(byV)){const v=venues[vid];
     const day=t=>new Date(t).toISOString().slice(0,10);
     const lo=day(Math.min(...gs.map(g=>g.start))),hi=day(Math.max(...gs.map(g=>g.start))+864e5);
     const j=await getJSON(`https://archive-api.open-meteo.com/v1/archive?latitude=${v.lat}&longitude=${v.lon}&start_date=${lo}&end_date=${hi}`+
-      `&hourly=temperature_2m,precipitation,wind_speed_10m&wind_speed_unit=mph&temperature_unit=fahrenheit&precipitation_unit=inch&timezone=GMT`);
+      `&hourly=temperature_2m,precipitation,wind_speed_10m,dew_point_2m&wind_speed_unit=mph&temperature_unit=fahrenheit&precipitation_unit=inch&timezone=GMT`);
     if(++n%25===0)log(`  weather ${S}: ${n}/${Object.keys(byV).length} venues`);
     if(!j||!j.hourly)continue;
     const T=j.hourly.time.map(t=>Date.parse(t+"Z"));
+    // normal = afternoon/evening hours (17-02 UTC) across the stadium's season, Sep-Nov only
+    let ds=0,ts=0,dn=0;T.forEach((t,i)=>{const d=new Date(t),m=d.getUTCMonth(),h=d.getUTCHours();
+      if(m>=8&&m<=10&&(h>=17||h<=2)&&j.hourly.dew_point_2m[i]!=null){ds+=+j.hourly.dew_point_2m[i];ts+=+j.hourly.temperature_2m[i];dn++;}});
+    if(dn>100)norm[vid]={dew:+(ds/dn).toFixed(1),temp:+(ts/dn).toFixed(1)};
+    if(v.dome)continue;
     for(const g of gs){const t0=Math.floor(g.start/36e5)*36e5,ix=[];T.forEach((t,i)=>{if(t>=t0&&t<t0+3*36e5)ix.push(i);});
       if(!ix.length)continue;const avg=k=>ix.reduce((a,i)=>a+(+j.hourly[k][i]||0),0)/ix.length;
-      out[g.id]={wind:+avg("wind_speed_10m").toFixed(1),precip:+avg("precipitation").toFixed(3),temp:Math.round(avg("temperature_2m"))};}
+      out[g.id]={wind:+avg("wind_speed_10m").toFixed(1),precip:+avg("precipitation").toFixed(3),temp:Math.round(avg("temperature_2m")),dew:Math.round(avg("dew_point_2m"))};}
     await new Promise(s=>setTimeout(s,150));
   }
-  fs.writeFileSync(file,JSON.stringify(out));
-  return out;
+  const res={games:out,norm};fs.writeFileSync(file,JSON.stringify(res));
+  return res;
 }
 
 // ---------- predictions for a season ----------
@@ -81,8 +88,9 @@ function seasonPreds(ctx,{raw=false}={}){
     for(const g of byWk[wk]){
       const q=ctx.qb[g.id]||{},w=ctx.wx[g.id];
       const inj={home:q[g.home]?{pts:C.QB_OUT,total:C.QB_TOTAL}:null,away:q[g.away]?{pts:C.QB_OUT,total:C.QB_TOTAL}:null};
-      const P=raw?{margin:M.sidePts(R,g.home,g.away)-M.sidePts(R,g.away,g.home),total:M.sidePts(R,g.home,g.away)+M.sidePts(R,g.away,g.home),f:M.features(ctx,g)}
-        :M.predict(R,ctx,g,{wx:w?{indoor:false,...w}:null,inj});
+      const ex={wx:w?{indoor:false,...w}:null,inj,norm:ctx.norm||{}};
+      const P=raw?{margin:M.sidePts(R,g.home,g.away)-M.sidePts(R,g.away,g.home),total:M.sidePts(R,g.home,g.away)+M.sidePts(R,g.away,g.home),f:M.features(ctx,g,ex)}
+        :M.predict(R,ctx,g,ex);
       out.push({g,wk,P,am:g.hp-g.ap,at:g.hp+g.ap,L:D.consensus(ctx.lines[g.id]),qH:q[g.home]||0,qA:q[g.away]||0,w});
     }
   }
@@ -122,11 +130,12 @@ async function fit(ctxs){
   log(`priors: PRIOR_GAMES ${best.PG}, PRIOR_REG ${best.PR}, TAL_K ${best.TK}, RET_K ${best.RK} (raw MAE ${best.s.toFixed(2)})`);
   // (c) margin scale + situational coefficients, ridge toward the defaults
   const rows=[];for(const c of tr)rows.push(...seasonPreds(c,{raw:true}));
-  const MX=rows.map(p=>[p.P.margin,p.P.f.home,p.P.f.capZ,p.P.f.travel,p.P.f.tz,p.P.f.rest,p.P.f.alt,p.qA-p.qH]);
-  const b0=[1,M.DEF.HFA,M.DEF.HFA_CAP,M.DEF.TRAVEL,M.DEF.TZ,M.DEF.REST,M.DEF.ALT,M.DEF.QB_OUT];
-  const lam=[0,50,200,300,300,300,100,20];   // how hard each coefficient is pulled to its default
+  const K=["MARGIN_SCALE","HFA","HFA_CAP","TRAVEL","TZ","REST","ALT_UP","ALT_DOWN","HUMID","HEAT","QB_OUT"];
+  const MX=rows.map(p=>{const f=p.P.f;return [p.P.margin,f.home,f.capZ,f.travel,f.tz,f.rest,f.climb,f.descend,f.humid,f.heat,p.qA-p.qH];});
+  const b0=K.map(k=>k==="MARGIN_SCALE"?1:M.DEF[k]);
+  const lam=[0,50,200,300,300,300,30,30,30,30,20];   // how hard each coefficient is pulled to its default
   const b=ridge(MX,rows.map(p=>p.am),b0,lam);
-  ["MARGIN_SCALE","HFA","HFA_CAP","TRAVEL","TZ","REST","ALT","QB_OUT"].forEach((k,i)=>{F[k]=+b[i].toFixed(3);C[k]=F[k];});
+  K.forEach((k,i)=>{F[k]=+b[i].toFixed(3);C[k]=F[k];});
   // (d) totals: bias + weather + QB, ridge toward defaults
   const wxOf=p=>p.w&&!p.P.f.dome?p.w:null;
   const TX=rows.map(p=>{const w=wxOf(p);return [1,w?Math.max(0,w.wind-C.WIND_MPH):0,w&&w.precip>=C.RAIN_IN?1:0,w&&w.temp<C.COLD_F?1:0,p.qA+p.qH];});
@@ -137,6 +146,36 @@ async function fit(ctxs){
   F._fit={train:TRAIN,at:new Date().toISOString().slice(0,10),games:rows.length};
   fs.writeFileSync(M.PFILE,JSON.stringify(F,null,1)+"\n");
   return F;
+}
+
+// ---------- evidence for single factors (altitude, humidity, heat) ----------
+// For games the factor touched, from the side it should help: the real effect in points (actual margin vs our
+// model with that factor removed), whether the market already prices it (actual vs closing line), and ATS.
+const FACTORS=[["climb","ALT_UP","Visitor climbed into altitude","km"],["descend","ALT_DOWN","Visitor came down from altitude","km"],
+  ["humid","HUMID","Visitor in muggier air than home (dew point)","10°F"],["heat","HEAT","Visitor in hotter air than home","10°F"]];
+function evidence(preds){
+  const L=["#### Altitude, humidity and heat: the evidence (all seasons, weeks ≥ 1, FBS vs FBS)","",
+    "Side = the team the factor should help (the home team for a visitor who climbed, etc.). 'Real effect' = that side's actual margin minus our model's with this factor switched off; 'vs market' = actual margin minus the closing line (positive = the market under-rated the factor).","",
+    "| factor | bucket | games | avg gap | real effect (pts) | vs market (pts) | ATS vs close | fitted pts per unit ± SE |","|---|---|---|---|---|---|---|---|"];
+  for(const [k,c,label,unit] of FACTORS){
+    const rows=preds.filter(p=>Math.abs(p.P.f[k])>=0.3);
+    // single-factor OLS on the residual with the factor removed: slope and standard error
+    let sxy=0,sxx=0;const res=[];
+    for(const p of preds){const x=p.P.f[k],r=p.am-(p.P.margin-x*C[c]);sxy+=x*r;sxx+=x*x;res.push([x,r]);}
+    const slope=sxx?sxy/sxx:0,s2=res.reduce((a,[x,r])=>a+(r-slope*x)**2,0)/Math.max(1,res.length-1),se=sxx?Math.sqrt(s2/sxx):0;
+    const buckets=k==="climb"||k==="descend"?[[0.3,0.8,"0.3-0.8 km"],[0.8,99,"0.8+ km"]]:[[0.3,1,"3-10°F"],[1,99,"10°F+"]];
+    buckets.forEach(([lo,hi,bl],bi)=>{
+      const g=rows.filter(p=>Math.abs(p.P.f[k])>=lo&&Math.abs(p.P.f[k])<hi);
+      let eff=0,mk=0,nm=0,w=0,l=0,gap=0;
+      for(const p of g){const x=p.P.f[k],s=Math.sign(x),base=p.P.margin-x*C[c];
+        eff+=s*(p.am-base);gap+=Math.abs(x);
+        if(p.L&&p.L.m!=null){mk+=s*(p.am-p.L.m);nm++;const d=s*(p.am-p.L.m);if(d>0)w++;else if(d<0)l++;}}
+      const n=g.length;
+      L.push(`| ${bi?"":label} | ${bl} | ${n} | ${n?(gap/n).toFixed(2)+" "+unit:"-"} | ${n?(eff/n).toFixed(2):"-"} | ${nm?(mk/nm).toFixed(2):"-"} | ${w+l?pct(w,l)+` (${w+l})`:"-"} | ${bi?"":`${slope.toFixed(2)} ± ${se.toFixed(2)}`} |`);
+    });
+  }
+  L.push("","Fitted = one-factor regression over every game (± 1 standard error); |fitted| < 2 SE means the data can't tell it from zero.");
+  return L.join("\n");
 }
 
 // ---------- grading ----------
@@ -182,6 +221,8 @@ function table(title,res){
   md.push("");
   for(const [k,label] of [["test",`TEST ${TEST.join("+")}`],["train",`train ${TRAIN.join("+")}`]]){
     md.push(table(`Spreads, ${label}`,grade(all[k],"spread")),"",table(`Totals, ${label}`,grade(all[k],"total")),"");}
+  const everyGame=[];for(const c of ctxs)everyGame.push(...seasonPreds(c));
+  md.push(evidence(everyGame),"");
   const early=[];for(const c of ctxs)if(TEST.includes(c.S))early.push(...seasonPreds(c).filter(x=>x.wk<MIN_WEEK));
   md.push(table(`Spreads, TEST weeks 1-${MIN_WEEK-1} only (priors-heavy)`,grade(early,"spread")),"");
   const out=md.join("\n");console.log("\n"+out);summary(out);
