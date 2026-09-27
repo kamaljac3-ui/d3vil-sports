@@ -14,10 +14,10 @@ const cfbd=require("./cfbd"),D=require("./data"),M=require("./model"),A=require(
 
 const MODE=envs("MODE","auto");
 const CFG={
-  MIN_SPREAD:env("MIN_SPREAD",3),MIN_TOTAL:env("MIN_TOTAL",4),
-  SPREAD_EDGES:env("SPREAD_EDGES",1),TOTAL_EDGES:env("TOTAL_EDGES",1),
+  MIN_SPREAD:env("MIN_SPREAD",4),MIN_TOTAL:env("MIN_TOTAL",8),   // from the 2023-25 backtest (README)
+  SPREAD_EDGES:env("SPREAD_EDGES",1),TOTAL_EDGES:env("TOTAL_EDGES",0),   // totals: no reliable edge in the backtest
   MAX_EDGE:env("MAX_EDGE",14),           // bigger gaps are usually news the model hasn't seen: shown with ⚠️, not ✅
-  MIN_WEEK:env("MIN_WEEK",3),            // no ✅ before this week
+  MIN_WEEK:env("MIN_WEEK",4),            // weeks 1-3 lost in the backtest (priors-heavy)
   FIRST_HOUR:env("FIRST_HOUR",14),FIRST_COVER:env("FIRST_COVER",0.6),
   UPDATE_HOUR:env("UPDATE_HOUR",12),FINAL_HOUR:env("FINAL_HOUR",9),
   GD_MIN:env("GD_MIN",75),GD_MAX:env("GD_MAX",110),

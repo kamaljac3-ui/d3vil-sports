@@ -29,6 +29,7 @@ It's served by GitHub Pages from `main`.
 | `results-tracker.yml` | Bot Results Tracker | cron daily 11:00 UTC + manual | Grades sent picks and pushes the ledger to the `bot-results` branch. Sends a weekly ntfy scorecard on Mondays. |
 | `nfl-props-alerts.yml` | NFL Props Edges | cron every 15 min + manual | NFL props bot, ntfy only. |
 | `nfl-lines-alerts.yml` | NFL Lines | cron every 15 min + manual | NFL game-lines bot, ntfy only. |
+| `cfb-lines-alerts.yml` | CFB Lines | manual only (cron commented out until Kamal approves) | College football spread/total bot, ntfy only. |
 
 **Consequences of every push to `main`:**
 - The Pages deploy re-runs.
@@ -106,6 +107,18 @@ scoreboard, i.e. DraftKings; optionally The Odds API) next to a port of `nfl-edg
 - **It reuses `nfl-props/` helpers** (`lib`, `data`, `weather`, `odds`), with its state in `nfl-lines/.cache`
   via `NP_CACHE`. Changes to those shared files must keep both bots working.
 - **ESPN returns 403 to the custom browser User-Agent**, so ESPN requests go out with no custom User-Agent.
+
+## CFB game lines: `cfb-lines/` ("CFB Lines")
+
+College football spreads and totals. **`cfb-lines/README.md` is the full reference.** In short:
+- **Data:** CollegeFootballData.com (`CFBD_API_KEY` secret). The free tier is 1,000 calls/month, shared with CFBD
+  basketball, and the bot stops at `CFBD_MONTHLY_BUDGET` 700. Every response is cached in `cfb-lines/.cache/cfbd`.
+- **Availability:** SEC, Big Ten, ACC and Big 12 conference-game reports come from the HD Intelligence feed that
+  the conference sites embed. It's undocumented, so treat it as best-effort.
+- **Model and backtest:** `node cfb-lines/backtest.js` refits `params.json` on 2021–22 and grades 2023–25.
+  Rerun it after any model change.
+- **Modes:** first look (Sunday/Monday), update (Thursday noon), final (9 AM ET on game day) and a game-day
+  alert 75–110 min out only on material change. `MODE=probe` checks every source from the runner.
 
 ## Conventions and lessons (apply to every bot here)
 
