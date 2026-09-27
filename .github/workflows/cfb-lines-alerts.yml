@@ -1,11 +1,10 @@
 name: CFB Lines
 
 on:
-  # Live schedule is OFF until Kamal approves the backtest. To turn it on, uncomment:
-  # schedule:
-  #   # Every 15 min, 12:00-05:59 UTC (8 AM-1:59 AM ET), Aug-Jan. The script decides what's due from
-  #   # Eastern time via Intl, so the Nov 1 DST change needs no cron edit, and it exits fast otherwise.
-  #   - cron: "7,22,37,52 12-23,0-5 * 8-12,1 *"
+  schedule:
+    # Every 15 min, 12:00-05:59 UTC (8 AM-1:59 AM ET), Aug-Jan. The script decides what's due from
+    # Eastern time via Intl, so the Nov 1 DST change needs no cron edit, and it exits fast otherwise.
+    - cron: "7,22,37,52 12-23,0-5 * 8-12,1 *"
   workflow_dispatch:
     inputs:
       mode:

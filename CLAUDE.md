@@ -32,7 +32,7 @@ It's served by GitHub Pages from `main`.
 | `results-tracker.yml` | Bot Results Tracker | cron daily 11:00 UTC + manual | Grades sent picks and pushes the ledger to the `bot-results` branch. Sends a weekly ntfy scorecard on Mondays. |
 | `nfl-props-alerts.yml` | NFL Props Edges | cron every 15 min + manual | NFL props bot, ntfy only. |
 | `nfl-lines-alerts.yml` | NFL Lines | cron every 15 min + manual | NFL game-lines bot, ntfy only. |
-| `cfb-lines-alerts.yml` | CFB Lines | manual only (cron commented out until Kamal approves) | College football spread/total bot, ntfy only. |
+| `cfb-lines-alerts.yml` | CFB Lines | cron every 15 min (Aug–Jan) + manual | College football spread/total bot. Sends to its **own** ntfy topic (`NTFY_TOPIC_CFB`), not the shared one. |
 
 **Consequences of every push to `main`:**
 - The Pages deploy re-runs.
@@ -44,7 +44,7 @@ It's served by GitHub Pages from `main`.
 ## ntfy alerts (bots only)
 
 - The bots send phone alerts **only to ntfy, never to Kit/the newsletter.**
-- Repo secrets: `NTFY_TOPIC` (required), plus optional `NTFY_TOKEN` (sent as a Bearer header) and `NTFY_SERVER`
+- Repo secrets: `NTFY_TOPIC` (required; CFB Lines uses its own `NTFY_TOPIC_CFB` instead), plus optional `NTFY_TOKEN` (sent as a Bearer header) and `NTFY_SERVER`
   (defaults to `https://ntfy.sh`).
 - The bot POSTs JSON `{topic,title,message,priority,tags}` to the server root. Messages are truncated to about 3,900 characters.
 - If `NTFY_TOPIC` is missing or `DRY_RUN=1`, the bot prints the alert to the log and doesn't send it.

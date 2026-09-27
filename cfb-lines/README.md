@@ -1,6 +1,6 @@
 # CFB Lines
 
-College football **spread and total** edges, sent as ntfy alerts to Kamal's phone. It never touches the Kit newsletter.
+College football **spread and total** edges, sent as ntfy alerts to Kamal's phone on their **own topic** (secret `NTFY_TOPIC_CFB`), separate from the baseball/NBA/NFL alerts. It never touches the Kit newsletter.
 It covers game lines only. For NFL props see `nfl-props/`, and for NFL lines see `nfl-lines/`.
 
 **Not betting advice.** Read the backtest section before trusting a ✅.
@@ -133,8 +133,8 @@ How it scores:
 ### Verdict (read before trusting a ✅)
 
 - **Spreads, bet at the first-look number: a small edge, strongest as the closing-line value.**
-  - On the test seasons, edges ≥ 4 went 54.5% against the opener, and the market moved toward our number 57% of the time (avg +0.8 pts).
-  - At edge ≥ 5 those figures are 55.0%, 59% and +0.9.
+  - On the test seasons, edges ≥ 4 went 54.2% against the opener, and the market moved toward our number 57% of the time (avg +0.8 pts).
+  - At edge ≥ 5 those figures are 54.7%, 60% and +0.9.
   - The line moving our way grows steadily with edge size in both train and test. That's the best sign the model knows something the opener doesn't.
   - The win% alone is only about 1 standard error above breakeven, so it isn't proof by itself.
 - **Spreads, bet at the closing number: no edge** (about 52% at every threshold). The market catches up by kickoff.
@@ -151,33 +151,54 @@ Defaults picked from this: spread edge ≥ **4**, totals off, week ≥ 4.
 - visitor travel +0.7 per 1,000 extra miles
 - time zones +0.1 each
 - rest +0.14 per day
-- altitude +0.35
 - wind −1.2 per mph above 15 (59 games)
 - rain −1.8 (only 4 games, so weak)
 - cold −1.1
 - QB change −5.3 on the margin and −2.1 on the total
 
+### Altitude, humidity and heat
+
+Each factor is measured against the team's own home, so it's "how much higher, muggier or hotter than you're used to":
+- **altitude climb:** km climbed above 1,000 m
+- **altitude descent:** km descended
+- **humidity:** kickoff dew point vs the team's Sep–Nov home average, counted from a 60°F dew point
+- **heat:** the same with temperature, counted from 80°F
+
+Home climates come from the Open-Meteo archive.
+
+What the research says:
+- **Climbing: strong.** Allen, *Sport Management Review* 2026, ~15,000 FBS games from 2001–23: +1.5 to 3 pts for the team playing above the other's home elevation, growing with the gap. McSharry, *BMJ* 2007: about 0.5 goals per 1,000 m in South American soccer. The famous 4th-quarter fatigue at Denver doesn't hold up in recent NFL data.
+- **Coming down: weak.** No football evidence for "train high, play low".
+- **Heat: moderate, NFL.** A 2025 NFL study (*Temperature*) finds northern teams lose ~0.15 pts per °F in hot games.
+- **Humidity on its own:** not studied.
+
+What our 2021–25 games say (table below):
+- **Climbing:** points the same way. Visitors climbing 0.8+ km did about 3 pts worse than the model without altitude, and ~2.5 pts worse than the closing line. But it's only 28 games, and the per-km estimate (+1.8 ± 1.8) can't be told apart from zero.
+- **Coming down, humidity, heat:** no effect in the expected direction. Heat runs the wrong way (visitors did slightly *better* in hotter-than-home air), probably confounded with who plays those early-season games.
+
+**Used live:** altitude climb **1.5 pts per km** (research plus our data agree). Descent, humidity and heat are **0**. They're pinned rather than fitted because too few games move them, and the evidence table below re-tests them on every backtest run. Muggy or hot kickoffs still show the dew point in the alert's reasons.
+
 Train (params fitted on): 2021, 2022. Test (never seen by the fit): 2023, 2024, 2025. Weeks ≥ 4, FBS vs FBS, regular season, consensus (median) line across CFBD's books. Breakeven at -110 is 52.4%.
 
 - 2021: margin MAE model 12.92 vs closing line 12.54; total MAE model 13.09 vs close 12.35 (585 games)
 - 2022: margin MAE model 12.02 vs closing line 12.06; total MAE model 13.04 vs close 12.23 (584 games)
-- 2023: margin MAE model 12.57 vs closing line 12.13; total MAE model 13.07 vs close 12.61 (597 games)
+- 2023: margin MAE model 12.56 vs closing line 12.13; total MAE model 13.07 vs close 12.61 (597 games)
 - 2024: margin MAE model 12.40 vs closing line 11.97; total MAE model 13.60 vs close 13.01 (612 games)
-- 2025: margin MAE model 12.34 vs closing line 11.77; total MAE model 12.86 vs close 12.21 (617 games)
+- 2025: margin MAE model 12.35 vs closing line 11.77; total MAE model 12.86 vs close 12.21 (617 games)
 
 #### Spreads, TEST 2023+2024+2025
 
 | edge ≥ | bets (close) | win% vs close | bets (open) | win% vs open | line moved our way | avg move (pts) |
 |---|---|---|---|---|---|---|
-| 0 | 1785 | 51.9% | 1802 | 52.6% | 50.8% | 0.42 |
-| 1 | 1497 | 52.3% | 1549 | 52.9% | 52.1% | 0.51 |
-| 2 | 1224 | 52.1% | 1267 | 53.4% | 53.1% | 0.59 |
-| 3 | 977 | 52.2% | 1004 | 54.4% | 55.3% | 0.71 |
-| 4 | 742 | 51.8% | 772 | 54.5% | 57.2% | 0.82 |
-| 5 | 539 | 51.4% | 578 | 55.0% | 59.1% | 0.90 |
-| 6 | 376 | 51.6% | 405 | 54.8% | 60.5% | 1.05 |
-| 8 | 172 | 49.4% | 185 | 56.2% | 62.9% | 1.46 |
-| 10 | 81 | 55.6% | 94 | 54.3% | 63.8% | 1.65 |
+| 0 | 1785 | 52.0% | 1802 | 52.7% | 50.7% | 0.42 |
+| 1 | 1495 | 52.5% | 1550 | 53.0% | 52.1% | 0.50 |
+| 2 | 1228 | 52.1% | 1266 | 53.6% | 53.1% | 0.60 |
+| 3 | 976 | 52.4% | 1011 | 54.5% | 55.6% | 0.72 |
+| 4 | 740 | 51.9% | 770 | 54.2% | 56.8% | 0.81 |
+| 5 | 543 | 51.7% | 580 | 54.7% | 59.5% | 0.90 |
+| 6 | 374 | 51.3% | 402 | 55.2% | 60.4% | 1.04 |
+| 8 | 171 | 50.3% | 184 | 56.0% | 62.2% | 1.43 |
+| 10 | 82 | 54.9% | 92 | 53.3% | 64.1% | 1.70 |
 
 #### Totals, TEST 2023+2024+2025
 
@@ -197,14 +218,14 @@ Train (params fitted on): 2021, 2022. Test (never seen by the fit): 2023, 2024, 
 
 | edge ≥ | bets (close) | win% vs close | bets (open) | win% vs open | line moved our way | avg move (pts) |
 |---|---|---|---|---|---|---|
-| 0 | 1154 | 53.1% | 1148 | 54.4% | 49.4% | 0.30 |
-| 1 | 953 | 53.8% | 975 | 54.7% | 49.7% | 0.32 |
-| 2 | 790 | 53.8% | 788 | 54.8% | 51.4% | 0.39 |
-| 3 | 626 | 52.6% | 618 | 55.3% | 53.7% | 0.46 |
-| 4 | 476 | 53.8% | 477 | 57.4% | 56.3% | 0.57 |
-| 5 | 352 | 55.1% | 359 | 59.1% | 56.4% | 0.64 |
-| 6 | 241 | 54.8% | 258 | 61.2% | 59.6% | 0.77 |
-| 8 | 121 | 54.5% | 135 | 58.5% | 60.9% | 0.86 |
+| 0 | 1154 | 53.5% | 1148 | 54.4% | 49.4% | 0.30 |
+| 1 | 955 | 53.8% | 972 | 54.4% | 50.1% | 0.33 |
+| 2 | 791 | 53.6% | 788 | 54.6% | 51.4% | 0.39 |
+| 3 | 626 | 52.9% | 620 | 55.6% | 53.4% | 0.45 |
+| 4 | 473 | 54.1% | 477 | 57.4% | 56.3% | 0.58 |
+| 5 | 348 | 55.2% | 358 | 59.2% | 56.3% | 0.64 |
+| 6 | 241 | 53.5% | 258 | 60.9% | 58.7% | 0.76 |
+| 8 | 119 | 54.6% | 131 | 58.0% | 59.7% | 0.84 |
 | 10 | 53 | 64.2% | 57 | 64.9% | 62.7% | 1.08 |
 
 #### Totals, train 2021+2022
@@ -221,17 +242,33 @@ Train (params fitted on): 2021, 2022. Test (never seen by the fit): 2023, 2024, 
 | 8 | 128 | 51.6% | 158 | 59.5% | 74.2% | 1.71 |
 | 10 | 50 | 46.0% | 69 | 59.4% | 77.8% | 2.11 |
 
+#### Altitude, humidity and heat: the evidence (all seasons, weeks ≥ 1, FBS vs FBS)
+
+Side = the team the factor should help (the home team for a visitor who climbed, etc.). 'Real effect' = that side's actual margin minus our model's with this factor switched off; 'vs market' = actual margin minus the closing line (positive = the market under-rated the factor).
+
+| factor | bucket | games | avg gap | real effect (pts) | vs market (pts) | ATS vs close | fitted pts per unit ± SE |
+|---|---|---|---|---|---|---|---|
+| Visitor climbed into altitude | 0.3-0.8 km | 148 | 0.50 km | 0.55 | 0.62 | 52.4% (143) | 1.84 ± 1.83 |
+|  | 0.8+ km | 28 | 1.11 km | 3.29 | 2.51 | 48.1% (27) |  |
+| Visitor came down from altitude | 0.3-0.8 km | 171 | 0.49 km | -0.61 | -0.53 | 53.0% (168) | 0.65 ± 1.67 |
+|  | 0.8+ km | 36 | 1.11 km | 1.81 | 3.05 | 55.9% (34) |  |
+| Visitor in muggier air than home (dew point) | 3-10°F | 337 | 0.57 10°F | -1.04 | -0.78 | 46.2% (333) | -0.77 ± 0.66 |
+|  | 10°F+ | 188 | 1.51 10°F | -0.83 | 0.19 | 51.1% (184) |  |
+| Visitor in hotter air than home | 3-10°F | 255 | 0.62 10°F | -1.94 | -1.05 | 48.8% (252) | -2.43 ± 1.09 |
+|  | 10°F+ | 62 | 1.23 10°F | -3.23 | -1.83 | 42.6% (61) |  |
+
+Fitted = one-factor regression over every game (± 1 standard error); |fitted| < 2 SE means the data can't tell it from zero.
+
 #### Spreads, TEST weeks 1-3 only (priors-heavy)
 
 | edge ≥ | bets (close) | win% vs close | bets (open) | win% vs open | line moved our way | avg move (pts) |
 |---|---|---|---|---|---|---|
-| 0 | 432 | 50.2% | 435 | 51.5% | 47.5% | 0.13 |
-| 1 | 375 | 50.1% | 373 | 52.3% | 50.5% | 0.26 |
-| 2 | 311 | 50.2% | 313 | 51.4% | 51.9% | 0.35 |
-| 3 | 252 | 48.0% | 249 | 49.0% | 54.0% | 0.45 |
-| 4 | 203 | 48.3% | 195 | 50.3% | 53.3% | 0.49 |
-| 5 | 162 | 46.3% | 156 | 48.1% | 55.1% | 0.55 |
-| 6 | 121 | 47.1% | 117 | 51.3% | 55.1% | 0.72 |
+| 0 | 432 | 49.1% | 435 | 51.3% | 47.7% | 0.15 |
+| 1 | 375 | 50.1% | 375 | 52.3% | 50.5% | 0.26 |
+| 2 | 311 | 50.2% | 313 | 51.1% | 51.6% | 0.35 |
+| 3 | 251 | 47.8% | 248 | 48.8% | 53.8% | 0.45 |
+| 4 | 202 | 48.0% | 195 | 49.2% | 53.3% | 0.48 |
+| 5 | 161 | 46.0% | 155 | 47.1% | 55.4% | 0.56 |
+| 6 | 118 | 46.6% | 119 | 51.3% | 55.8% | 0.71 |
 | 8 | 65 | 46.2% | 73 | 47.9% | 52.7% | 0.68 |
-| 10 | 34 | 47.1% | 32 | 46.9% | 62.5% | 1.23 |
-
+| 10 | 34 | 47.1% | 32 | 50.0% | 59.4% | 0.98 |
