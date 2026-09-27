@@ -1,0 +1,53 @@
+name: NBA News
+
+# Injury-news watcher. Two long-polling windows on game days (jobs cap at 6 h, and cron can start late, so the job
+# polls internally every POLL_SEC instead of relying on frequent schedules):
+#   15:30 UTC (11:30 AM EDT / 10:30 AM EST) and 21:30 UTC (5:30 PM EDT / 4:30 PM EST, runs to ~03:25 UTC).
+# Each run stops early once every game today is within a few minutes of tip. Oct-Jun only.
+on:
+  schedule:
+    - cron: "30 15 * 10-12,1-6 *"
+    - cron: "30 21 * 10-12,1-6 *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "1 = print instead of sending"
+        default: "0"
+      max_minutes:
+        description: "how long to poll"
+        default: "355"
+
+concurrency:
+  group: nba-news
+  cancel-in-progress: false
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 358
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Restore cache
+        uses: actions/cache/restore@v4
+        with:
+          path: nba-news/.cache
+          key: nba-news-${{ github.run_id }}
+          restore-keys: nba-news-
+      - name: Watch injury news
+        env:
+          DRY_RUN: ${{ github.event.inputs.dry_run || '0' }}
+          MAX_MINUTES: ${{ github.event.inputs.max_minutes || '355' }}
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          NTFY_SERVER: ${{ secrets.NTFY_SERVER }}
+          NTFY_TOKEN: ${{ secrets.NTFY_TOKEN }}
+        run: node nba-news/watch.js
+      # save even if the watch step failed, so seen-outs and picks survive into the next window
+      - name: Save cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: nba-news/.cache
+          key: nba-news-${{ github.run_id }}

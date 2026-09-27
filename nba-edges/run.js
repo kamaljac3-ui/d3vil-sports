@@ -290,7 +290,7 @@ async function probe(){
     catch(e){log(`FAIL ${n}: ${e.message}`);}}
 }
 // require()d by backtest.js for the stats fetch and the scoring; only runs the bot when started directly
-module.exports={nba,nbaSeason,blend,projectSide,flagRows,nk,ESPN_TO_NBA,SETTINGS:{ZONE_MIN,BOOST_MIN,ABS_MIN,STATS,AVG}};
+module.exports={nba,nbaSeason,blend,projectSide,flagRows,nk,ESPN_TO_NBA,loadData,slate,roster,TODAY,SETTINGS:{ZONE_MIN,BOOST_MIN,ABS_MIN,STATS,AVG}};
 if(require.main===module)(async()=>{
   if(MODE==="probe")return probe();
   if(MODE==="snapshot")return snapshot();

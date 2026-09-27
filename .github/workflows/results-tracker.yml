@@ -47,6 +47,12 @@ jobs:
           path: mlb-live/.cache
           key: mlb-live-tracker-${{ github.run_id }}
           restore-keys: mlb-live-
+      - name: Restore NBA News bot cache
+        uses: actions/cache/restore@v4
+        with:
+          path: nba-news/.cache
+          key: nba-news-tracker-${{ github.run_id }}
+          restore-keys: nba-news-
       - name: Check out ledger (bot-results branch)
         run: |
           if git ls-remote --exit-code --heads origin bot-results >/dev/null; then

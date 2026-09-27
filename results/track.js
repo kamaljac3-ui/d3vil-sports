@@ -9,7 +9,7 @@ const NTFY_SERVER=(process.env.NTFY_SERVER||"https://ntfy.sh").replace(/\/$/,"")
 const NTFY_TOPIC=process.env.NTFY_TOPIC;
 const NTFY_TOKEN=process.env.NTFY_TOKEN||"";
 const LEDGER=path.resolve(ROOT,process.env.LEDGER_DIR||"ledger");
-const PICK_DIRS=(process.env.PICK_DIRS||"launch-angle/.cache,nba-edges/.cache,mlb-live/.cache").split(",").map(d=>path.resolve(ROOT,d.trim()));
+const PICK_DIRS=(process.env.PICK_DIRS||"launch-angle/.cache,nba-edges/.cache,mlb-live/.cache,nba-news/.cache").split(",").map(d=>path.resolve(ROOT,d.trim()));
 const RECENT_DAYS=+(process.env.RECENT_DAYS||7);
 const GIVE_UP_DAYS=+(process.env.GIVE_UP_DAYS||3);   // void a pick whose game still isn't final after this long
 const SMALL=+(process.env.SMALL_SAMPLE||100);
