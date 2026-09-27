@@ -82,7 +82,7 @@ async function replay(season){
   const games=[];await pool(dates,async d=>{const g=await gamesOn(d);if(g)games.push(...g);});
   log(`${games.length} games; downloading box scores…`);
   await pool(games,async g=>{g.b=await boxOf(g.id);});
-  const recs=[];const snaps={};
+  const sides=[];const snaps={};
   for(const g of games.sort((a,b)=>a.date<b.date?-1:1)){
     if(!g.b)continue;
     const bucket=addDays(start,7*Math.floor(days(start,g.date)/7));
@@ -97,20 +97,27 @@ async function replay(season){
       const keys=new Set([...box.map(x=>R.nk(x.name)),...Object.values(D.players).filter(p=>p.gpCur>0&&p.team===G[side].abbr).map(p=>p.key)]);
       const team=[...keys].map(k=>D.players[k]).filter(Boolean);
       const out=new Set(team.filter(p=>!played.has(p.key)).map(p=>p.key));
-      const S=R.projectSide(team,G,side,D,out);
-      const flags=R.flagRows(S,null);
-      for(const {p,zone,pr} of S.players){
-        const a=played.get(p.key);if(!a)continue;
-        const f=flags.filter(r=>r.key===p.key);
-        recs.push({season,date:g.date,name:p.name,team:S.me,opp:S.opp,hasLine:!!g.b.total,
-          p:{MIN:p.MIN,MIN10:p.MIN10,PTS:p.PTS,REB:p.REB,AST:p.AST,FG3M:p.FG3M,FTM:p.FTM,gpCur:p.gpCur},
-          zone:zone&&{ptsFactor:zone.ptsFactor,threesFactor:zone.threesFactor,delta:zone.delta},ctx:S.ctx,pr,
-          act:{min:a.min,pts:a.pts,reb:a.reb,ast:a.ast,fg3m:a.fg3m},
-          zoneFlag:f.some(r=>r.kind==="zone"),boostFlags:f.filter(r=>r.kind==="boost").map(r=>r.stat)});
-      }
+      sides.push({season,date:g.date,G,side,D,team,out,played,hasLine:!!g.b.total});
     }
   }
-  log(`${season}: ${recs.length} player-games scored`);
+  log(`${season}: ${sides.length} team-games collected`);
+  return sides;
+}
+// score collected team-games with the bot's code under given teammate-out settings -> one record per player-game
+function score(sides,outOpts){
+  const recs=[];
+  for(const x of sides){
+    const S=R.projectSide(x.team,x.G,x.side,x.D,x.out,outOpts),flags=R.flagRows(S,null);
+    for(const {p,zone,pr,boost} of S.players){
+      const a=x.played.get(p.key);if(!a)continue;
+      const f=flags.filter(r=>r.key===p.key);
+      recs.push({season:x.season,date:x.date,name:p.name,team:S.me,opp:S.opp,hasLine:x.hasLine,outCount:S.tags.some(t=>t.startsWith("w/o")),
+        p:{MIN:p.MIN,MIN10:p.MIN10,PTS:p.PTS,REB:p.REB,AST:p.AST,FG3M:p.FG3M,FTM:p.FTM,gpCur:p.gpCur},
+        zone:zone&&{ptsFactor:zone.ptsFactor,threesFactor:zone.threesFactor,delta:zone.delta},ctx:S.ctx,boost,pr,
+        act:{min:a.min,pts:a.pts,reb:a.reb,ast:a.ast,fg3m:a.fg3m},
+        zoneFlag:f.some(r=>r.kind==="zone"),boostFlags:f.filter(r=>r.kind==="boost").map(r=>r.stat)});
+    }
+  }
   return recs;
 }
 
@@ -118,19 +125,25 @@ async function replay(season){
 const NOBOOST={pts:1,reb:1,ast:1};
 const VARIANTS={
   "full model":r=>r.pr,
-  "without shot zones":r=>M.project(r.p,{...r.ctx,zone:null}),
-  "without last-10 minutes":r=>M.project({...r.p,MIN10:undefined},{...r.ctx,zone:r.zone}),
-  "without game total / pace":r=>M.project(r.p,{...r.ctx,zone:r.zone,env:1}),
-  "without opponent REB/AST allowed":r=>M.project(r.p,{...r.ctx,zone:r.zone,oppReb:1,oppAst:1}),
-  "without blowout trim":r=>M.project(r.p,{...r.ctx,zone:r.zone,blowout:false}),
+  "without shot zones":r=>M.project(r.p,{...r.ctx,boost:r.boost,zone:null}),
+  "without last-10 minutes":r=>M.project({...r.p,MIN10:undefined},{...r.ctx,boost:r.boost,zone:r.zone}),
+  "without game total / pace":r=>M.project(r.p,{...r.ctx,boost:r.boost,zone:r.zone,env:1}),
+  "without opponent REB/AST allowed":r=>M.project(r.p,{...r.ctx,boost:r.boost,zone:r.zone,oppReb:1,oppAst:1}),
+  "without blowout trim":r=>M.project(r.p,{...r.ctx,boost:r.boost,zone:r.zone,blowout:false}),
   "without teammate-out boost":r=>M.project(r.p,{...r.ctx,zone:r.zone,boost:NOBOOST}),
 };
+// teammate-out settings to compare; the best on the fit season (by total relative error on PTS/REB/AST) becomes the default
+const GRID=[{label:"old rule (everyone +70% × lost/remaining)",opts:{mode:"uniform"}},{label:"none",opts:{mode:"minutes",minScale:0,usage:0}}];
+for(const minScale of [0.25,0.5,0.75,1])for(const usage of [0,0.15,0.3,0.5])GRID.push({label:`minutes ${minScale}, usage ${usage}`,opts:{mode:"minutes",minScale,usage}});
+const relErr=recs=>["pts","reb","ast"].reduce((s,k)=>s+fit(recs,k,VARIANTS["full model"]).mseRatio,0)/3;
+const outSlope=recs=>fit(recs.filter(x=>x.outCount),"pts",VARIANTS["full model"]).k;
 const mean=a=>a.length?a.reduce((s,x)=>s+x,0)/a.length:NaN;
 function fit(recs,s,proj){ // MAE vs the plain average, and the slope of (actual-avg) on (proj-avg)
-  let mA=0,mP=0,sxy=0,sxx=0;const n=recs.length;
-  for(const r of recs){const avg=r.p[AVG[s]],pv=proj(r)[s],a=r.act[s];mA+=Math.abs(a-avg);mP+=Math.abs(a-pv);sxy+=(pv-avg)*(a-avg);sxx+=(pv-avg)**2;}
+  let mA=0,mP=0,qA=0,qP=0,sxy=0,sxx=0;const n=recs.length;
+  for(const r of recs){const avg=r.p[AVG[s]],pv=proj(r)[s],a=r.act[s];mA+=Math.abs(a-avg);mP+=Math.abs(a-pv);qA+=(a-avg)**2;qP+=(a-pv)**2;sxy+=(pv-avg)*(a-avg);sxx+=(pv-avg)**2;}
   const k=sxx?sxy/sxx:0;let res=0;for(const r of recs){const avg=r.p[AVG[s]],pv=proj(r)[s],a=r.act[s];res+=(a-avg-k*(pv-avg))**2;}
-  return {n,maeAvg:mA/n,maeProj:mP/n,skill:1-mP/mA,k,se:sxx?Math.sqrt(res/(n-1)/sxx):NaN};
+  // MAE rewards the median and box scores are right-skewed, so MSE (rewards getting the mean right) is the fair test
+  return {n,maeAvg:mA/n,maeProj:mP/n,mseRatio:qP/qA,skill:1-qP/qA,k,se:sxx?Math.sqrt(res/(n-1)/sxx):NaN};
 }
 const f2=v=>isFinite(v)?v.toFixed(2):"–",f3=v=>isFinite(v)?v.toFixed(3):"–",sg=v=>(v>=0?"+":"")+v.toFixed(2),pc=v=>isFinite(v)?(v*100).toFixed(1)+"%":"–";
 function flagTable(recs){
@@ -144,18 +157,31 @@ function flagTable(recs){
   return out;
 }
 function fitTable(recs,label){
-  const out=[`| ${label} | Stat | Player-games | Error of plain average | Error of projection | Better by | Slope (1 = right size, 0 = noise) |`,"|---|---|---:|---:|---:|---:|---:|"];
+  const out=[`| ${label} | Stat | Player-games | Avg miss, plain average | Avg miss, projection | Squared error vs plain average | Slope (1 = right size, 0 = noise) |`,"|---|---|---:|---:|---:|---:|---:|"];
   for(const [name,fn] of Object.entries(VARIANTS))for(const s of STATS){const f=fit(recs,s,fn);
-    out.push(`| ${name} | ${LABEL[s]} | ${f.n.toLocaleString()} | ${f3(f.maeAvg)} | ${f3(f.maeProj)} | ${pc(f.skill)} | ${f2(f.k)} ± ${f2(f.se)} |`);}
+    out.push(`| ${name} | ${LABEL[s]} | ${f.n.toLocaleString()} | ${f3(f.maeAvg)} | ${f3(f.maeProj)} | ${pc(-f.skill)} | ${f2(f.k)} ± ${f2(f.se)} |`);}
   return out;
 }
 (async()=>{
-  const all={};for(const s of SEASONS)all[s]=await replay(s);
+  const sides={};for(const s of SEASONS)sides[s]=await replay(s);
   const [train,...tests]=SEASONS;
+  // teammate-out grid: pick on the fit season, report every season
+  const gridRows=[];let best=null;
+  for(const g of GRID){
+    const row={label:g.label,opts:g.opts};
+    for(const s of SEASONS){const r=score(sides[s],g.opts);row[s]={all:relErr(r),out:relErr(r.filter(x=>x.outCount)),slope:outSlope(r)};}
+    gridRows.push(row);if(!best||row[train].all<best[train].all)best=row;
+    log(`grid ${g.label}: `+SEASONS.map(s=>`${s} ${row[s].all.toFixed(4)} (out ${row[s].out.toFixed(4)}, slope ${row[s].slope.toFixed(2)})`).join(", "));
+  }
+  const all={};for(const s of SEASONS)all[s]=score(sides[s],best.opts);
+  const gridMd=[`## Teammate-out settings`,"",`Squared error relative to the plain season average, averaged over PTS/REB/AST (**below 1.000 = the projection beats the average**; squared error because box scores are right-skewed and average-miss rewards the median). "Slope" is got ÷ said for points in games where someone was out (1 = right size). "Games with someone out" is the subset where the rule actually does anything. Picked on ${train}: **${best.label}**.`,"",
+    `| Setting | ${SEASONS.map(s=>`${s} all | ${s} someone out | ${s} slope`).join(" | ")} |`,`|---|${SEASONS.map(()=>"---:|---:|---:").join("|")}|`,
+    ...gridRows.map(r=>`| ${r===best?"**"+r.label+"**":r.label} | ${SEASONS.map(s=>`${r[s].all.toFixed(4)} | ${r[s].out.toFixed(4)} | ${r[s].slope.toFixed(2)}`).join(" | ")} |`),""];
   const md=[`# NBA Edges backtest`,"",
     `Generated ${new Date().toISOString().slice(0,10)} by \`node nba-edges/backtest.js\`. The bot's own scoring code (\`run.js\` projectSide/flagRows) replayed over whole regular seasons with **no look-ahead**: stats are season-to-date as of the day before each weekly bucket, blended with the prior season like the live bot.`,"",
     `**How to read it.** "Error" is the average miss in that stat per player-game. The projection has to beat simply using the player's season average. The **slope** asks: when the model says "+2 over his average", how much of that shows up? 1.00 means it's the right size, 0.50 means the real effect is half as big, and 0 means it's noise. **Got ÷ said** is the same idea for the picks the bot would actually alert on.`,"",
-    `**Caveats.** (1) ESPN keeps only *current* injury lists, so "ruled out" is "a regular who didn't play". That's slightly optimistic, because real late scratches are known here. (2) Spreads/totals exist only from Dec 2025 on, so earlier games use the bot's pace fallback. (3) Prop lines aren't available historically, so this can't say whether the bot beats the sportsbooks, only whether its projections beat the player's average.`,""];
+    `**Caveats.** (1) ESPN keeps only *current* injury lists, so "ruled out" is "a regular who didn't play". That's slightly optimistic, because real late scratches are known here. (2) Spreads/totals exist only from Dec 2025 on, so earlier games use the bot's pace fallback. (3) Prop lines aren't available historically, so this can't say whether the bot beats the sportsbooks, only whether its projections beat the player's average.`,"",
+    ...gridMd,`The sections below use the picked setting.`,""];
   for(const s of SEASONS){
     const r=all[s];
     md.push(`## ${s}${s===train?" (fit season)":" (out of sample)"}`,"",`${r.length.toLocaleString()} player-games (rotation players, 20+ min/g, who played).`,"",
@@ -165,7 +191,7 @@ function fitTable(recs,label){
   }
   // shrink the boost to the size that actually showed up in the fit season, then check it out of sample
   md.push(`## Shrinking the projection to its real size`,"",`Fit on ${train}: projection' = average + k × (projection − average), with k = that season's slope. Then applied unchanged to later seasons.`,"",
-    "| Season | Stat | k (from fit season) | Error of plain average | Error of raw projection | Error of shrunk projection |","|---|---|---:|---:|---:|---:|");
+    "| Season | Stat | k (from fit season) | Error of plain average | Avg miss, raw projection | Avg miss, shrunk projection |","|---|---|---:|---:|---:|---:|");
   const K={};for(const s of STATS)K[s]=Math.max(0,fit(all[train],s,VARIANTS["full model"]).k);
   for(const season of SEASONS)for(const s of STATS){const r=all[season],shr=x=>({[s]:x.p[AVG[s]]+K[s]*(x.pr[s]-x.p[AVG[s]])});
     const raw=fit(r,s,VARIANTS["full model"]),sh=fit(r,s,shr);

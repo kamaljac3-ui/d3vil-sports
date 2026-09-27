@@ -56,13 +56,36 @@ function Phi(x){const t=1/(1+0.2316419*Math.abs(x)),d=0.3989423*Math.exp(-x*x/2)
   const q=d*t*(0.3193815+t*(-0.3565638+t*(1.781478+t*(-1.821256+t*1.330274))));return x>0?1-q:q;}
 const pOver=(proj,line,stat)=>1-Phi((line-proj)/SD[stat](proj));
 
-// Teammates ruled out: 70% of their production is spread across the remaining rotation.
-// Only counts players who have actually been playing (a long-term absence is already in everyone's averages).
-function outBoost(team,outKeys,teamGP){
+// Teammates ruled out. Only counts regulars who have actually been playing (a long-term absence is already in
+// everyone's averages). Returns {out: names, forPlayer(p) -> {pts,reb,ast} multipliers}.
+//  mode "minutes" (default): the out players' minutes go to the rest of the rotation weighted by MIN x (MAX_MIN - MIN),
+//    so bench/rotation players with room absorb most of it and 36-minute starters little; each player's minutes
+//    factor is scaled by minScale. On top of that, per-minute production rises by usage x (share of that stat the
+//    team lost). Both fit by backtest.js: best on 2024-25 and held on 2025-26 was minScale 0.25, usage 0. For 20+ MPG
+//    players a teammate sitting barely moves their numbers; any usage bump made projections worse.
+//  mode "uniform": the original rule (everyone +70% x lost/remaining, capped at +25%); the 2024-26 backtest showed
+//    it overshoots ~5x, kept only so the backtest can compare.
+const OUT_OPTS={mode:process.env.NBA_OUT_MODE||"minutes",minScale:+(process.env.NBA_OUT_MIN_SCALE||0.25),usage:+(process.env.NBA_OUT_USAGE||0),maxMin:36};
+function outBoost(team,outKeys,teamGP,opts={}){
+  const o={...OUT_OPTS,...opts};
   const regular=p=>p.MIN>=15&&(teamGP<5||(p.gpCur||0)>=0.6*teamGP);
-  const out=team.filter(p=>outKeys.has(p.key)&&regular(p)),rest=team.filter(p=>!outKeys.has(p.key)&&p.MIN>=12);
-  const f=k=>{const lost=out.reduce((s,p)=>s+(p[k]||0),0),have=rest.reduce((s,p)=>s+(p[k]||0),0);return have?clamp(1+0.7*lost/have,1,1.25):1;};
-  return {pts:f("PTS"),reb:f("REB"),ast:f("AST"),out:out.map(p=>p.name)};
+  const out=team.filter(p=>outKeys.has(p.key)&&regular(p)),names=out.map(p=>p.name);
+  const none={pts:1,reb:1,ast:1};
+  if(!out.length)return {out:names,forPlayer:()=>none};
+  if(o.mode==="uniform"){
+    const rest=team.filter(p=>!outKeys.has(p.key)&&p.MIN>=12);
+    const f=k=>{const lost=out.reduce((s,p)=>s+(p[k]||0),0),have=rest.reduce((s,p)=>s+(p[k]||0),0);return have?clamp(1+0.7*lost/have,1,1.25):1;};
+    const b={pts:f("PTS"),reb:f("REB"),ast:f("AST")};return {out:names,forPlayer:()=>b};
+  }
+  const rest=team.filter(p=>!outKeys.has(p.key)&&p.MIN>=8);
+  const w=p=>p.MIN*Math.max(0,o.maxMin-p.MIN),W=rest.reduce((s,p)=>s+w(p),0);
+  const lostMin=out.reduce((s,p)=>s+p.MIN,0);
+  const share=k=>{const lost=out.reduce((s,p)=>s+(p[k]||0),0),have=rest.reduce((s,p)=>s+(p[k]||0),0);return lost+have?lost/(lost+have):0;};
+  const sh={pts:share("PTS"),reb:share("REB"),ast:share("AST")};
+  return {out:names,forPlayer:p=>{
+    const dm=W?Math.min(lostMin*w(p)/W,Math.max(0,o.maxMin+4-p.MIN)):0,mf=1+o.minScale*dm/Math.max(p.MIN,1);
+    return {pts:mf*(1+o.usage*sh.pts),reb:mf*(1+o.usage*sh.reb),ast:mf*(1+o.usage*sh.ast)};
+  }};
 }
 
 module.exports={ZONES,zonesFromRow,leagueZones,zoneMatchup,project,pOver,outBoost,clamp};

@@ -14,7 +14,9 @@ const NTFY_TOKEN=process.env.NTFY_TOKEN||"";
 const ODDS_KEY=process.env.ODDS_API_KEY||"";
 const ODDS_IN_MORNING=process.env.ODDS_IN_MORNING==="1";
 const TOP_N=+(process.env.TOP_N||6);
-const ZONE_MIN=+(process.env.ZONE_MIN||1.0);      // pts/game gained from the opponent's zone defense
+// pts/game gained from the opponent's zone defense. Shot-zone alerts are OFF by default (99): the 2024-26 backtest
+// found them noise (flags promised ~+2 pts, got +0.2-0.3). The zone factor still feeds the projections. ZONE_MIN=1 re-enables.
+const ZONE_MIN=+(process.env.ZONE_MIN||99);
 const BOOST_MIN=+(process.env.BOOST_MIN||0.10);   // projection this far above the player's own average
 const P_MIN=+(process.env.P_MIN||0.58);           // model over/under probability vs a posted line
 const PREGAME_MIN=+(process.env.PREGAME_MIN||90);
@@ -202,9 +204,10 @@ async function sideRows(g,side,D,outKeys,lines){
 }
 // Pure scoring (also used by backtest.js): project every rotation player on one side of a game.
 // team: stat objects for that side's roster; g: {home,away:{abbr},total,homeSpread}; outKeys: Set of ruled-out name keys.
-function projectSide(team,g,side,D,outKeys){
+// outOpts: optional teammate-out settings (model.outBoost), used by the backtest grid.
+function projectSide(team,g,side,D,outKeys,outOpts){
   const me=g[side],op=g[side==="home"?"away":"home"],T=D.teams[me.abbr]||{},O=D.teams[op.abbr]||{},lg=D.league;
-  const boost=M.outBoost(team,outKeys,Math.max(0,...team.map(p=>p.gpCur||0)));
+  const ob=M.outBoost(team,outKeys,Math.max(0,...team.map(p=>p.gpCur||0)),outOpts),boost=ob;
   let env=1;
   if(g.total&&g.homeSpread!=null&&T.ppg){const implied=g.total/2+(side==="home"?-1:1)*g.homeSpread/2;env=M.clamp(implied/T.ppg,0.88,1.12);}
   else if(O.pace&&lg.pace)env=M.clamp(O.pace/lg.pace,0.94,1.06);
@@ -216,9 +219,10 @@ function projectSide(team,g,side,D,outKeys){
   for(const p of team){
     if(outKeys.has(p.key)||p.MIN<20)continue;
     const zone=p.zones&&O.oppZones&&lg.zones?M.zoneMatchup(p.zones,p.gpEff||p.GP,O.oppZones,lg.zones):null;
-    players.push({p,zone,pr:M.project(p,{zone,env,oppReb,oppAst,blowout,boost})});
+    const b=ob.forPlayer(p);   // teammate-out multipliers are per player now
+    players.push({p,zone,boost:b,pr:M.project(p,{zone,env,oppReb,oppAst,blowout,boost:b})});
   }
-  return {me:me.abbr,opp:op.abbr,tags,ctx:{env,oppReb,oppAst,blowout,boost},players};
+  return {me:me.abbr,opp:op.abbr,tags,ctx:{env,oppReb,oppAst,blowout},players};
 }
 // the alert rows: shot-zone edges, prop-line edges (with lines) or projection boosts (without)
 function flagRows(side,lines){
