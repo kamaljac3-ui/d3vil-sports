@@ -22,8 +22,8 @@ const DEF={
   // margin coefficients (home perspective)
   HFA:2.5,HFA_CAP:0.6,          // base home edge; extra per 25k seats above 50k
   HFA_AWAY_VENUE:0.5,           // home team "hosting" away from its own stadium keeps this share
-  TRAVEL:-0.3,                  // per 1,000 miles the team travelled (applied to the difference)
-  TZ:-0.3,                      // per time zone crossed
+  TRAVEL:0.3,                   // home pts per 1,000 more miles the visitor travelled than the home team
+  TZ:0.3,                       // home pts per extra time zone the visitor crossed
   REST:0.15,REST_CAP:7,         // per day of rest advantage (bye weeks included), capped
   ALT:1.5,ALT_M:1500,           // home team at >1,500 m vs a visitor from low ground
   // totals

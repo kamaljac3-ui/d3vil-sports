@@ -62,6 +62,14 @@ jobs:
           else
             node cfb-lines/run.js
           fi
+      - name: Upload backtest results
+        if: github.event.inputs.mode == 'backtest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: cfb-backtest
+          path: |
+            cfb-lines/params.json
+            cfb-lines/.cache/backtest.md
       - name: Save state
         if: always() && steps.run.outputs.state_changed == 'true'
         uses: actions/cache/save@v4
