@@ -15,7 +15,9 @@ It's served by GitHub Pages from `main`.
 - `scripts/` has `send-newsletter.js` (Kit), `send-commentary.js` and `generate-recap-audio.js` (ElevenLabs, Sundays).
 - `launch-angle/` is the MLB edge bot and `nfl-props/` is the NFL player-props bot (details below). `nba-edges/` is an
   NBA bot built in a separate session, with the same ntfy and cache pattern. Read its `run.js` header and `README.md` before touching it.
-- `results/` is the results tracker. It grades the picks `launch-angle/` and `nba-edges/` actually sent (each writes
+- `mlb-live/` sends in-game pitching-change alerts. It reuses `launch-angle/model.js` read-only, and runs two
+  long-polling windows a day. See `mlb-live/README.md`.
+- `results/` is the results tracker. It grades the picks `launch-angle/`, `nba-edges/` and `mlb-live/` actually sent (each writes
   `.cache/picks-<date>.json` on real sends) and keeps the ledger on the **`bot-results` branch**, never `main`. See `results/README.md`.
 
 ### Workflows (`.github/workflows/`)
@@ -26,6 +28,7 @@ It's served by GitHub Pages from `main`.
 | `test-send.yml` | | manual | Newsletter test send. |
 | `launch-angle-alerts.yml` | Launch Angle Edges | cron + manual | MLB bot, ntfy only. |
 | `nba-edges-alerts.yml` | NBA Edges | cron (Oct–Jun) + manual | NBA bot, ntfy only. |
+| `mlb-live-alerts.yml` | MLB Live | cron 17:30 + 23:20 UTC (Mar–Nov) + manual | Polls live games for up to about 6 h per run. Pitching-change alerts, ntfy only. |
 | `results-tracker.yml` | Bot Results Tracker | cron daily 11:00 UTC + manual | Grades sent picks and pushes the ledger to the `bot-results` branch. Sends a weekly ntfy scorecard on Mondays. |
 | `nfl-props-alerts.yml` | NFL Props Edges | cron every 15 min + manual | NFL props bot, ntfy only. |
 | `nfl-lines-alerts.yml` | NFL Lines | cron every 15 min + manual | NFL game-lines bot, ntfy only. |

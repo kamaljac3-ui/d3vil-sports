@@ -9,7 +9,7 @@ const NTFY_SERVER=(process.env.NTFY_SERVER||"https://ntfy.sh").replace(/\/$/,"")
 const NTFY_TOPIC=process.env.NTFY_TOPIC;
 const NTFY_TOKEN=process.env.NTFY_TOKEN||"";
 const LEDGER=path.resolve(ROOT,process.env.LEDGER_DIR||"ledger");
-const PICK_DIRS=(process.env.PICK_DIRS||"launch-angle/.cache,nba-edges/.cache").split(",").map(d=>path.resolve(ROOT,d.trim()));
+const PICK_DIRS=(process.env.PICK_DIRS||"launch-angle/.cache,nba-edges/.cache,mlb-live/.cache").split(",").map(d=>path.resolve(ROOT,d.trim()));
 const RECENT_DAYS=+(process.env.RECENT_DAYS||7);
 const GIVE_UP_DAYS=+(process.env.GIVE_UP_DAYS||3);   // void a pick whose game still isn't final after this long
 const SMALL=+(process.env.SMALL_SAMPLE||100);
@@ -32,7 +32,8 @@ async function get(url){
 
 // ---------- ledger ----------
 const SPORTS=["mlb","nba"];
-const ID={mlb:p=>`${p.date}|${p.gamePk}|${p.hitterId}`,nba:p=>`${p.date}|${p.gameId}|${p.key}|${p.kind}|${p.stat||""}`};
+// live (mlb-live) picks are hitter vs one reliever, so the same hitter can have several in a game
+const ID={mlb:p=>`${p.date}|${p.gamePk}|${p.hitterId}`+(p.kind==="live"?`|live|${p.pitcherId}`:""),nba:p=>`${p.date}|${p.gameId}|${p.key}|${p.kind}|${p.stat||""}`};
 function loadLedger(){
   const L={};for(const s of SPORTS){try{L[s]=JSON.parse(fs.readFileSync(path.join(LEDGER,`${s}.json`),"utf8"));}catch(e){L[s]=[];}}
   return L;
@@ -84,7 +85,7 @@ async function gradeMlb(r){
   }
   const base=await hrRateBefore(r.hitterId,r.date);
   const pa=bat.plateAppearances;
-  return {status:"final",pa,hr:bat.homeRuns||0,paVsSP,hrVsSP,bbe,inWin,starterMatched:starter===String(r.pitcherId),baseHrPA:base,pHR:1-Math.pow(1-base,pa)};
+  return {status:"final",pa,hr:bat.homeRuns||0,paVsSP,hrVsSP,bbe,inWin,starterMatched:starter===String(r.pitcherId),baseHrPA:base,pHR:1-Math.pow(1-base,pa),pHRvs:1-Math.pow(1-base,paVsSP)};
 }
 // ---------- NBA grading ----------
 const sums=new Map();
@@ -119,8 +120,16 @@ const pct=v=>isFinite(v)?Math.round(v*100)+"%":"–";
 const sg=v=>(v>=0?"+":"")+v.toFixed(1);
 const mean=a=>a.length?a.reduce((s,x)=>s+x,0)/a.length:NaN;
 const small=n=>n<SMALL?` (small sample: noise until ~${SMALL}+)`:"";
+function liveCard(recs){
+  const f=recs.filter(r=>r.kind==="live"&&r.result&&r.result.status==="final");if(!f.length)return [];
+  const faced=f.filter(r=>r.result.paVsSP>0),hr=faced.filter(r=>r.result.hrVsSP>0).length;
+  const exp=faced.reduce((s,r)=>s+r.result.pHRvs,0),v=faced.reduce((s,r)=>s+r.result.pHRvs*(1-r.result.pHRvs),0),z=v?(hr-exp)/Math.sqrt(v):0;
+  return [`MLB live (pitching changes): ${f.length} picks, ${faced.length} faced the new pitcher${small(faced.length)}`,
+    `- Homered off him in ${hr} vs ${exp.toFixed(1)} expected over ${faced.reduce((s,r)=>s+r.result.paVsSP,0)} PA: ${exp?(hr/exp).toFixed(2)+"x":"–"}, z ${sg(z)}`];
+}
 function mlbCard(recs){
-  const f=recs.filter(r=>r.result&&r.result.status==="final");if(!f.length)return ["MLB: no graded picks yet."];
+  const live=liveCard(recs);recs=recs.filter(r=>r.kind!=="live");
+  const f=recs.filter(r=>r.result&&r.result.status==="final");if(!f.length)return ["MLB: no graded picks yet.",...live];
   const hrG=f.filter(r=>r.result.hr>0).length,exp=f.reduce((s,r)=>s+r.result.pHR,0),v=f.reduce((s,r)=>s+r.result.pHR*(1-r.result.pHR),0);
   const z=v?(hrG-exp)/Math.sqrt(v):0;
   const bbe=f.reduce((s,r)=>s+r.result.bbe,0),inW=f.reduce((s,r)=>s+r.result.inWin,0),predW=bbe?f.reduce((s,r)=>s+r.win*r.result.bbe,0)/bbe:NaN;
@@ -129,7 +138,7 @@ function mlbCard(recs){
     `MLB: ${f.length} hitter-games${small(f.length)}`,
     `- Homered in ${hrG} (${pct(hrG/f.length)}) vs ${exp.toFixed(1)} expected from their own HR rates: ${exp?(hrG/exp).toFixed(2)+"x":"–"}, z ${sg(z)}`,
     `- Off the flagged starter: HR in ${hrSP} of ${sp.length} games he started`,
-    `- Launch window: ${pct(bbe?inW/bbe:NaN)} of ${bbe} batted balls at 25-35 deg vs ${pct(predW)} predicted`];
+    `- Launch window: ${pct(bbe?inW/bbe:NaN)} of ${bbe} batted balls at 25-35 deg vs ${pct(predW)} predicted`,...live];
 }
 function nbaCard(recs){
   const f=recs.filter(r=>r.result&&r.result.status==="final");if(!f.length)return ["NBA: no graded picks yet."];
@@ -151,6 +160,7 @@ function recentLines(L,since){
   const out=[];
   for(const r of L.mlb.filter(r=>r.date>=since&&r.result))
     out.push(r.result.status==="void"?`${r.date} ${r.name} vs ${r.pitcher}: void (${r.result.why})`:
+      r.kind==="live"?`${r.date} ${r.name} vs ${r.pitcher} (live, ${r.inning}): ${r.result.hrVsSP} HR in ${r.result.paVsSP} PA vs him (${pct(r.result.pHRvs)} expected)`:
       `${r.date} ${r.name} vs ${r.pitcher}: ${r.result.hr} HR in ${r.result.pa} PA (${pct(r.result.pHR)} expected), ${r.result.inWin}/${r.result.bbe} in window`);
   const LBL={pts:"PTS",reb:"REB",ast:"AST",fg3m:"3PM"};
   for(const r of L.nba.filter(r=>r.date>=since&&r.result)){

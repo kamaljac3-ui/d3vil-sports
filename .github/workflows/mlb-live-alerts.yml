@@ -1,0 +1,52 @@
+name: MLB Live
+
+# Two long-running windows a day. Each polls every live game until MAX_MINUTES or until every game is final.
+# Jobs cap at 6 h, so the day is split: afternoon 17:30 UTC (1:30 PM EDT) and evening 23:20 UTC (7:20 PM EDT, runs to ~5 AM UTC).
+# The shared concurrency group queues the evening run behind the afternoon one if they overlap.
+on:
+  schedule:
+    - cron: "30 17 * 3-11 *"
+    - cron: "20 23 * 3-11 *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "1 = print instead of sending"
+        default: "0"
+      max_minutes:
+        description: "how long to poll"
+        default: "345"
+
+concurrency:
+  group: mlb-live
+  cancel-in-progress: false
+
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 358
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Restore cache
+        uses: actions/cache/restore@v4
+        with:
+          path: mlb-live/.cache
+          key: mlb-live-${{ github.run_id }}
+          restore-keys: mlb-live-
+      - name: Poll live games
+        env:
+          DRY_RUN: ${{ github.event.inputs.dry_run || '0' }}
+          MAX_MINUTES: ${{ github.event.inputs.max_minutes || '345' }}
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          NTFY_SERVER: ${{ secrets.NTFY_SERVER }}
+          NTFY_TOKEN: ${{ secrets.NTFY_TOKEN }}
+        run: node mlb-live/live.js
+      # save even if the poll step failed, so sent markers, picks and bullpen profiles survive
+      - name: Save cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: mlb-live/.cache
+          key: mlb-live-${{ github.run_id }}
