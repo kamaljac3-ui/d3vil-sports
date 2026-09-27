@@ -103,8 +103,17 @@ Full results are in `research/travel-climate-results.md`.
 | Dry-climate teams in humidity | only DEN/LV qualify, 22 games: too few to say | no |
 | Warm/dome visitors outdoors in Dec–Jan | **45.6% ATS** (668 games), 43.2% in 1999–2011, **47.6% in 2012–2025** (about break-even to fade now), 38% in playoffs (79 games) | ⚠️ tag, informational only |
 | Freezing temps (≤ 32°F) beyond the time of year; totals in cold or muggy games | nothing | no |
+| Defense missing a starting CB (`research/cb-replacement.js`, 2013–2025) | opposing offense **54.2% ATS in 2020–25** (650 games, +1.4 pts), but 48.1% in 2013–19; 61.8% with 2+ starters out (103 games). No effect on the top receiver's yards | ⚠️ tag, informational only |
+| A CB who got torched the last 2 games | regresses almost fully the next week (58.5 → 28.3 yds vs 26.0 average) | no |
+| Team/QB division or primetime records | past records don't predict future ones (correlation ≈ 0) | no |
 
 Tags never change the model's numbers or ✅. They're context to weigh yourself.
+
+**How the missing-CB tag works:**
+- **Starters** are the cornerbacks with ≥ 70% of defensive snaps in 2 of the team's last 3 games (nflverse snap counts).
+- **Missing** means Sleeper lists him as Out, IR, PUP, Suspended or Doubtful, or he's no longer on the team, or the nflverse injury report lists him as Out or Doubtful.
+- **Matching:** Sleeper has no NFL player id for most defensive backs, so they're matched by name and team.
+- **Unmatched players** (about 2 of 55, usually nicknames) are never assumed missing.
 
 ## Settings
 

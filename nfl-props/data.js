@@ -1,6 +1,6 @@
 // nflverse + Sleeper loaders. Everything is rolled up into per-game team and player records;
 // the model decides which games count (only games before the week being projected).
-const {parseCSV,getText,getJSON,readState,writeState,log}=require("./lib");
+const {parseCSV,getText,getJSON,readState,writeState,log,normName}=require("./lib");
 
 const NV="https://github.com/nflverse/nflverse-data/releases/download";
 const GAMES_URL="https://github.com/nflverse/nfldata/raw/master/data/games.csv";
@@ -168,8 +168,13 @@ async function sleeper(maxAgeH){
   const j=await getJSON("https://api.sleeper.app/v1/players/nfl");
   if(!j){log("Sleeper unavailable - using nflverse injury report only");return readState("sleeper.json")||{};}
   const out={};
-  for(const p of Object.values(j)){if(!p.gsis_id||!SKILL[p.position])continue;
-    out[String(p.gsis_id).trim()]=[SLEEPER_TEAM[p.team]||p.team||"",p.injury_status||"",p.status||""];}
+  for(const p of Object.values(j)){
+    const row=[SLEEPER_TEAM[p.team]||p.team||"",p.injury_status||"",p.status||""];
+    if(p.gsis_id&&SKILL[p.position])out[String(p.gsis_id).trim()]=row;
+    // defensive backs (for nfl-lines' missing-starting-CB tag): Sleeper lists most as "DB" with no gsis id,
+    // so key them by name + team as well
+    if(["CB","DB","S"].includes(p.position)&&row[0]){if(p.gsis_id)out[String(p.gsis_id).trim()]=row;out["n:"+normName(p.full_name)+"|"+row[0]]=row;}
+  }
   log(`Sleeper: ${Object.keys(out).length} skill players refreshed`);
   return writeState("sleeper.json",out);
 }
