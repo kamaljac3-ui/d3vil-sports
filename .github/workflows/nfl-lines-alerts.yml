@@ -39,7 +39,7 @@ jobs:
           NP_CACHE: nfl-lines/.cache
           MODE: ${{ github.event.inputs.mode || 'auto' }}
           DRY_RUN: ${{ github.event.inputs.dry_run || '0' }}
-          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC_NFL || secrets.NTFY_TOPIC }}   # NFL feed; falls back to the shared topic until NTFY_TOPIC_NFL exists
           NTFY_SERVER: ${{ secrets.NTFY_SERVER }}
           NTFY_TOKEN: ${{ secrets.NTFY_TOKEN }}
           ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}

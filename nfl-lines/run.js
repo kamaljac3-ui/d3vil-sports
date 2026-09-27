@@ -5,6 +5,7 @@
 // Shares nfl-props' helpers; state goes to NP_CACHE (the workflow points it at nfl-lines/.cache).
 const {env,envs,log,etParts,etToUtc,etClock,readState,writeState,ntfy,summary,getRaw,LIVE,DRY}=require("../nfl-props/lib");
 const data=require("../nfl-props/data"),W=require("../nfl-props/weather"),odds=require("../nfl-props/odds"),M=require("./model");
+const {lateSeasonTag}=require("./tags");
 
 const MODE=envs("MODE","auto");
 const CFG={
@@ -106,7 +107,7 @@ function gameBlock(g,P,L,notes){
     const hq=qbStatus(sched,S,week,g,g.home_team,sl,inj),aq=qbStatus(sched,S,week,g,g.away_team,sl,inj);
     const wx=await W.kickoffWeather(g,new Date(g.kick));
     const P=M.predict(R,g,{homeQB:hq.status,awayQB:aq.status,wx});
-    const notes=[hq.note,aq.note].filter(Boolean);
+    const notes=[hq.note,aq.note,lateSeasonTag(sched,g)].filter(Boolean);
     if(wx&&!wx.indoor&&(wx.wind>=M.C.WIND_MPH||wx.precip>=M.C.PRECIP_IN))notes.push(W.wxText(wx));
     blocks.push(gameBlock(g,P,L[`${g.away_team}@${g.home_team}`],notes));
   }

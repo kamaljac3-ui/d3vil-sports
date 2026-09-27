@@ -133,7 +133,8 @@ They're listed at the top of `model.js`.
 
 ## Secrets
 
-- `NTFY_TOPIC`: required for live alerts. `NTFY_TOKEN` and `NTFY_SERVER` are optional. These are shared with the MLB bot.
+- `NTFY_TOPIC_NFL`: the NFL-only ntfy topic, shared with `nfl-lines`. If it isn't set, alerts go to the shared
+  `NTFY_TOPIC`. `NTFY_TOKEN` and `NTFY_SERVER` are optional and shared with the other bots.
 - `ODDS_API_KEY`: optional.
 
 ## Running it by hand

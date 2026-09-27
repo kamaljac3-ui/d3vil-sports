@@ -11,6 +11,8 @@ after inactives. For every game in the slot it shows:
 It's the game-day replacement for `nfl-edge-finder`'s line alerts. It's separate from the props alerts
 (`nfl-props/`) and never goes to the Kit newsletter.
 
+Both NFL bots post to the `NTFY_TOPIC_NFL` secret, their own ntfy feed. If that secret isn't set, they fall back to `NTFY_TOPIC`.
+
 **Not betting advice, and the model isn't proven.** See the backtest below before acting on a ✅.
 
 ## Lines
@@ -66,6 +68,21 @@ It covers weeks 4–18 against nflverse **closing** lines. QB changes use the ga
 So the ✅ marks are "this model disagrees with the market," not a proven edge. The alert's real value today is the
 current line, QB news and weather in one place at the right time. Improving the model means efficiency-based ratings
 (EPA per play from play-by-play), market-aware totals, and grading picks against the lines the bot actually saw.
+
+## Situational tags
+
+These come from `research/travel-climate.js`, which tests 1999–2025 results against the closing line.
+Full results are in `research/travel-climate-results.md`.
+
+| Tested | Result | In the alert? |
+|---|---|---|
+| Visitors at Denver (altitude) | Denver's home edge is real (+1.4 pts over a normal home team) but priced in: visitors cover 52.3% | no |
+| Denver on the road; the week after visiting Denver | within noise (48.6% / 50.6%) | no |
+| Dry-climate teams in humidity | only DEN/LV qualify, 22 games: too few to say | no |
+| Warm/dome visitors outdoors in Dec–Jan | **45.6% ATS** (668 games), 43.2% in 1999–2011, **47.6% in 2012–2025** (about break-even to fade now), 38% in playoffs (79 games) | ⚠️ tag, informational only |
+| Freezing temps (≤ 32°F) beyond the time of year; totals in cold or muggy games | nothing | no |
+
+Tags never change the model's numbers or ✅. They're context to weigh yourself.
 
 ## Settings
 

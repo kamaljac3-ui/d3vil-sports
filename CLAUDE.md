@@ -48,6 +48,10 @@ It's served by GitHub Pages from `main`.
   (defaults to `https://ntfy.sh`).
 - The bot POSTs JSON `{topic,title,message,priority,tags}` to the server root. Messages are truncated to about 3,900 characters.
 - If `NTFY_TOPIC` is missing or `DRY_RUN=1`, the bot prints the alert to the log and doesn't send it.
+- **Per-sport topics.** Each workflow maps its own secret onto the `NTFY_TOPIC` env var:
+  - NFL (`nfl-props`, `nfl-lines`): `NTFY_TOPIC_NFL`, falling back to `NTFY_TOPIC` if it isn't set.
+  - CFB: `NTFY_TOPIC_CFB`, with no fallback.
+  - MLB and NBA: `NTFY_TOPIC`.
 
 ## MLB bot: `launch-angle/` ("Launch Angle Edges")
 
