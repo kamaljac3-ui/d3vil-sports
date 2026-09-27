@@ -16,13 +16,15 @@ function compute(vp,vaa,vs,aa,D){
   const w=-2.5*((vtt-vbt)*0.44704)/0.0368;
   return {la:Math.atan2(out[1],out[0])/d2r, ev:Math.hypot(out[0],out[1]), w};
 }
-function clears(ev,la,w,fenceFt){
-  const rho=1.2,A=0.00426,m=0.145,Cd=0.40,R=0.0368,g=9.81,dt=0.01,fence=fenceFt/3.281;
+// air: optional {rho (kg/m^3), wind (mph along the flight direction, + = blowing out)}; omitted = still air at rho 1.2
+function clears(ev,la,w,fenceFt,air){
+  const rho=air&&air.rho||1.2,wx=(air&&air.wind||0)*0.44704,A=0.00426,m=0.145,Cd=0.40,R=0.0368,g=9.81,dt=0.01,fence=fenceFt/3.281;
   let x=0,y=0.9,v0=ev*0.44704,vx=v0*Math.cos(la*d2r),vy=v0*Math.sin(la*d2r),tt=0;
   const kd=0.5*rho*Cd*A/m,sg=Math.sign(w);
   while(y>=0&&tt<10){
-    const v=Math.hypot(vx,vy),S=R*Math.abs(w)/v,CL=Math.min(S<0.1?1.5*S:0.09+0.6*S,0.3),kl=0.5*rho*CL*A/m;
-    const ax=-kd*v*vx-kl*v*vy*sg, ay=-g-kd*v*vy+kl*v*vx*sg;
+    const rvx=vx-wx;   // drag and lift act on the ball's velocity relative to the air
+    const v=Math.hypot(rvx,vy),S=R*Math.abs(w)/v,CL=Math.min(S<0.1?1.5*S:0.09+0.6*S,0.3),kl=0.5*rho*CL*A/m;
+    const ax=-kd*v*rvx-kl*v*vy*sg, ay=-g-kd*v*vy+kl*v*rvx*sg;
     vx+=ax*dt;vy+=ay*dt;const px=x;x+=vx*dt;y+=vy*dt;tt+=dt;
     if(px<fence&&x>=fence) return y>3.05;
   }
@@ -35,19 +37,34 @@ function calibrate(h){
   for(let D=-1.2;D<=2.0;D+=0.02){const q=compute(REF.vp,REF.vaa,h.bs,h.aa,D);if(!q)continue;const d=Math.abs(q.la-h.la);if(d<bd){bd=d;best=D;}}
   return best;
 }
-function matchPitch(h,p,fence){
+// env: optional park+weather from env.js ({rho, dirs:[{fence,wind,weight}]}).
+// The collision model gives near-perfect contact (every fly ball 105+ mph), which clears any fence in any air, so with
+// an env the exit velocity is spread over a contact-quality distribution (QUALITY: fraction of the modeled EV, mean
+// ~0.8) and the HR share is weighted over spray directions. Calibrated so an average hitter in a neutral park turns
+// ~12% of 18-45 deg contact into HR (mean 0.90, checked 2026-09-27). Without env: the original single-EV, flat-fence behavior.
+const QUALITY=(()=>{const m=+(process.env.LA_QMEAN||0.90),s=+(process.env.LA_QSD||0.085),out=[];let W=0;
+  for(let q=0.56;q<=1.021;q+=0.04){const w=Math.exp(-(((q-m)/s)**2)/2);out.push([q,w]);W+=w;}
+  return out.map(([q,w])=>[q,w/W]);})();
+function clearsIn(q,fence,env){
+  if(!env)return clears(q.ev,q.la,q.w,fence)?1:0;
+  let s=0;
+  for(const [k,wq] of QUALITY){const ev=q.ev*k;if(ev<88)continue;
+    for(const d of env.dirs)if(clears(ev,q.la,q.w,d.fence,{rho:env.rho,wind:d.wind}))s+=wq*d.weight;}
+  return s;
+}
+function matchPitch(h,p,fence,env){
   const sig=0.55,D0=h.D0;let W=0,win=0,hr=0;
   for(let z=-2;z<=2.001;z+=0.2){
     const w=Math.exp(-z*z/2),D=D0+z*sig;W+=w;
     const q=compute(p.vp,p.vaa,h.bs,h.aa,D);if(!q)continue;
     if(q.la>=25&&q.la<=35)win+=w;
-    if(q.la>=18&&q.la<=45&&q.ev>90&&clears(q.ev,q.la,q.w,fence))hr+=w;
+    if(q.la>=18&&q.la<=45&&q.ev>90)hr+=w*clearsIn(q,fence,env);
   }
   return {win:win/W,hr:hr/W};
 }
-function matchup(h,pit,fence){
+function matchup(h,pit,fence,env){
   let win=0,hr=0,u=0;const per=[];
-  for(const p of pit.pitches){const r=matchPitch(h,p,fence);per.push({...r,p});win+=p.use*r.win;hr+=p.use*r.hr;u+=p.use;}
+  for(const p of pit.pitches){const r=matchPitch(h,p,fence,env);per.push({...r,p});win+=p.use*r.win;hr+=p.use*r.hr;u+=p.use;}
   const prim=pit.pitches.slice().sort((a,b)=>b.use-a.use)[0];
   return {win:win/u,hr:hr/u,per,gap:h.aa-(-prim.vaa),prim};
 }
@@ -142,4 +159,4 @@ function pitchersFrom(files){
 }
 
 const LEAGUE_AVG_PITCHER={id:"avg",name:"League-average fastball",pitches:[{type:"FF",label:"4-seam",vp:86,vaa:-5,use:1}]};
-module.exports={compute,clears,calibrate,matchPitch,matchup,hittersFrom,pitchersFrom,LEAGUE_AVG_PITCHER};
+module.exports={compute,clears,clearsIn,calibrate,matchPitch,matchup,hittersFrom,pitchersFrom,LEAGUE_AVG_PITCHER};

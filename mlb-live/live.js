@@ -4,7 +4,7 @@
 // Starters are left to launch-angle/ (morning + lineups); this bot only covers pitchers who enter mid-game.
 // One run polls until MAX_MINUTES or until every game today is final (two scheduled windows cover a day).
 const fs=require("fs"),path=require("path");
-const M=require("../launch-angle/model");   // shared physics, read-only
+const M=require("../launch-angle/model"),E=require("../launch-angle/env");   // shared physics + park/weather, read-only
 
 const DRY=process.env.DRY_RUN==="1";
 const NTFY_SERVER=(process.env.NTFY_SERVER||"https://ntfy.sh").replace(/\/$/,"");
@@ -148,8 +148,17 @@ async function onChange(g,H,pitcher,pitTeamId){
   const inn=`${(ls.inningHalf||"").slice(0,3)} ${ls.currentInning||""}`.trim();
   const scoreLine=`${abbr(g.teams.away.team)} ${ls.teams.away.runs??0}, ${abbr(g.teams.home.team)} ${ls.teams.home.runs??0}`;
   if(!rows.length){log(`${label} ${inn}: ${pitcher.fullName} in, no edges in the next ${next.length}`);return;}
+  // park + weather (info only): MLB's game-time report, per hitter's batting side vs this pitcher
+  let wxLine="";
+  try{
+    const sj=await get(`https://statsapi.mlb.com/api/v1/schedule?sportId=1&gamePk=${g.gamePk}&hydrate=weather,venue(location,fieldInfo)`);
+    const sg_=sj&&sj.dates&&sj.dates[0]&&sj.dates[0].games[0];
+    if(sg_){const w=await E.forGame(sg_),hand=await E.hands([...rows.map(r=>r.hitterId),pitcher.id]);
+      if(w.wx){wxLine=`\n${w.wx.label}`;
+        for(const r of rows){const hb=hand[r.hitterId]||{},hp=hand[String(pitcher.id)]||{};r.envMult=E.multiplier(M,H[r.hitterId],w.park,w.wx,E.batsVs(hb.bat,hp.pitch),FENCE);r.wx=w.wx.label;}}}
+  }catch(e){log("park/weather error",e.message);}
   await ntfy(`${label}, ${inn}: ${pitcher.fullName} in`,
-    rows.map(r=>`${ORD[r.due-1]} up: ${r.name}: HR contact ${pct(r.hr)} (${sgn(r.hrEdge)}), window ${pct(r.win)} (${sgn(r.edge)}), gap ${r.gap>=0?"+":""}${r.gap.toFixed(1)}° vs ${r.prim}`).join("\n")+`\n\n${scoreLine}`);
+    rows.map(r=>`${ORD[r.due-1]} up: ${r.name}: HR contact ${pct(r.hr)} (${sgn(r.hrEdge)}), window ${pct(r.win)} (${sgn(r.edge)}), gap ${r.gap>=0?"+":""}${r.gap.toFixed(1)}° vs ${r.prim}${r.envMult?`, park/wx ×${r.envMult.toFixed(2)}`:""}`).join("\n")+`\n\n${scoreLine}${wxLine}`);
   logPicks(rows);
 }
 

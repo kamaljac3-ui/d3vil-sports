@@ -63,10 +63,20 @@ It's served by GitHub Pages from `main`.
   bat–ball collision (COR 0.5, with spin) followed by a drag-and-Magnus flight integration to a 380 ft fence (`FENCE`).
   The outputs are the "window" (25–35° launch share) and the "HR contact" share. The edge is the matchup minus the same
   hitter against a league-average fastball.
-- **Environment isn't modeled yet.** The flight model uses a fixed air density (ρ = 1.2), no wind, no park
-  dimensions and no roof handling. Weather (Open-Meteo, the ballpark wind reading, air density) is a future
-  upgrade, not current behavior. The Open-Meteo stadium-weather code that does exist is in the separate Python repo
-  `nfl-edge-finder` (`providers/weather.py`, `stadiums.py`).
+- **Park and weather (`env.js`, shown in alerts only).** This is used by `launch-angle/` and `mlb-live/`.
+  - **Sources.** MLB venue data gives fence distances by direction, elevation, the home-plate-to-CF azimuth and roof type.
+    Game weather is MLB's own first-pitch report ("12 mph, Out To LF", temp, "Roof Closed") once posted. Before that
+    it's the Open-Meteo forecast at game time, with the wind projected onto the field by the azimuth.
+  - **Physics.** Air density comes from temperature and elevation. The wind is applied along each spray direction, and
+    spray is pull-weighted by batting side (switch hitters bat opposite the pitcher's hand).
+  - **Why contact quality is spread.** The collision model alone gives every fly ball 105+ mph, which ignores the
+    environment. So when an env is passed, `model.js` spreads exit velocity over a contact-quality distribution
+    (`LA_QMEAN` 0.90, which gives about 12% HR per 18–45° contact).
+  - **Shrinking.** The backtest showed real signal but the physics overstates it, so alerts use
+    `(env HR / neutral-park HR)^LA_ENV_B` (0.2) with the reported wind scaled by `LA_WIND_SCALE` (0.5).
+  - **No env = old behavior.** Without an env, `model.matchup` is byte-for-byte unchanged.
+  - **Not in the edge rule.** Neither the edge rule nor the ranking uses the multiplier yet: it didn't improve picks
+    in the backtest.
 - **Modes.**
   - `MODE=morning` runs at cron `0 14 * * *`, which is 10 AM EDT and 9 AM EST. It scores probable starters against
     each team's active-roster hitters and sends one "top edges" push per day.
@@ -91,7 +101,14 @@ It's served by GitHub Pages from `main`.
   about 157k PA; results are in `launch-angle/BACKTEST.md`. The bot's picks homered 1.05x as often as expected from
   hitter and pitcher HR rates (z +0.6), and the live-bot rule came in at 1.03x. HR-contact deciles show no trend.
   Say so if Kamal asks whether it's an edge. The pitch data is cached in `launch-angle/.cache/bt`, so re-testing
-  a model change takes minutes.
+  a model change takes minutes (the park/weather pass adds about 12 min).
+- **Park/weather backtest.** The settings were fit on 2025 and checked on 2026 (log-likelihood gain 9.5 out of sample).
+  - The bottom decile of the multiplier came in at 0.78x/0.82x actual HR, and the top decile at 1.18x/1.13x.
+  - By MLB-reported wind: wind blowing in reduces HRs, and 13+ mph in was 0.47x in 2025. Blowing out is only about
+    +0–13%.
+  - It doesn't improve the bot's picks: bot rule + multiplier ≥ 1.15 came in at 1.19x/1.10x, not significant.
+  - Ranking starters by hitter×pitcher HR rate underperforms (0.81x/0.92x) whether or not weather is added, so the
+    expected-rate baseline is overconfident at the top.
 
 ## NFL bot: `nfl-props/` ("NFL Props Edges")
 

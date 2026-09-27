@@ -13,6 +13,95 @@ Generated 2026-09-27 by `node launch-angle/backtest.js` (FENCE 380, MIN_EDGE 0.0
 | Live bot rule | 698 | 1,101 | 31 | 30.0 | **1.03x** | +0.2 | 1.03x | 15.9% / 16.6% |
 | Morning alert sim | 1,023 | 2,584 | 102 | 95.3 | **1.07x** | +0.7 | 1.10x | 15.6% / 16.4% |
 
+## Park, air and wind
+
+Each hitter-game gets a **modeled multiplier**: his HR contact against a league-average fastball in that game's park (fence distances by spray direction, elevation), air (temperature → density) and MLB's reported wind (direction relative to the field, applied along each spray direction, pull-side weighted by batter hand), divided by the same in a neutral park. "Wind scale" shrinks the reported wind (0 = park + air only). The fit finds the power *b* on the multiplier that best explains actual HRs (b = 1: the physics is right as is; b = 0: no information). The log-likelihood gain is vs. no park/weather at all; a gain above ~2 per parameter is meaningful.
+
+| Season | Wind scale | Best b | LL gain |
+|---|---:|---:|---:|
+| 2025 | 0 | 0.30 | 10.5 |
+| 2025 | 0.5 | 0.20 | 10.6 |
+| 2025 | 1 | 0.15 | 9.0 |
+| 2026 | 0 | 0.25 | 7.2 |
+| 2026 | 0.5 | 0.20 | 9.5 |
+| 2026 | 1 | 0.15 | 7.8 |
+
+**Chosen on 2025: wind scale 0.5, b = 0.20.** Out of sample: 2026 LL gain with those settings 9.5.
+
+### 2025: MLB-reported wind at first pitch
+
+| Reported wind | Speed | PA | HR | Expected | Lift | z |
+|---|---|---:|---:|---:|---:|---:|
+| blowing out | <8 mph | 10,543 | 397 | 360.0 | **1.10x** | +2.0 |
+| blowing out | 8-12 mph | 10,772 | 398 | 372.8 | **1.07x** | +1.3 |
+| blowing out | 13+ mph | 3,503 | 121 | 119.2 | **1.01x** | +0.2 |
+| blowing in | <8 mph | 8,948 | 284 | 299.1 | **0.95x** | -0.9 |
+| blowing in | 8-12 mph | 6,288 | 204 | 211.6 | **0.96x** | -0.5 |
+| blowing in | 13+ mph | 1,195 | 19 | 40.7 | **0.47x** | -3.4 |
+| crosswind | <8 mph | 9,967 | 318 | 339.8 | **0.94x** | -1.2 |
+| crosswind | 8-12 mph | 8,693 | 327 | 288.3 | **1.13x** | +2.3 |
+| crosswind | 13+ mph | 1,937 | 45 | 62.4 | **0.72x** | -2.2 |
+| calm/none | any | 2,924 | 98 | 107.7 | **0.91x** | -0.9 |
+| roof closed | any | 11,435 | 380 | 389.3 | **0.98x** | -0.5 |
+
+### 2025: modeled park/weather multiplier (wind scale 0.5, b 0.20)
+
+| Decile | Modeled multiplier | PA | HR | Expected (no weather) | Model predicts | Actual | z |
+|---|---|---:|---:|---:|---:|---:|---:|
+| D1 | 0.05–0.58 | 7,472 | 186 | 237.2 | 0.85x | **0.78x** | -3.3 |
+| D2 | 0.58–0.72 | 7,750 | 262 | 283.8 | 0.92x | **0.92x** | -1.3 |
+| D3 | 0.72–0.85 | 7,521 | 257 | 265.9 | 0.95x | **0.97x** | -0.5 |
+| D4 | 0.85–0.97 | 7,584 | 256 | 264.5 | 0.98x | **0.97x** | -0.5 |
+| D5 | 0.97–1.05 | 7,588 | 249 | 238.8 | 1.00x | **1.04x** | +0.7 |
+| D6 | 1.05–1.14 | 7,604 | 318 | 277.9 | 1.02x | **1.14x** | +2.4 |
+| D7 | 1.14–1.26 | 7,578 | 267 | 273.2 | 1.04x | **0.98x** | -0.4 |
+| D8 | 1.26–1.42 | 7,670 | 261 | 266.9 | 1.06x | **0.98x** | -0.4 |
+| D9 | 1.42–1.66 | 7,797 | 270 | 257.7 | 1.09x | **1.05x** | +0.8 |
+| D10 | 1.66–4.58 | 7,641 | 265 | 225.1 | 1.14x | **1.18x** | +2.7 |
+
+Top 8 starter matchups per day by expected HR rate: **with park/weather 205 HR vs 251.8 expected without it (0.81x)**, vs. the same ranking without park/weather 209 HR vs 256.0 (0.82x).
+
+| Group | Matchups | PA | HR | Expected | Lift | z | Lift (hitter only) | 25-35° actual / predicted |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| Bot rule + park/weather multiplier ≥ 1.15 | 440 | 754 | 32 | 27.0 | **1.19x** | +1.0 | 1.21x | 16.3% / 16.5% |
+
+### 2026: MLB-reported wind at first pitch
+
+| Reported wind | Speed | PA | HR | Expected | Lift | z |
+|---|---|---:|---:|---:|---:|---:|
+| blowing out | <8 mph | 11,172 | 417 | 370.3 | **1.13x** | +2.4 |
+| blowing out | 8-12 mph | 11,644 | 380 | 380.2 | **1.00x** | -0.0 |
+| blowing out | 13+ mph | 4,305 | 132 | 134.7 | **0.98x** | -0.2 |
+| blowing in | <8 mph | 7,886 | 236 | 258.0 | **0.91x** | -1.4 |
+| blowing in | 8-12 mph | 4,467 | 116 | 139.8 | **0.83x** | -2.0 |
+| blowing in | 13+ mph | 2,090 | 56 | 65.9 | **0.85x** | -1.2 |
+| crosswind | <8 mph | 10,083 | 317 | 329.2 | **0.96x** | -0.7 |
+| crosswind | 8-12 mph | 8,848 | 309 | 284.5 | **1.09x** | +1.5 |
+| crosswind | 13+ mph | 2,200 | 80 | 72.2 | **1.11x** | +0.9 |
+| calm/none | any | 3,571 | 88 | 111.9 | **0.79x** | -2.3 |
+| roof closed | any | 14,187 | 481 | 465.3 | **1.03x** | +0.7 |
+
+### 2026: modeled park/weather multiplier (wind scale 0.5, b 0.20)
+
+| Decile | Modeled multiplier | PA | HR | Expected (no weather) | Model predicts | Actual | z |
+|---|---|---:|---:|---:|---:|---:|---:|
+| D1 | 0.05–0.58 | 7,906 | 187 | 227.4 | 0.84x | **0.82x** | -2.7 |
+| D2 | 0.58–0.72 | 8,074 | 262 | 283.4 | 0.92x | **0.92x** | -1.3 |
+| D3 | 0.72–0.84 | 8,069 | 276 | 268.2 | 0.95x | **1.03x** | +0.5 |
+| D4 | 0.84–0.96 | 8,014 | 245 | 268.4 | 0.98x | **0.91x** | -1.4 |
+| D5 | 0.96–1.06 | 8,143 | 230 | 253.5 | 1.00x | **0.91x** | -1.5 |
+| D6 | 1.06–1.16 | 8,085 | 265 | 271.9 | 1.02x | **0.97x** | -0.4 |
+| D7 | 1.16–1.27 | 8,146 | 292 | 272.2 | 1.04x | **1.07x** | +1.2 |
+| D8 | 1.27–1.42 | 8,062 | 330 | 272.1 | 1.06x | **1.21x** | +3.5 |
+| D9 | 1.42–1.65 | 7,994 | 255 | 256.7 | 1.09x | **0.99x** | -0.1 |
+| D10 | 1.65–3.87 | 7,960 | 270 | 238.1 | 1.14x | **1.13x** | +2.1 |
+
+Top 8 starter matchups per day by expected HR rate: **with park/weather 226 HR vs 246.3 expected without it (0.92x)**, vs. the same ranking without park/weather 231 HR vs 248.7 (0.93x).
+
+| Group | Matchups | PA | HR | Expected | Lift | z | Lift (hitter only) | 25-35° actual / predicted |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| Bot rule + park/weather multiplier ≥ 1.15 | 598 | 993 | 39 | 35.6 | **1.10x** | +0.6 | 1.10x | 16.5% / 16.0% |
+
 ## 2025 season (profiles from 2024)
 
 215 hitter profiles, 396 pitcher profiles, 45,091 hitter-game-pitcher matchups (19,145 vs starters).

@@ -7,7 +7,7 @@
 // matches, so a flagged group's obs/exp ratio is what the model adds on top of "slugger vs. HR-prone pitcher".
 // Usage: node launch-angle/backtest.js            (SEASONS=2025,2026 by default; first run downloads ~1,500 CSVs)
 const fs=require("fs"),path=require("path");
-const M=require("./model");
+const M=require("./model"),E=require("./env");
 
 const SEASONS=(process.env.SEASONS||"2025,2026").split(",").map(Number);
 const FENCE=+(process.env.FENCE||380);
@@ -131,7 +131,60 @@ async function season(Y){
   // calibrate both baselines to this season's actual HR total
   const tot=rows.reduce((s,g)=>({hr:s.hr+g.hr,a:s.a+g.expHitter,b:s.b+g.expBoth}),{hr:0,a:0,b:0});
   for(const g of rows){g.expHitter*=tot.hr/tot.a;g.expBoth*=tot.hr/tot.b;}
+  if(ENV_SCALES.length)await addEnv(Y,rows,H);
   return {Y,rows,nP:Object.keys(P).length,nH:Object.keys(H).length};
+}
+
+// ---------- park + weather ----------
+// For each hitter-game: envMult[scale] = modeled HR contact (vs a league-average fastball) in that game's park, air and
+// wind (wind scaled by `scale`) / the same in a neutral park (sea level, 70F, calm, 330/375/400 fences).
+// Weather is MLB's own game-time report ("12 mph, Out To LF", temp, "Roof Closed").
+const ENV_SCALES=(process.env.ENV_SCALES??"0,0.5,1").split(",").filter(s=>s!=="").map(Number);
+const NEUTRAL_PARK={location:{elevation:0},fieldInfo:{leftLine:330,leftCenter:375,center:400,rightCenter:375,rightLine:330}};
+async function scheduleEnv(Y){
+  return diskCached(`sched-${Y}.json`,async()=>{
+    const j=await get(`https://statsapi.mlb.com/api/v1/schedule?sportId=1&gameType=R&startDate=${Y}-03-01&endDate=${Y}-11-30&hydrate=weather,venue(location,fieldInfo)`);
+    if(!j)return null;const out={};
+    for(const d of j.dates)for(const g of d.games)out[g.gamePk]={venue:g.venue&&{name:g.venue.name,location:g.venue.location,fieldInfo:g.venue.fieldInfo},weather:g.weather||null};
+    return out;
+  });
+}
+async function handedness(ids){
+  const out={};
+  for(let i=0;i<ids.length;i+=150){
+    const batch=ids.slice(i,i+150),key=`hands-${batch[0]}-${batch.length}.json`;
+    const v=await diskCached(key,async()=>{const j=await get(`https://statsapi.mlb.com/api/v1/people?personIds=${batch.join(",")}`);
+      return j?Object.fromEntries(j.people.map(p=>[String(p.id),{bat:p.batSide&&p.batSide.code,pitch:p.pitchHand&&p.pitchHand.code}])):null;});
+    Object.assign(out,v||{});
+  }
+  return out;
+}
+const windCat=w=>{const d=(w&&w.wind||"").replace(/^\d+\s*mph,\s*/,"");
+  if(/roof closed|dome/i.test(w&&w.condition||""))return "roof closed";
+  if(/^Out/.test(d))return "blowing out";if(/^In/.test(d))return "blowing in";if(/To (L|R)$/.test(d))return "crosswind";return "calm/none";};
+async function addEnv(Y,rows,H){
+  const sched=await scheduleEnv(Y);
+  const ids=[...new Set(rows.flatMap(g=>[g.batter,g.pitcher]))].sort();
+  const hand=await handedness(ids);
+  const neutral={},memo={};let t0=Date.now(),n=0;
+  log(`park/weather: ${rows.length} matchups, wind scales ${ENV_SCALES.join("/")}…`);
+  for(const g of rows){
+    const s=sched[g.game];g.envMult={};
+    const w=s&&s.weather,mph=w?parseInt(w.wind)||0:0;g.windCat=w?windCat(w):"unknown";g.windMph=mph;
+    if(!s||!s.venue||!s.venue.fieldInfo){for(const k of ENV_SCALES)g.envMult[k]=1;continue;}
+    const hb=hand[g.batter]||{},hp=hand[g.pitcher]||{};
+    const bats=hb.bat==="S"?(hp.pitch==="L"?"R":"L"):(hb.bat||"R");g.bats=bats;
+    const nk=`${g.batter}|${bats}`;
+    if(neutral[nk]===undefined)neutral[nk]=M.matchup(H[g.batter],M.LEAGUE_AVG_PITCHER,FENCE,E.build(NEUTRAL_PARK,E.fromMlb({temp:"70",wind:"0 mph, Calm"}),bats)).hr;
+    for(const k of ENV_SCALES){
+      const mk=`${g.batter}|${g.game}|${bats}|${k}`;
+      if(memo[mk]===undefined){const e=E.build(s.venue,E.fromMlb(w),bats,{windScale:k});
+        const v=M.matchup(H[g.batter],M.LEAGUE_AVG_PITCHER,FENCE,e).hr;memo[mk]=neutral[nk]>0?v/neutral[nk]:1;n++;}
+      g.envMult[k]=memo[mk];
+    }
+    if(n&&n%20000===0)log(`  ${n} environments (${Math.round((Date.now()-t0)/1000)}s)`);
+  }
+  log(`park/weather done: ${n} environments in ${Math.round((Date.now()-t0)/1000)}s`);
 }
 
 // ---------- report ----------
@@ -171,6 +224,56 @@ function section(r){
     `### By modeled HR-contact edge (deciles)`,"",HEAD,...deciles(R,"hrEdge"),"",
     `### By modeled launch-window edge (deciles)`,"",HEAD,...deciles(R,"edge"),""].join("\n");
 }
+// ---------- park + weather report ----------
+const envM=(g,s)=>Math.max(0.05,g.envMult?g.envMult[s]??1:1);
+// Poisson log-likelihood of actual HR ~ c * expBoth * envMult^b (c keeps the season total fixed); b=0 is "no park/weather"
+function ll(rows,s,b){let E=0,H=0,S=0;for(const g of rows){const e=g.expBoth*Math.pow(envM(g,s),b);if(e<=0)continue;E+=e;H+=g.hr;if(g.hr)S+=g.hr*Math.log(e);}return S+H*Math.log(H/E)-H;}
+function fitB(rows,s){let best=0,bl=-Infinity;for(let b=-0.5;b<=2.001;b+=0.05){const v=ll(rows,s,b);if(v>bl){bl=v;best=b;}}return {b:best,gain:bl-ll(rows,s,0)};}
+function envTable(rows,s,b){ // deciles of the modeled multiplier: predicted vs actual (actual lift vs the no-weather expectation)
+  const R=rows.filter(g=>g.envMult),x=R.slice().sort((a,c)=>envM(a,s)-envM(c,s)),out=[];
+  for(let d=0;d<10;d++){const p=x.slice(Math.floor(d*x.length/10),Math.floor((d+1)*x.length/10));
+    const hr=p.reduce((t,g)=>t+g.hr,0),e=p.reduce((t,g)=>t+g.expBoth,0),pred=p.reduce((t,g)=>t+g.expBoth*Math.pow(envM(g,s),b),0)/e;
+    out.push(`| D${d+1} | ${envM(p[0],s).toFixed(2)}–${envM(p[p.length-1],s).toFixed(2)} | ${p.reduce((t,g)=>t+g.pa,0).toLocaleString()} | ${hr} | ${e.toFixed(1)} | ${pred.toFixed(2)}x | **${(hr/e).toFixed(2)}x** | ${sg((hr-e)/Math.sqrt(e))} |`);}
+  return ["| Decile | Modeled multiplier | PA | HR | Expected (no weather) | Model predicts | Actual | z |","|---|---|---:|---:|---:|---:|---:|---:|",...out];
+}
+function windTable(rows){
+  const cats=["blowing out","blowing in","crosswind","calm/none","roof closed"],spd=[["<8 mph",0,7],["8-12 mph",8,12],["13+ mph",13,99]];
+  const out=["| Reported wind | Speed | PA | HR | Expected | Lift | z |","|---|---|---:|---:|---:|---:|---:|"];
+  for(const c of cats)for(const [l,lo,hi] of (c==="roof closed"||c==="calm/none"?[["any",0,99]]:spd)){
+    const p=rows.filter(g=>g.windCat===c&&g.windMph>=lo&&g.windMph<=hi);if(!p.length)continue;
+    const hr=p.reduce((t,g)=>t+g.hr,0),e=p.reduce((t,g)=>t+g.expBoth,0);
+    out.push(`| ${c} | ${l} | ${p.reduce((t,g)=>t+g.pa,0).toLocaleString()} | ${hr} | ${e.toFixed(1)} | **${(hr/e).toFixed(2)}x** | ${sg((hr-e)/Math.sqrt(e))} |`);}
+  return out;
+}
+function envPicks(rows,s,b){ // top TOP_N starter matchups per day by expected HR rate with park/weather
+  const byDay={};for(const g of rows)if(g.starter&&g.envMult)(byDay[g.date]=byDay[g.date]||[]).push(g);
+  const rate=g=>g.expBoth/g.pa*Math.pow(envM(g,s),b),noEnv=g=>g.expBoth/g.pa,picked=[],plain=[];
+  for(const d in byDay){picked.push(...byDay[d].slice().sort((x,y)=>rate(y)-rate(x)).slice(0,TOP_N));plain.push(...byDay[d].slice().sort((x,y)=>noEnv(y)-noEnv(x)).slice(0,TOP_N));}
+  return {picked,plain};
+}
+function envSection(results){
+  if(!ENV_SCALES.length||!results[0].rows.some(g=>g.envMult))return [];
+  const [train,...tests]=results,out=[`## Park, air and wind`,"",
+    `Each hitter-game gets a **modeled multiplier**: his HR contact against a league-average fastball in that game's park (fence distances by spray direction, elevation), air (temperature → density) and MLB's reported wind (direction relative to the field, applied along each spray direction, pull-side weighted by batter hand), divided by the same in a neutral park. "Wind scale" shrinks the reported wind (0 = park + air only). The fit finds the power *b* on the multiplier that best explains actual HRs (b = 1: the physics is right as is; b = 0: no information). The log-likelihood gain is vs. no park/weather at all; a gain above ~2 per parameter is meaningful.`,"",
+    `| Season | Wind scale | Best b | LL gain |`,`|---|---:|---:|---:|`];
+  const fits={};
+  for(const r of results)for(const s of ENV_SCALES){const f=fitB(r.rows,s);fits[`${r.Y}|${s}`]=f;out.push(`| ${r.Y} | ${s} | ${f.b.toFixed(2)} | ${f.gain.toFixed(1)} |`);}
+  // choose scale and b on the first season, then check them on the others
+  let bestS=ENV_SCALES[0];for(const s of ENV_SCALES)if(fits[`${train.Y}|${s}`].gain>fits[`${train.Y}|${bestS}`].gain)bestS=s;
+  const b=fits[`${train.Y}|${bestS}`].b;
+  out.push("",`**Chosen on ${train.Y}: wind scale ${bestS}, b = ${b.toFixed(2)}.** Out of sample: `+tests.map(r=>`${r.Y} LL gain with those settings ${(ll(r.rows,bestS,b)-ll(r.rows,bestS,0)).toFixed(1)}`).join("; ")+".","");
+  for(const r of results){
+    out.push(`### ${r.Y}: MLB-reported wind at first pitch`,"",...windTable(r.rows),"",
+      `### ${r.Y}: modeled park/weather multiplier (wind scale ${bestS}, b ${b.toFixed(2)})`,"",...envTable(r.rows,bestS,b),"");
+    const {picked,plain}=envPicks(r.rows,bestS,b),st=stat(picked),sp=stat(plain);
+    const hrP=picked.reduce((t,g)=>t+g.hr,0),eP=picked.reduce((t,g)=>t+g.expBoth,0);
+    out.push(`Top ${TOP_N} starter matchups per day by expected HR rate: **with park/weather ${hrP} HR vs ${eP.toFixed(1)} expected without it (${(hrP/eP).toFixed(2)}x)**, `+
+      `vs. the same ranking without park/weather ${sp.hr} HR vs ${sp.eB.toFixed(1)} (${f2(sp.liftB)}x).`,"");
+    const eb=r.rows.filter(g=>isEdge(g)&&g.envMult&&envM(g,bestS)>=1.15);
+    if(eb.length)out.push(HEAD,rowMd(`Bot rule + park/weather multiplier ≥ 1.15`,stat(eb)),"");
+  }
+  return out;
+}
 (async()=>{
   const results=[];for(const Y of SEASONS)results.push(await season(Y));
   const all={Y:SEASONS.join("+"),rows:results.flatMap(r=>r.rows)};
@@ -182,6 +285,7 @@ function section(r){
     rowMd("Current bot rule",stat(all.rows.filter(isEdge))),
     rowMd("Live bot rule",stat(all.rows.filter(g=>isEdge(g)&&g.hrEdge>=0))),
     rowMd("Morning alert sim",stat(results.flatMap(r=>morningSim(r.rows)))),"",
+    ...envSection(results),
     ...results.map(section)].join("\n");
   fs.writeFileSync(OUT,md);log(`wrote ${path.relative(process.cwd(),OUT)}`);
   console.log(md.split("\n").slice(0,16).join("\n"));

@@ -2,7 +2,7 @@
 // MODE=morning  -> probable starters vs each team's active hitters, one "top edges" push
 // MODE=lineups  -> once a game's lineups post, one push per game with its edges (sent once)
 const fs=require("fs"),path=require("path");
-const M=require("./model");
+const M=require("./model"),E=require("./env");
 
 const MODE=process.env.MODE||"morning";
 const DRY=process.env.DRY_RUN==="1";
@@ -77,7 +77,7 @@ async function pitcherProfile(id,name){
 }
 // ---------- MLB schedule / rosters ----------
 async function schedule(){
-  const j=await get(`https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=${TODAY}&hydrate=probablePitcher,lineups,team`);
+  const j=await get(`https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=${TODAY}&hydrate=probablePitcher,lineups,team,weather,venue(location,fieldInfo)`);
   return (j&&j.dates&&j.dates[0]?j.dates[0].games:[]).filter(g=>g.status.abstractGameState==="Preview"||g.status.detailedState==="Warmup");
 }
 async function rosterHitters(teamId){
@@ -95,7 +95,21 @@ function score(hitter,pitcher,hitterName,team,oppP){
 const isEdge=r=>r.edge>=MIN_EDGE&&r.gap>=GAP_LO&&r.gap<=GAP_HI;
 const pct=v=>Math.round(v*100)+"%";
 const sgn=v=>(v>=0?"+":"")+Math.round(v*100);
-const line=r=>`${r.name} (${r.team}) vs ${r.pitcher}: HR contact ${pct(r.hr)} (${sgn(r.hrEdge)}), window ${pct(r.win)} (${sgn(r.edge)}), gap ${r.gap>=0?"+":""}${r.gap.toFixed(1)}° vs ${r.prim}`;
+const wxStr=r=>r.envMult?` | park/wx ×${r.envMult.toFixed(2)} (${r.wx})`:"";
+const line=r=>`${r.name} (${r.team}) vs ${r.pitcher}: HR contact ${pct(r.hr)} (${sgn(r.hrEdge)}), window ${pct(r.win)} (${sgn(r.edge)}), gap ${r.gap>=0?"+":""}${r.gap.toFixed(1)}° vs ${r.prim}${wxStr(r)}`;
+// park + weather for the rows that will actually be sent (info only: the edge rule and ranking don't use it yet)
+async function addParkWeather(rows,games,H){
+  if(!rows.length)return rows;
+  const byPk=Object.fromEntries(games.map(g=>[g.gamePk,g])),wx={},hand=await E.hands(rows.flatMap(r=>[r.hitterId,r.pitcherId]));
+  for(const r of rows){
+    const g=byPk[r.gamePk];if(!g)continue;
+    if(!wx[r.gamePk])wx[r.gamePk]=await E.forGame(g);
+    const w=wx[r.gamePk];if(!w.wx)continue;
+    const h=hand[r.hitterId]||{},p=hand[r.pitcherId]||{};
+    r.envMult=E.multiplier(M,H[r.hitterId],w.park,w.wx,E.batsVs(h.bat,p.pitch),FENCE);r.wx=w.wx.label;
+  }
+  return rows;
+}
 
 async function ntfy(title,message,priority=3,tags=["baseball"]){
   if(DRY||!NTFY_TOPIC){log("DRY ntfy:",title,"\n"+message);return;}
@@ -125,7 +139,7 @@ function logPicks(mode,rows){
   if(MODE==="morning"){
     const sentKey=`morning-${TODAY}.json`;if(cached(sentKey,30)&&!DRY){log("morning already sent");return;}
     let all=[];for(const g of games)for(const s of ["home","away"])all=all.concat(await sideRows(g,s,H,false));
-    const edges=all.filter(isEdge).sort((a,b)=>b.hr-a.hr).slice(0,TOP_N);
+    const edges=await addParkWeather(all.filter(isEdge).sort((a,b)=>b.hr-a.hr).slice(0,TOP_N),games,H);
     const noSP=games.filter(g=>!g.teams.home.probablePitcher||!g.teams.away.probablePitcher).length;
     const msg=edges.length?edges.map((r,i)=>`${i+1}. ${line(r)}`).join("\n"):"No hitters clear the edge bar today.";
     await ntfy(`Launch Angle Edges ${TODAY}`,msg+(noSP?`\n\n${noSP} game(s) still missing a probable starter.`:""),edges.length?4:2,["baseball","chart_with_upwards_trend"]);
@@ -137,7 +151,7 @@ function logPicks(mode,rows){
       if(sent[g.gamePk])continue;
       const lu=g.lineups;if(!lu||!lu.homePlayers?.length||!lu.awayPlayers?.length)continue;
       const rows=[...await sideRows(g,"home",H,true),...await sideRows(g,"away",H,true)];
-      const edges=rows.filter(isEdge).sort((a,b)=>b.hr-a.hr);
+      const edges=await addParkWeather(rows.filter(isEdge).sort((a,b)=>b.hr-a.hr),games,H);
       const matchup=`${g.teams.away.team.abbreviation||g.teams.away.team.name} @ ${g.teams.home.team.abbreviation||g.teams.home.team.name}`;
       const t=new Date(g.gameDate).toLocaleTimeString("en-US",{timeZone:"America/New_York",hour:"numeric",minute:"2-digit"});
       if(edges.length){await ntfy(`${matchup} ${t} ET: ${edges.length} edge${edges.length>1?"s":""}`,edges.map(line).join("\n"),4,["baseball"]);logPicks("lineups",edges);}
