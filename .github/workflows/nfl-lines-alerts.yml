@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: "auto, slate (force the next kickoff slot now), or backtest"
+        description: "auto, slate (force the next kickoff slot now), backtest, or test (send one test alert)"
         default: slate
       dry_run:
         description: "1 = print instead of sending (and mark nothing as sent)"

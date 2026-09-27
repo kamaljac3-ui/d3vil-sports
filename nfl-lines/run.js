@@ -115,6 +115,9 @@ function gameBlock(g,P,L,notes,stale){
 }
 
 (async()=>{
+  if(MODE==="test"){   // just prove the ntfy topic reaches the phone (no data, no credits, no state)
+    const ok=await ntfy("NFL alerts test","If you can read this, NFL alerts are reaching this ntfy feed.",3,["football","white_check_mark"]);
+    log(ok?"test alert sent":"test alert failed");if(!ok)process.exit(1);return;}
   const now=Date.now(),et=etParts(new Date(now));
   const S=+et.date.slice(0,4)-(+et.date.slice(5,7)<3?1:0);
   const cachedSched=async h=>{const hit=readState(`sched-${S}.json`,h);if(hit)return hit;
