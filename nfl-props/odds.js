@@ -31,7 +31,14 @@ function affordable(cost,what){const u=usage();
   return true;}
 
 async function call(url){
-  const r=await fetch(url).catch(e=>{log("odds fetch error",e.message);return null;});
+  // retry network errors and 5xx; a 4xx (bad key, out of credits, bad market) won't fix itself
+  let r=null;
+  for(let a=0;a<3;a++){
+    r=await fetch(url).catch(e=>{log(`odds fetch error (try ${a+1}/3)`,e.message);return null;});
+    if(r&&r.status<500)break;
+    if(r)log(`Odds API ${r.status} (try ${a+1}/3)`);
+    await new Promise(x=>setTimeout(x,3000*(a+1)));
+  }
   if(!r)return null;
   const u=usage(),last=+r.headers.get("x-requests-last")||0,rem=r.headers.get("x-requests-remaining");
   if(last||rem!=null){u.used+=last;if(rem!=null)u.remaining=+rem;writeState("odds-usage.json",u);}  // credits are real even on dry runs
