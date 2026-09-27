@@ -201,6 +201,8 @@ async function probe(){
   out.push(`CFBD /info: ${info}`);
   try{const ctx=await context();const up=ctx.games.filter(g=>g.start>now);const wk=up[0]?.wk;
     out.push(`CFBD games ${S}: ${ctx.games.length} (next week ${wk}), venues ${Object.keys(ctx.venues).length}, FBS teams ${Object.keys(ctx.teams).length}`);
+    const hi=Object.values(ctx.venues).filter(v=>/Falcon|War Memorial|Folsom|Canvas|LaVell|Maverik|University Stadium|Rice-Eccles|Bronco|Sun Devil|Kinnick/.test(v.name)).map(v=>`${v.name} ${v.elev}`);out.push(`venue elevations: ${hi.join("; ")}`);
+    const tm=["Air Force","Wyoming","Miami","Colorado"].map(t=>`${t} ${ctx.teams[t]&&ctx.teams[t].elev}`);out.push(`team elevations: ${tm.join("; ")}`);
     const L=await D.lines(S,S,wk,1);out.push(`CFBD lines week ${wk}: ${Object.keys(L).length} games priced, books: ${[...new Set(Object.values(L).flat().map(l=>l.book))].join(", ")}`);
     const g=up.find(x=>ctx.venues[x.venueId]&&!ctx.venues[x.venueId].dome);
     if(g){const w=await A.kickoffWeather(ctx.venues[g.venueId],g.start);out.push(`Open-Meteo ${g.venue}: ${w?A.wxText(w):"no forecast yet (more than 15 days out?)"}`);}

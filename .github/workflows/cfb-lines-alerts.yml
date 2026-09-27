@@ -42,7 +42,8 @@ jobs:
           DRY_RUN: ${{ github.event.inputs.dry_run || '0' }}
           CFBD_API_KEY: ${{ secrets.CFBD_API_KEY }}
           CFBD_MONTHLY_BUDGET: ${{ vars.CFB_CFBD_BUDGET || '700' }}
-          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          # its own topic, separate from the baseball/NBA/NFL alerts
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC_CFB }}
           NTFY_SERVER: ${{ secrets.NTFY_SERVER }}
           NTFY_TOKEN: ${{ secrets.NTFY_TOKEN }}
           MIN_SPREAD: ${{ vars.CFB_MIN_SPREAD }}
