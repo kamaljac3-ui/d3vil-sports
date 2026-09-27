@@ -1,0 +1,72 @@
+[
+ {
+  "id": "2026-09-26|823733|641343",
+  "sport": "mlb",
+  "date": "2026-09-26",
+  "at": "2026-09-26T22:07:51.329Z",
+  "name": "Jake Bauers",
+  "team": "MIL",
+  "pitcher": "Quinn Mathews",
+  "win": 0.12907425394897734,
+  "hr": 0.2062218603769275,
+  "edge": 0.03863956891897309,
+  "hrEdge": -0.04441618687397189,
+  "gap": 6.807667090769663,
+  "prim": "4-seam",
+  "hitterId": "641343",
+  "pitcherId": "687273",
+  "gamePk": 823733,
+  "modes": [
+   "lineups"
+  ],
+  "result": {
+   "status": "final",
+   "pa": 4,
+   "hr": 0,
+   "paVsSP": 3,
+   "hrVsSP": 0,
+   "bbe": 1,
+   "inWin": 0,
+   "starterMatched": true,
+   "baseHrPA": 0.04328358208955224,
+   "pHR": 0.16221436930977706,
+   "pHRvs": 0.12431143125982935,
+   "gradedOn": "2026-09-27"
+  }
+ },
+ {
+  "id": "2026-09-26|824949|670623",
+  "sport": "mlb",
+  "date": "2026-09-26",
+  "at": "2026-09-27T00:48:51.834Z",
+  "name": "Isaac Paredes",
+  "team": "HOU",
+  "pitcher": "Jack Perkins",
+  "win": 0.23070619014724797,
+  "hr": 0,
+  "edge": 0.07326689254974217,
+  "hrEdge": 0,
+  "gap": 10.73262334047815,
+  "prim": "4-seam",
+  "hitterId": "670623",
+  "pitcherId": "678022",
+  "gamePk": 824949,
+  "modes": [
+   "lineups"
+  ],
+  "result": {
+   "status": "final",
+   "pa": 5,
+   "hr": 1,
+   "paVsSP": 3,
+   "hrVsSP": 1,
+   "bbe": 4,
+   "inWin": 1,
+   "starterMatched": true,
+   "baseHrPA": 0.036,
+   "pHR": 0.16749822238617607,
+   "pHRvs": 0.10415865600000007,
+   "gradedOn": "2026-09-27"
+  }
+ }
+]
