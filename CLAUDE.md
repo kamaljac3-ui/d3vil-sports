@@ -138,7 +138,8 @@ scoreboard, i.e. DraftKings; optionally The Odds API) next to a port of `nfl-edg
 - **Stale-line finder (`nfl-props/sharp.js`, used by both NFL bots):** compares `MY_BOOKS` against the sharp book's no-vig price and flags +EV offers with 💰. Live alerts log their picks to `.cache/picks-<date>.json` with `sport:"nfl"`. `results/track.js` doesn't grade NFL yet.
 - **nfl-lines ⚠️ tags (`nfl-lines/tags.js`) are informational and never change the model:**
   - warm/dome visitor outdoors in Dec–Jan
-  - defense missing a starting CB
+  - missing starters: defense missing a CB, offense missing 2+ O-linemen, defense missing a DL/LB vs a run-heavy offense
+  - windy games (12+ mph), with wind direction relative to the field
   The evidence is in `nfl-lines/research/*-results.md`.
 - **Sleeper's trimmed copy** (`nfl-props/data.js`) also keeps defensive backs, keyed `n:<name>|<team>`, because most have no gsis id.
 - **ESPN returns 403 to the custom browser User-Agent**, so ESPN requests go out with no custom User-Agent.

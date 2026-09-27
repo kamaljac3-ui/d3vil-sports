@@ -56,7 +56,11 @@ Each player's projection is **opportunity × matchup × environment**.
 **Environment**
 - Open-Meteo forecast at kickoff for outdoor stadiums only. Domes and closed roofs are indoor. Retractable roofs are
   treated as closed, the same as `nfl-edge-finder`.
-- Wind above 12 mph cuts passing efficiency by 1.2% per mph (more for deep targets) and pass rate by 0.4% per mph.
+- **Wind:** above 8 mph it cuts passing efficiency by 0.9% per mph (more for deep targets) and pass rate by 0.3% per mph.
+  - **Direction:** at 12+ mph a crosswind counts 1.3× and wind along the field 0.8×.
+  - **Direction data:** each stadium's field bearing comes from OpenStreetMap; the forecast gives the wind direction.
+  - **Evidence:** combined passing drops about 16 yds at 8–12 mph and about 53 at 16+; at 12+ mph it's about 43 with a crosswind vs about 26 along the field (`nfl-lines/research/wind-direction.js`).
+  - **Backtest:** the new thresholds were slightly better on every stat. The direction multiplier itself can't be backtested, because the history only records wind speed.
 - Rain cuts passing efficiency by 4%.
 
 **Availability**
@@ -86,10 +90,10 @@ spread/total and recorded wind. So it measures the model, not the injury feed.
 
 | stat | player-games | MAE model | MAE last-4 avg | bias | calls ≥15% off avg | right side |
 |---|---|---|---|---|---|---|
-| rec yds | 2,633 | 20.5 | 21.8 | +0.4 | 1,166 | 67% |
-| receptions | 2,902 | 1.46 | 1.53 | +0.05 | 978 | 66% |
+| rec yds | 2,633 | 20.4 | 21.8 | +0.1 | 1,181 | 68% |
+| receptions | 2,902 | 1.45 | 1.53 | +0.04 | 987 | 66% |
 | rush yds | 1,097 | 21.4 | 23.1 | −1.2 | 525 | 69% |
-| pass yds | 414 | 60.5 | 67.1 | +1.9 | 140 | 69% |
+| pass yds | 414 | 60.4 | 67.1 | +0.1 | 137 | 69% |
 
 Read the "right side" column carefully. It's measured against a naive recent average, not a sportsbook line. Books
 already correct for most of that pull back toward the typical result, so the edge against real lines will be much smaller.

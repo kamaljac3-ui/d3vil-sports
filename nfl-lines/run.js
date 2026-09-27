@@ -6,7 +6,7 @@
 const {env,envs,log,etParts,etToUtc,etClock,readState,writeState,ntfy,summary,getRaw,LIVE,DRY}=require("../nfl-props/lib");
 const data=require("../nfl-props/data"),W=require("../nfl-props/weather"),odds=require("../nfl-props/odds"),M=require("./model");
 const SH=require("../nfl-props/sharp");
-const {lateSeasonTag,loadCB,cbTags}=require("./tags");
+const {lateSeasonTag,loadStarters,absenceTags,windTag}=require("./tags");
 
 const MODE=envs("MODE","auto");
 const CFG={
@@ -137,14 +137,14 @@ function gameBlock(g,P,L,notes,stale){
 
   const games=upcoming.filter(g=>g.kick===kick),week=games[0].week;
   const R=M.ratings(sched,S,week);
-  const [{L,OD},sl,inj,CB]=await Promise.all([currentLines(S,week,games),data.sleeper(1),data.injuryReport(S,week),loadCB(S)]);
+  const [{L,OD},sl,inj,CB]=await Promise.all([currentLines(S,week,games),data.sleeper(1),data.injuryReport(S,week),loadStarters(S)]);
   const blocks=[],picks=[];
   for(const g of games){
     const hq=qbStatus(sched,S,week,g,g.home_team,sl,inj),aq=qbStatus(sched,S,week,g,g.away_team,sl,inj);
     const wx=await W.kickoffWeather(g,new Date(g.kick));
     const P=M.predict(R,g,{homeQB:hq.status,awayQB:aq.status,wx});
-    const notes=[hq.note,aq.note,lateSeasonTag(sched,g),...cbTags(CB,g,sl,inj)].filter(Boolean);
-    if(wx&&!wx.indoor&&(wx.wind>=M.C.WIND_MPH||wx.precip>=M.C.PRECIP_IN))notes.push(W.wxText(wx));
+    const notes=[hq.note,aq.note,lateSeasonTag(sched,g),...absenceTags(CB,g,sl,inj)].filter(Boolean);
+    const wt=windTag(wx);if(wt)notes.push(wt);else if(wx&&!wx.indoor&&wx.precip>=M.C.PRECIP_IN)notes.push(W.wxText(wx));
     const key=`${g.away_team}@${g.home_team}`,st=staleLines(g,OD&&OD[key]);
     blocks.push(gameBlock(g,P,L[key],notes,st));
     for(const p of st.picks)picks.push({kind:"stale",game:g.game_id,...p});

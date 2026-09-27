@@ -16,6 +16,7 @@ const CFG={
   MIN_BASE_GAMES:env("MIN_BASE_GAMES",3),                          // no line: games behind that average
   MIN_EDGE:{recYds:env("MIN_EDGE_RECYDS",10),rec:env("MIN_EDGE_REC",0.8),rushYds:env("MIN_EDGE_RUSHYDS",10),passYds:env("MIN_EDGE_PASSYDS",20)},
   MIN_BASE:{recYds:env("MIN_BASE_RECYDS",25),rec:env("MIN_BASE_REC",2.5),rushYds:env("MIN_BASE_RUSHYDS",25),passYds:env("MIN_BASE_PASSYDS",150)},
+  WIND_NOTE:env("WIND_NOTE",12),                               // mph before a game's wind is mentioned
   BUMP_TGT:env("BUMP_TGT",1.5),BUMP_CAR:env("BUMP_CAR",2.5),      // usage bump worth mentioning
   GD_DELTA_PCT:env("GD_DELTA_PCT",0.12),GD_WIND_DELTA:env("GD_WIND_DELTA",6),GD_ALWAYS:env("GD_ALWAYS",0),
   GD_DELTA_ABS:{recYds:env("GD_DELTA_RECYDS",8),rec:env("GD_DELTA_REC",0.7),rushYds:env("GD_DELTA_RUSHYDS",8),passYds:env("GD_DELTA_PASSYDS",15)},
@@ -144,7 +145,7 @@ async function weekly(ctx,kind,games){
   evals.sort((a,b)=>b.prob-a.prob);
   const seen=new Set(),top=evals.filter(e=>!seen.has(e.p.id)&&seen.add(e.p.id)).slice(0,CFG.TOP_N);   // one line per player
   const bumps=bumpLines(G.flatMap(x=>x.players)).slice(0,6);
-  const wind=G.filter(x=>x.wx&&!x.wx.indoor&&x.wx.wind>=M.C.WIND_MIN).map(x=>`${x.g.away_team}@${x.g.home_team}: ${W.wxText(x.wx)}`);
+  const wind=G.filter(x=>x.wx&&!x.wx.indoor&&x.wx.wind>=CFG.WIND_NOTE).map(x=>`${x.g.away_team}@${x.g.home_team}: ${W.wxText(x.wx)}`);
   const qb=G.flatMap(x=>x.sides).filter(s=>s.qbChanged).map(s=>`${s.team} QB: ${s.qb||"unknown"}`);
   const label=kind==="wed"?"first projections":"post-injury-report update";
   let msg=top.length?top.map((e,i)=>`${i+1}. ${pickLine(e)}`).join("\n"):"Nothing clears the edge bar yet.";
@@ -192,9 +193,9 @@ async function gameday(ctx,g){
   if(moves.length)notes.push(`Usage/projection moves:\n${moves.slice(0,8).map(m=>m[1]).join("\n")}`);
   const w0=snap&&snap.wx,w1=x.wx;
   if(w1&&!w1.indoor){
-    const changed=w0&&!w0.indoor&&(Math.abs(w1.wind-w0.wind)>=CFG.GD_WIND_DELTA||(w1.wind>=M.C.WIND_MIN)!==(w0.wind>=M.C.WIND_MIN));
+    const changed=w0&&!w0.indoor&&(Math.abs(w1.wind-w0.wind)>=CFG.GD_WIND_DELTA||(w1.wind>=CFG.WIND_NOTE)!==(w0.wind>=CFG.WIND_NOTE));
     if(changed)notes.push(`Weather: ${W.wxText(w1)} (was ${W.wxText(w0)})`);
-    else if(!w0&&w1.wind>=M.C.WIND_MIN)notes.push(`Weather: ${W.wxText(w1)}`);
+    else if(!w0&&w1.wind>=CFG.WIND_NOTE)notes.push(`Weather: ${W.wxText(w1)}`);
   }
   const evals=[];for(const p of x.players)for(const s in p.stats){const e=evaluate(p,s,p.lines);if(e&&e.ok)evals.push(e);}
   evals.sort((a,b)=>b.prob-a.prob);

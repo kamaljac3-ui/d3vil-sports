@@ -162,6 +162,7 @@ async function injuryReport(S,week){
   return I;
 }
 // Sleeper asks for /players/nfl at most about once a day; we keep a trimmed copy in state.
+const NON_SKILL=new Set(["OL","OT","OG","T","G","C","DL","DE","DT","NT","LB","ILB","OLB","MLB","DB","CB","S","SS","FS"]);
 const SLEEPER_TEAM={LAR:"LA",OAK:"LV",SD:"LAC",STL:"LA",JAC:"JAX"};
 async function sleeper(maxAgeH){
   const hit=readState("sleeper.json",maxAgeH);if(hit)return hit;
@@ -171,9 +172,9 @@ async function sleeper(maxAgeH){
   for(const p of Object.values(j)){
     const row=[SLEEPER_TEAM[p.team]||p.team||"",p.injury_status||"",p.status||""];
     if(p.gsis_id&&SKILL[p.position])out[String(p.gsis_id).trim()]=row;
-    // defensive backs (for nfl-lines' missing-starting-CB tag): Sleeper lists most as "DB" with no gsis id,
-    // so key them by name + team as well
-    if(["CB","DB","S"].includes(p.position)&&row[0]){if(p.gsis_id)out[String(p.gsis_id).trim()]=row;out["n:"+normName(p.full_name)+"|"+row[0]]=row;}
+    // linemen, linebackers and DBs (for nfl-lines' missing-starter tags): Sleeper's labels vary (OL/OT/T/G, DL/DE/DT,
+    // DB/CB/S) and most have no gsis id, so key them by name + team as well
+    if(NON_SKILL.has(p.position)&&row[0]){if(p.gsis_id)out[String(p.gsis_id).trim()]=row;out["n:"+normName(p.full_name)+"|"+row[0]]=row;}
   }
   log(`Sleeper: ${Object.keys(out).length} skill players refreshed`);
   return writeState("sleeper.json",out);

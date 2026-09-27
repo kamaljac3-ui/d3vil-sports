@@ -17,7 +17,10 @@ const C={
   REDIST:env("REDIST",0.85),      // share of a missing player's usage that goes to projected teammates
   SHARE_CAP:env("SHARE_CAP",0.95),
   QB_SHARE:env("QB_SHARE",0.97),  // starter's share of team dropbacks (backups, trick plays take the rest)// max total target/carry share across a team's projected players
-  WIND_MIN:env("WIND_MIN",12),WIND_PASS_K:env("WIND_PASS_K",0.012),WIND_RATE_K:env("WIND_RATE_K",0.004),RAIN_MULT:env("RAIN_MULT",0.96),
+  // wind: passing already drops ~16 yds (both teams) at 8-12 mph and ~53 at 16+ (research/wind-direction.js)
+  WIND_MIN:env("WIND_MIN",8),WIND_PASS_K:env("WIND_PASS_K",0.009),WIND_RATE_K:env("WIND_RATE_K",0.003),RAIN_MULT:env("RAIN_MULT",0.96),
+  // at 12+ mph a crosswind hurts passing more than wind along the field (~43 vs ~26 yds): scale the wind effect
+  DIR_MIN:env("DIR_MIN",12),DIR_CROSS:env("DIR_CROSS",1.3),DIR_ALONG:env("DIR_ALONG",0.8),
 };
 // Spread of outcomes: sd = A * mean^B, fit from the 2025 backtest (see README).
 const SD={recYds:[env("SD_RECYDS_A",4.94),env("SD_RECYDS_B",0.49)],rec:[env("SD_REC_A",1.20),env("SD_REC_B",0.45)],
@@ -171,7 +174,9 @@ function projectTeam(DB,{team,opp,home,spread,total,weather,asOf,candidates,stat
   const margin=spread===""||spread==null?0:(home?+spread:-spread);
   const pts=total===""||total==null?L.pts:(+total+margin)/2;
   const w=weather&&!weather.indoor?weather:null;
-  const windEx=w?Math.max(0,Math.max(w.wind,(w.gust||0)*0.6)-C.WIND_MIN):0;
+  const windRaw=w?Math.max(w.wind,(w.gust||0)*0.6):0;
+  const dirMult=w&&w.rel&&windRaw>=C.DIR_MIN?(w.rel==="cross"?C.DIR_CROSS:w.rel==="along"?C.DIR_ALONG:1):1;
+  const windEx=Math.max(0,windRaw-C.WIND_MIN)*dirMult;
   const passMult=clamp(1-C.WIND_PASS_K*windEx,0.75,1)*(w&&w.precip>=0.04?C.RAIN_MULT:1);
 
   const plays=(0.5*T.plays+0.5*D.playsF)*(1+C.PTS_K*(pts/L.pts-1));

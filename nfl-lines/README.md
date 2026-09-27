@@ -104,16 +104,20 @@ Full results are in `research/travel-climate-results.md`.
 | Warm/dome visitors outdoors in Dec–Jan | **45.6% ATS** (668 games), 43.2% in 1999–2011, **47.6% in 2012–2025** (about break-even to fade now), 38% in playoffs (79 games) | ⚠️ tag, informational only |
 | Freezing temps (≤ 32°F) beyond the time of year; totals in cold or muggy games | nothing | no |
 | Defense missing a starting CB (`research/cb-replacement.js`, 2013–2025) | opposing offense **54.2% ATS in 2020–25** (650 games, +1.4 pts), but 48.1% in 2013–19; 61.8% with 2+ starters out (103 games). No effect on the top receiver's yards | ⚠️ tag, informational only |
+| Wind direction (`research/wind-direction.js`) | at 12+ mph a crosswind cut passing about 43 yds vs about 26 along the field. Windy games went under the closing total 55–58%, and 64% with a 16+ mph crosswind (66 games). That was measured on actual wind, so it's partly hindsight | ⚠️ tag at 12+ mph, shows the direction; props model weights crosswinds 1.3× |
+| Offense missing 2+ starting O-linemen (`research/position-absences.js`) | covered **43.9%** (364 games): **45% in 2013–19 and 43% in 2020–25**, the most era-consistent finding. −9 pass yds, +0.2 sacks. No worse against a top pass rush | ⚠️ tag |
+| Defense missing a DL/LB starter vs a run-heavy offense (≥ 122 rush yds/g) | offense ran +8 yds and scored **+1.4 pts over its implied team total** (507 games), but covered only 49%: a team-total angle, not a spread angle | ⚠️ tag |
+| Single missing O-lineman, safety, WR, TE or RB; DL alone | small or era-inconsistent | no |
 | A CB who got torched the last 2 games | regresses almost fully the next week (58.5 → 28.3 yds vs 26.0 average) | no |
 | Team/QB division or primetime records | past records don't predict future ones (correlation ≈ 0) | no |
 
 Tags never change the model's numbers or ✅. They're context to weigh yourself.
 
-**How the missing-CB tag works:**
-- **Starters** are the cornerbacks with ≥ 70% of defensive snaps in 2 of the team's last 3 games (nflverse snap counts).
+**How the missing-starter tags work** (CB, O-line, DL/LB):
+- **Starters** are players at or above the group's snap share in 2 of the team's last 3 games (nflverse snap counts): O-line 80%, CB 70%, LB 60%, DL 55%.
 - **Missing** means Sleeper lists him as Out, IR, PUP, Suspended or Doubtful, or he's no longer on the team, or the nflverse injury report lists him as Out or Doubtful.
 - **Matching:** Sleeper has no NFL player id for most defensive backs, so they're matched by name and team.
-- **Unmatched players** (about 2 of 55, usually nicknames) are never assumed missing.
+- **Unmatched players** (about 2% of starters, usually nicknames) are never assumed missing.
 
 ## Settings
 
