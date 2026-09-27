@@ -22,6 +22,12 @@ NBA matchup alerts sent to ntfy: per-game stat projections (projection boosts, a
 - **Points boosts are the real signal.** With that setting, flagged points boosts beat the player's average 60% / 56% of the time, against a 48% / 46% baseline. They delivered 98% / 66% of the promised gain (+2.5 promised → +2.5, and +2.7 → +1.8 out of sample).
 - **Other boosts show up at about half size.** Rebounds, assists and threes delivered roughly 40–80% of the promised gain.
 - **Shot-zone edges are noise.** They promised about +2 pts and delivered +0.2–0.3, so shot-zone alerts are off by default (`ZONE_MIN` 99). The zone factor stays in the projections.
+- **Bench players (10–20 MPG) are where teammate-out news pays.** They're projected by default (`MIN_PROJ` 10), with their own share of a missing teammate's minutes (`NBA_OUT_BENCH_SCALE` 0.25, picked on 2024–25).
+  - Flagged bench boosts, almost all in games with a teammate out, beat the player's average 77% / 70% of the time, against a ~48% baseline.
+  - Points came in at +5.0 / +4.5 against +3.0 promised. The model is conservative here.
+  - 6–10% of flagged bench players got a coach's-decision DNP. The backtest counts those as "didn't play", not as known in advance. A prop on a player who doesn't play is usually voided.
+  - **The big caveat:** these spots depend on knowing who's out. The backtest knows every absence, and the live bot only knows what the injury report says 90 minutes before tip. Late scratches will cost some of this.
+  - Bench boosts are large in % terms, so they tend to fill the morning list. Alerts label them `bench N mpg`.
 - **Whole-model accuracy barely moves.** Projections beat the plain average by only 0.1–1% in squared error. The value is in the flagged tail, not in every projection.
 - **Caveats:**
   - "Ruled out" means a regular who didn't play, because ESPN keeps no historical injury lists. That's slightly optimistic.
@@ -47,7 +53,7 @@ Workflow: `.github/workflows/nba-edges-alerts.yml`. Morning runs at 15:00 UTC, a
 
 ## Settings (env)
 
-`TOP_N` (6), `ZONE_MIN` (99 = shot-zone alerts off; 1.0 to turn them on), `NBA_OUT_MIN_SCALE` (0.25), `NBA_OUT_USAGE` (0), `NBA_OUT_MODE` (`minutes`; `uniform` = the old rule), `BOOST_MIN` (0.10), `P_MIN` (0.58), `PREGAME_MIN` (90), `ODDS_IN_MORNING` (0), `DATE` (test a past slate; keeps finished games), `FORCE_ESPN` (1 = skip nba.com), `DRY_RUN`.
+`TOP_N` (6), `ZONE_MIN` (99 = shot-zone alerts off; 1.0 to turn them on), `NBA_OUT_MIN_SCALE` (0.25), `NBA_OUT_USAGE` (0), `NBA_OUT_MODE` (`minutes`; `uniform` = the old rule), `NBA_OUT_BENCH_SCALE` (0.25), `MIN_PROJ` (10; 20 = starters only), `BOOST_MIN` (0.10), `P_MIN` (0.58), `PREGAME_MIN` (90), `ODDS_IN_MORNING` (0), `DATE` (test a past slate; keeps finished games), `FORCE_ESPN` (1 = skip nba.com), `DRY_RUN`.
 
 ## Cache (`.cache/`)
 

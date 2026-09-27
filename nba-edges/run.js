@@ -17,6 +17,9 @@ const TOP_N=+(process.env.TOP_N||6);
 // pts/game gained from the opponent's zone defense. Shot-zone alerts are OFF by default (99): the 2024-26 backtest
 // found them noise (flags promised ~+2 pts, got +0.2-0.3). The zone factor still feeds the projections. ZONE_MIN=1 re-enables.
 const ZONE_MIN=+(process.env.ZONE_MIN||99);
+// only project players averaging at least this many minutes. 10 = bench included: in the 2024-26 backtest, flagged
+// bench boosts (almost all "teammate out" spots) beat the player's average 70-77% of the time vs ~48% baseline.
+const MIN_PROJ=+(process.env.MIN_PROJ||10);
 const BOOST_MIN=+(process.env.BOOST_MIN||0.10);   // projection this far above the player's own average
 const P_MIN=+(process.env.P_MIN||0.58);           // model over/under probability vs a posted line
 const PREGAME_MIN=+(process.env.PREGAME_MIN||90);
@@ -205,7 +208,7 @@ async function sideRows(g,side,D,outKeys,lines){
 // Pure scoring (also used by backtest.js): project every rotation player on one side of a game.
 // team: stat objects for that side's roster; g: {home,away:{abbr},total,homeSpread}; outKeys: Set of ruled-out name keys.
 // outOpts: optional teammate-out settings (model.outBoost), used by the backtest grid.
-function projectSide(team,g,side,D,outKeys,outOpts){
+function projectSide(team,g,side,D,outKeys,outOpts,minProj=MIN_PROJ){
   const me=g[side],op=g[side==="home"?"away":"home"],T=D.teams[me.abbr]||{},O=D.teams[op.abbr]||{},lg=D.league;
   const ob=M.outBoost(team,outKeys,Math.max(0,...team.map(p=>p.gpCur||0)),outOpts),boost=ob;
   let env=1;
@@ -217,7 +220,7 @@ function projectSide(team,g,side,D,outKeys,outOpts){
   const tags=[...(boost.out.length?[`w/o ${boost.out.map(n=>n.split(" ").slice(-1)[0]).join(", ")}`]:[]),...(env>=1.04?["high team total"]:[]),...(blowout?["blowout risk"]:[])];
   const players=[];
   for(const p of team){
-    if(outKeys.has(p.key)||p.MIN<20)continue;
+    if(outKeys.has(p.key)||p.MIN<minProj)continue;
     const zone=p.zones&&O.oppZones&&lg.zones?M.zoneMatchup(p.zones,p.gpEff||p.GP,O.oppZones,lg.zones):null;
     const b=ob.forPlayer(p);   // teammate-out multipliers are per player now
     players.push({p,zone,boost:b,pr:M.project(p,{zone,env,oppReb,oppAst,blowout,boost:b})});
@@ -228,7 +231,7 @@ function projectSide(team,g,side,D,outKeys,outOpts){
 function flagRows(side,lines){
   const rows=[];
   for(const {p,zone,pr} of side.players){
-    const base={name:p.name,key:p.key,team:side.me,opp:side.opp,tags:side.tags};
+    const base={name:p.name,key:p.key,team:side.me,opp:side.opp,tags:side.tags,mpg:p.MIN};
     if(zone&&zone.delta>=ZONE_MIN&&p.PTS>=10)rows.push({kind:"zone",...base,stat:"pts",delta:zone.delta,best:zone.best,proj:pr.pts,avg:p.PTS});
     for(const s of STATS){
       const proj=pr[s],avg=p[AVG[s]],line=lines&&lines[p.key]&&lines[p.key][s];
@@ -243,7 +246,7 @@ const f1=v=>v.toFixed(1);
 const tagStr=r=>r.tags.length?` [${r.tags.join("; ")}]`:"";
 const LINE={
   zone:r=>`${r.name} (${r.team}) vs ${r.opp}: +${f1(r.delta)} pts from shot mix; ${r.best.label} ${f1(r.best.fga)} FGA/g, ${r.opp} allows ${pct(r.best.oppPct)} (lg ${pct(r.best.lgPct)})`,
-  boost:r=>`${r.name} (${r.team}) vs ${r.opp}: ${LABEL[r.stat]} proj ${f1(r.proj)} vs ${f1(r.avg)} avg (+${pct(r.proj/r.avg-1)})${tagStr(r)}`,
+  boost:r=>`${r.name} (${r.team}${r.mpg<20?`, bench ${Math.round(r.mpg)} mpg`:""}) vs ${r.opp}: ${LABEL[r.stat]} proj ${f1(r.proj)} vs ${f1(r.avg)} avg (+${pct(r.proj/r.avg-1)})${tagStr(r)}`,
   prop:r=>`${r.name} (${r.team}) ${LABEL[r.stat]} ${r.po>=0.5?"o":"u"}${r.line}: proj ${f1(r.proj)}, ${pct(r.po>=0.5?r.po:1-r.po)} ${r.po>=0.5?"over":"under"}${tagStr(r)}`};
 const rank={zone:r=>r.delta,boost:r=>r.proj/r.avg-1,prop:r=>Math.abs(r.po-0.5)};
 // the rows that make it into an alert: top n of each section

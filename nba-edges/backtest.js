@@ -60,12 +60,12 @@ async function gamesOn(d){
   });
 }
 async function boxOf(id){
-  return diskCached(`g-${id}.json`,async()=>{
+  return diskCached(`g2-${id}.json`,async()=>{
     const s=await getJ(`${ESPN}/summary?event=${id}`);if(!s)return null;
     const pc=(s.pickcenter||[])[0]||{},box={};
     for(const t of s.boxscore.players||[]){const g=t.statistics[0],L=g.labels,out=[];
       for(const a of g.athletes||[]){const v=k=>a.stats&&a.stats[L.indexOf(k)];
-        out.push({name:a.athlete.displayName,dnp:!!a.didNotPlay||!a.stats||!a.stats.length,min:parseInt(v("MIN"))||0,
+        out.push({name:a.athlete.displayName,dnp:!!a.didNotPlay||!a.stats||!a.stats.length,reason:a.reason||"",min:parseInt(v("MIN"))||0,
           pts:+v("PTS")||0,reb:+v("REB")||0,ast:+v("AST")||0,fg3m:parseInt(String(v("3PT")).split("-")[0])||0});}
       box[t.team.abbreviation]=out;}
     return {details:pc.details||null,total:pc.overUnder||null,box};
@@ -96,7 +96,8 @@ async function replay(season){
       // roster: everyone in the box + this season's regulars on this team; a regular who didn't play is "out"
       const keys=new Set([...box.map(x=>R.nk(x.name)),...Object.values(D.players).filter(p=>p.gpCur>0&&p.team===G[side].abbr).map(p=>p.key)]);
       const team=[...keys].map(k=>D.players[k]).filter(Boolean);
-      const out=new Set(team.filter(p=>!played.has(p.key)).map(p=>p.key));
+      const cd=new Set(box.filter(x=>x.dnp&&/coach/i.test(x.reason)).map(x=>R.nk(x.name)));
+      const out=new Set(team.filter(p=>!played.has(p.key)&&!cd.has(p.key)).map(p=>p.key));
       sides.push({season,date:g.date,G,side,D,team,out,played,hasLine:!!g.b.total});
     }
   }
@@ -104,17 +105,17 @@ async function replay(season){
   return sides;
 }
 // score collected team-games with the bot's code under given teammate-out settings -> one record per player-game
-function score(sides,outOpts){
+function score(sides,outOpts,minProj=20){
   const recs=[];
   for(const x of sides){
-    const S=R.projectSide(x.team,x.G,x.side,x.D,x.out,outOpts),flags=R.flagRows(S,null);
+    const S=R.projectSide(x.team,x.G,x.side,x.D,x.out,outOpts,minProj),flags=R.flagRows(S,null);
     for(const {p,zone,pr,boost} of S.players){
-      const a=x.played.get(p.key);if(!a)continue;
+      const a=x.played.get(p.key)||null;   // null = coach's-decision DNP (a bet on him would be void)
       const f=flags.filter(r=>r.key===p.key);
       recs.push({season:x.season,date:x.date,name:p.name,team:S.me,opp:S.opp,hasLine:x.hasLine,outCount:S.tags.some(t=>t.startsWith("w/o")),
         p:{MIN:p.MIN,MIN10:p.MIN10,PTS:p.PTS,REB:p.REB,AST:p.AST,FG3M:p.FG3M,FTM:p.FTM,gpCur:p.gpCur},
         zone:zone&&{ptsFactor:zone.ptsFactor,threesFactor:zone.threesFactor,delta:zone.delta},ctx:S.ctx,boost,pr,
-        act:{min:a.min,pts:a.pts,reb:a.reb,ast:a.ast,fg3m:a.fg3m},
+        act:a&&{min:a.min,pts:a.pts,reb:a.reb,ast:a.ast,fg3m:a.fg3m},
         zoneFlag:f.some(r=>r.kind==="zone"),boostFlags:f.filter(r=>r.kind==="boost").map(r=>r.stat)});
     }
   }
@@ -139,6 +140,7 @@ const relErr=recs=>["pts","reb","ast"].reduce((s,k)=>s+fit(recs,k,VARIANTS["full
 const outSlope=recs=>fit(recs.filter(x=>x.outCount),"pts",VARIANTS["full model"]).k;
 const mean=a=>a.length?a.reduce((s,x)=>s+x,0)/a.length:NaN;
 function fit(recs,s,proj){ // MAE vs the plain average, and the slope of (actual-avg) on (proj-avg)
+  recs=recs.filter(r=>r.act);
   let mA=0,mP=0,qA=0,qP=0,sxy=0,sxx=0;const n=recs.length;
   for(const r of recs){const avg=r.p[AVG[s]],pv=proj(r)[s],a=r.act[s];mA+=Math.abs(a-avg);mP+=Math.abs(a-pv);qA+=(a-avg)**2;qP+=(a-pv)**2;sxy+=(pv-avg)*(a-avg);sxx+=(pv-avg)**2;}
   const k=sxx?sxy/sxx:0;let res=0;for(const r of recs){const avg=r.p[AVG[s]],pv=proj(r)[s],a=r.act[s];res+=(a-avg-k*(pv-avg))**2;}
@@ -147,13 +149,14 @@ function fit(recs,s,proj){ // MAE vs the plain average, and the slope of (actual
 }
 const f2=v=>isFinite(v)?v.toFixed(2):"–",f3=v=>isFinite(v)?v.toFixed(3):"–",sg=v=>(v>=0?"+":"")+v.toFixed(2),pc=v=>isFinite(v)?(v*100).toFixed(1)+"%":"–";
 function flagTable(recs){
+  recs=recs.filter(r=>r.act);
   const out=["| Flag | Picks | Beat their average | Model said (avg gain) | Actually got | Got ÷ said |","|---|---:|---:|---:|---:|---:|"];
   const row=(label,list,stat)=>{if(!list.length)return;const said=mean(list.map(r=>r.pr[stat]-r.p[AVG[stat]])),got=mean(list.map(r=>r.act[stat]-r.p[AVG[stat]]));
     out.push(`| ${label} | ${list.length.toLocaleString()} | ${pc(list.filter(r=>r.act[stat]>r.p[AVG[stat]]).length/list.length)} | ${sg(said)} | **${sg(got)}** | ${f2(got/said)} |`);};
   row("Shot-zone edge (PTS)",recs.filter(r=>r.zoneFlag),"pts");
   for(const s of STATS)row(`Projection boost: ${LABEL[s]}`,recs.filter(r=>r.boostFlags.includes(s)),s);
   // what "beat their average" looks like with no model at all, for reference
-  for(const s of STATS){const pool_=recs.filter(r=>r.p.MIN>=20);out.push(`| *(no flag) all rotation players, ${LABEL[s]}* | ${pool_.length.toLocaleString()} | ${pc(pool_.filter(r=>r.act[s]>r.p[AVG[s]]).length/pool_.length)} | – | ${sg(mean(pool_.map(r=>r.act[s]-r.p[AVG[s]])))} | – |`);}
+  for(const s of STATS){const pool_=recs;out.push(`| *(no flag) everyone in this group, ${LABEL[s]}* | ${pool_.length.toLocaleString()} | ${pc(pool_.filter(r=>r.act[s]>r.p[AVG[s]]).length/pool_.length)} | – | ${sg(mean(pool_.map(r=>r.act[s]-r.p[AVG[s]])))} | – |`);}
   return out;
 }
 function fitTable(recs,label){
@@ -197,5 +200,22 @@ function fitTable(recs,label){
     const raw=fit(r,s,VARIANTS["full model"]),sh=fit(r,s,shr);
     md.push(`| ${season} | ${LABEL[s]} | ${f2(K[s])} | ${f3(raw.maeAvg)} | ${f3(raw.maeProj)} | ${f3(sh.maeProj)} |`);}
   md.push("");
+  // ---------- bench players (10-20 MPG) ----------
+  const BENCH=[0,0.25,0.5,0.75,1,1.25];const benchRows=[];let bb=null;
+  const benchOf=(season,opts)=>score(sides[season],opts,10).filter(r=>r.p.MIN<20);
+  for(const b of BENCH){
+    const opts={...best.opts,benchScale:b},row={b};
+    for(const s of SEASONS){const r=benchOf(s,opts),ro=r.filter(x=>x.outCount);row[s]={all:relErr(r),out:relErr(ro),slope:fit(ro,"pts",VARIANTS["full model"]).k};}
+    benchRows.push(row);if(!bb||row[train].out<bb[train].out)bb=row;
+    log(`bench scale ${b}: `+SEASONS.map(s=>`${s} ${row[s].all.toFixed(4)} (out ${row[s].out.toFixed(4)}, slope ${row[s].slope.toFixed(2)})`).join(", "));
+  }
+  md.push(`## Bench players (10–20 MPG)`,"",`Same replay with players averaging 10–20 minutes also projected. Starters keep the picked setting; the bench gets its own share of a missing teammate's minutes (bench scale). Coach's-decision DNPs aren't treated as known before the game: those players are projected and count as "didn't play". Picked on ${train} by squared error in games where someone was out: **bench scale ${bb.b}**.`,"",
+    `| Bench scale | ${SEASONS.map(s=>`${s} all | ${s} someone out | ${s} slope`).join(" | ")} |`,`|---|${SEASONS.map(()=>"---:|---:|---:").join("|")}|`,
+    ...benchRows.map(r=>`| ${r===bb?"**"+r.b+"**":r.b} | ${SEASONS.map(s=>`${r[s].all.toFixed(4)} | ${r[s].out.toFixed(4)} | ${r[s].slope.toFixed(2)}`).join(" | ")} |`),"");
+  for(const s of SEASONS){
+    const r=benchOf(s,{...best.opts,benchScale:bb.b}),flagged=r.filter(x=>x.boostFlags.length),dnp=flagged.filter(x=>!x.act).length;
+    md.push(`### Bench, ${s}: ${r.filter(x=>x.act).length.toLocaleString()} player-games; ${flagged.length} flagged, ${pc(dnp/Math.max(1,flagged.length))} of those didn't play (coach's decision)`,"",
+      `All bench games:`,"",...flagTable(r),"",`Only games where a teammate was out:`,"",...flagTable(r.filter(x=>x.outCount)),"");
+  }
   fs.writeFileSync(OUT,md.join("\n"));log(`wrote ${path.relative(process.cwd(),OUT)}`);
 })().catch(e=>{console.error(e);process.exit(1);});

@@ -65,7 +65,9 @@ const pOver=(proj,line,stat)=>1-Phi((line-proj)/SD[stat](proj));
 //    players a teammate sitting barely moves their numbers; any usage bump made projections worse.
 //  mode "uniform": the original rule (everyone +70% x lost/remaining, capped at +25%); the 2024-26 backtest showed
 //    it overshoots ~5x, kept only so the backtest can compare.
-const OUT_OPTS={mode:process.env.NBA_OUT_MODE||"minutes",minScale:+(process.env.NBA_OUT_MIN_SCALE||0.25),usage:+(process.env.NBA_OUT_USAGE||0),maxMin:36};
+const OUT_OPTS={mode:process.env.NBA_OUT_MODE||"minutes",minScale:+(process.env.NBA_OUT_MIN_SCALE||0.25),usage:+(process.env.NBA_OUT_USAGE||0),maxMin:36,
+  // bench (under 20 MPG) share of a missing teammate's minutes: 0.25 picked on 2024-25, held on 2025-26 (0.5 was close)
+  benchScale:+(process.env.NBA_OUT_BENCH_SCALE||0.25)};
 function outBoost(team,outKeys,teamGP,opts={}){
   const o={...OUT_OPTS,...opts};
   const regular=p=>p.MIN>=15&&(teamGP<5||(p.gpCur||0)>=0.6*teamGP);
@@ -83,7 +85,8 @@ function outBoost(team,outKeys,teamGP,opts={}){
   const share=k=>{const lost=out.reduce((s,p)=>s+(p[k]||0),0),have=rest.reduce((s,p)=>s+(p[k]||0),0);return lost+have?lost/(lost+have):0;};
   const sh={pts:share("PTS"),reb:share("REB"),ast:share("AST")};
   return {out:names,forPlayer:p=>{
-    const dm=W?Math.min(lostMin*w(p)/W,Math.max(0,o.maxMin+4-p.MIN)):0,mf=1+o.minScale*dm/Math.max(p.MIN,1);
+    const scale=p.MIN<20&&o.benchScale!=null?o.benchScale:o.minScale;   // bench (under 20 MPG) can get its own strength
+    const dm=W?Math.min(lostMin*w(p)/W,Math.max(0,o.maxMin+4-p.MIN)):0,mf=1+scale*dm/Math.max(p.MIN,1);
     return {pts:mf*(1+o.usage*sh.pts),reb:mf*(1+o.usage*sh.reb),ast:mf*(1+o.usage*sh.ast)};
   }};
 }
