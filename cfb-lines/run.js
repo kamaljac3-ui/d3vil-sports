@@ -117,11 +117,11 @@ function edges(g,P,line){
 
 // ---------- formatting ----------
 const ab=(ctx,t)=>ctx.teams[t]?.abbr||t;
-const spreadTxt=(ctx,g,m)=>m===0?"PK":m>0?`${ab(ctx,g.home)} -${Math.abs(r1(m))}`:`${ab(ctx,g.away)} -${Math.abs(r1(m))}`;
+const spreadTxt=(ctx,g,m)=>r1(m)===0?"PK":m>0?`${ab(ctx,g.home)} -${Math.abs(r1(m))}`:`${ab(ctx,g.away)} -${Math.abs(r1(m))}`;
 function reasons(ctx,x){
   const g=x.g,out=[];
   for(const p of x.P.parts){if(Math.abs(p.pts)<0.5||p.label.endsWith("availability"))continue;
-    out.push(p.kind==="m"?`${p.label} ${p.pts>0?ab(ctx,g.home):ab(ctx,g.away)} +${f1(Math.abs(p.pts))}`:`${p.label} ${p.pts>0?"+":""}${f1(p.pts)} total`);}
+    out.push(p.kind==="m"?`${p.label==="crowd size"&&p.f<0?"small crowd":p.label} ${p.pts>0?ab(ctx,g.home):ab(ctx,g.away)} +${f1(Math.abs(p.pts))}`:`${p.label} ${p.pts>0?"+":""}${f1(p.pts)} total`);}
   if(x.wx&&!x.wx.indoor&&(x.wx.wind>M.C.WIND_MPH||x.wx.precip>=M.C.RAIN_IN||x.wx.temp<M.C.COLD_F))out.push(A.wxText(x.wx));
   out.push(...x.notes);
   return out;
