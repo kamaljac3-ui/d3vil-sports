@@ -15,11 +15,11 @@ const CFG={
   MIN_ML:env("MIN_ML",0.06),              // model win % minus the market's no-vig %
   MIN_TOTAL:env("MIN_TOTAL",4),
   TOTAL_EDGES:env("TOTAL_EDGES",0),       // off: totals lost badly in the 2023-25 backtests (see README)
-  LINES:envs("LINES","espn"),             // espn (free, DraftKings) | odds (Odds API consensus)
+  LINES:envs("LINES","auto"),             // auto = Odds API consensus when ODDS_API_KEY is set, else ESPN | espn | odds
   MIN_WEEK:env("MIN_WEEK",4),             // no ✅ before this week: ratings from 1-3 games swing wildly
   // stale lines (needs ODDS_API_KEY): your books vs the sharp book's no-vig price
   MIN_EV:env("MIN_EV_LINES",0.02),        // flag offers worth at least +2% expected value
-  STALE_GAP:env("STALE_GAP",1.5),         // max points between your book's number and the sharp number
+  STALE_GAP:env("STALE_GAP",2.5),         // max points between your book's number and the sharp number
   SIGMA_SPREAD:env("SIGMA_SPREAD",13.5),SIGMA_TOTAL:env("SIGMA_TOTAL",13),
 };
 const RUN_URL=process.env.GITHUB_RUN_ID?`${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`:"";
@@ -44,7 +44,7 @@ async function espnLines(S,week,postseason){
 // Returns {L: display lines per game, OD: per-book Odds API offers per game (null without a key)}.
 async function currentLines(S,week,games){
   let L={};const OD=odds.enabled()?await odds.gameLines():null;   // one call: consensus + every book's prices
-  if(CFG.LINES==="odds"&&OD)L={...OD};
+  if(CFG.LINES!=="espn"&&OD)L={...OD};   // live multi-book consensus beats ESPN's single (sometimes lagging) number
   const missing=()=>games.some(g=>!L[`${g.away_team}@${g.home_team}`]);
   if(missing()){const e=await espnLines(S,week,week>18);for(const k in e)if(!L[k])L[k]=e[k];}
   if(missing()&&OD)for(const k in OD)if(!L[k])L[k]=OD[k];
@@ -75,7 +75,9 @@ function staleLines(g,od){
     picks.push({market:"ml",team:x.team,book:x.key,price:x.price,fair:x.fair,ev:x.ev,sharp:`${s.key} ${ss.price}`});}
   // the sharp book's own spread, for reference
   const sk=SH.SHARP.find(k=>o.spreads.some(y=>y.key===k)),ps=o.spreads.find(x=>x.key===sk&&x.side==="A");
-  return {text,picks,sharp:ps?`${ps.title} ${ps.team} ${SH.fmt(ps.point)}`:null};
+  // show it favorite-first like the main line: home point -7.5 -> "BUF -7.5", home point +9.5 -> "SEA -9.5"
+  const sharpTxt=ps?(ps.point===0?`${ps.title} PK`:ps.point<0?`${ps.title} ${g.home_team} ${ps.point}`:`${ps.title} ${g.away_team} -${ps.point}`):null;
+  return {text,picks,sharp:sharpTxt};
 }
 
 // ---------- starting QB availability ----------

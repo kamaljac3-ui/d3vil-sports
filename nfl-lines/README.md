@@ -20,7 +20,7 @@ Both NFL bots post to the `NTFY_TOPIC_NFL` secret, their own ntfy feed. If that 
 | Source | Cost | Notes |
 |---|---|---|
 | **ESPN scoreboard** (default) | free, no key | DraftKings' current spread, total and moneyline. Unofficial endpoint: it rejects a spoofed browser User-Agent, so the bot sends none |
-| The Odds API (`LINES=odds`, needs `ODDS_API_KEY`) | 3 credits per slot | Median across US books. Also used automatically if ESPN is missing a game. Own budget, `ODDS_MONTHLY_BUDGET` = 100 |
+| The Odds API (needs `ODDS_API_KEY`) | 3 credits per slot | **Used by default once the key is set** (`LINES=auto`): median across the sharp book + your books, plus per-book prices for the stale check. ESPN fills any game it lacks. Own budget, `ODDS_MONTHLY_BUDGET` = 100 |
 | nflverse schedule | free | Last resort. Updated about daily |
 
 ## The model
