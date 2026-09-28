@@ -135,9 +135,31 @@ For each category:
    including it — don't infer recency from search-result placement, a
    snippet, or a title alone, since search results and cached pages can
    resurface an old article verbatim with no obvious signal that it's
-   stale. If you can fetch the article, read its actual dateline. If a
-   story's date can't be confirmed as genuinely current, drop it or search
-   again for what actually happened most recently in that storyline.
+   stale.
+
+   **Do not rely on WebFetch for this.** In this environment, WebFetch is
+   blocked (`EGRESS_BLOCKED`) for essentially every sports-news domain —
+   confirmed repeatedly, including ESPN, CBS Sports, Yahoo, Wikipedia,
+   Bleacher Report, ncaa.com, and others. "If you can fetch the article,
+   read its actual dateline" is not a usable fallback here — assume it will
+   fail and don't spend tool calls retrying it. Instead, verify the year
+   using WebSearch alone:
+   - Always include the actual current year as a literal term in your
+     search query (e.g. "Falcons Packers score September 2026", not just
+     "Falcons Packers score"). A query without an explicit year is far more
+     likely to surface last year's recap of the same fixture/event.
+   - Treat any story where the year isn't explicitly visible somewhere in
+     the search result's title, snippet, or URL as automatically suspect —
+     don't include it on the assumption that it's probably current. Run one
+     follow-up search adding the year or "2026" plus a distinguishing detail
+     (an opponent, a week number, a specific date) before deciding either
+     way.
+   - If two search results for the "same" event disagree on the day of the
+     week or date, that's a strong signal one of them is a stale recycled
+     result — dig in rather than picking either at random.
+   - If a story's date still can't be confirmed as genuinely current after
+     that, drop it or search again for what actually happened most recently
+     in that storyline.
 5. Before finalizing, check the last 1-2 prior posts (read
    `posts/latest.html` and, if it exists, the post before it) so you don't
    run the same story two nights in a row without a genuinely new
