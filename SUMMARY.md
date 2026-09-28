@@ -1,22 +1,26 @@
 # Bot results
 
-Updated 2026-09-27. 0 picks waiting on games to finish.
+Updated 2026-09-28. 0 picks waiting on games to finish.
 
 ## Last 7 days
 
-MLB: 2 hitter-games (small sample: noise until ~100+)
-- Homered in 1 (50%) vs 0.3 expected from their own HR rates: 3.03x, z +1.3
-- Off the flagged starter: HR in 1 of 2 games he started
-- Launch window: 20% of 5 batted balls at 25-35 deg vs 21% predicted
+MLB: 8 hitter-games (small sample: noise until ~100+)
+- Homered in 1 (13%) vs 1.0 expected from their own HR rates: 1.00x, z +0.0
+- Off the flagged starter: HR in 1 of 8 games he started
+- Launch window: 13% of 16 batted balls at 25-35 deg vs 20% predicted
+MLB live (pitching changes): 5 picks, 4 faced the new pitcher (small sample: noise until ~100+)
+- Homered off him in 0 vs 0.1 expected over 4 PA: 0.00x, z -0.3
 
 NBA: no graded picks yet.
 
 ## All time
 
-MLB: 2 hitter-games (small sample: noise until ~100+)
-- Homered in 1 (50%) vs 0.3 expected from their own HR rates: 3.03x, z +1.3
-- Off the flagged starter: HR in 1 of 2 games he started
-- Launch window: 20% of 5 batted balls at 25-35 deg vs 21% predicted
+MLB: 8 hitter-games (small sample: noise until ~100+)
+- Homered in 1 (13%) vs 1.0 expected from their own HR rates: 1.00x, z +0.0
+- Off the flagged starter: HR in 1 of 8 games he started
+- Launch window: 13% of 16 batted balls at 25-35 deg vs 20% predicted
+MLB live (pitching changes): 5 picks, 4 faced the new pitcher (small sample: noise until ~100+)
+- Homered off him in 0 vs 0.1 expected over 4 PA: 0.00x, z -0.3
 
 NBA: no graded picks yet.
 
@@ -28,5 +32,17 @@ NBA: no graded picks yet.
 
 ## Recent picks
 
+- 2026-09-27 Tristan Peters vs Kyle Freeland: 0 HR in 1 PA (3% expected), 0/1 in window
+- 2026-09-27 Ozzie Albies vs Janson Junk: 0 HR in 2 PA (6% expected), 0/1 in window
+- 2026-09-27 Luke Keaschall vs MacKenzie Gore: 0 HR in 5 PA (9% expected), 0/2 in window
+- 2026-09-27 Luke Keaschall vs Cody Bradford (live, Bottom 8): 0 HR in 1 PA vs him (2% expected)
+- 2026-09-27 JJ Wetherholt vs Jacob Misiorowski: void (did not bat)
+- 2026-09-27 J.T. Realmuto vs Casey Legumina (live, Bottom 8): 0 HR in 1 PA vs him (2% expected)
+- 2026-09-27 Isaac Paredes vs Seth Johnson: 0 HR in 4 PA (14% expected), 1/3 in window
+- 2026-09-27 Isaac Paredes vs Scott Blewett (live, Top 5): 0 HR in 1 PA vs him (4% expected)
+- 2026-09-27 Isaac Paredes vs Geoff Hartlieb (live, Top 7): 0 HR in 0 PA vs him (0% expected)
+- 2026-09-27 Isaac Paredes vs Chris Roycroft (live, Top 6): 0 HR in 1 PA vs him (4% expected)
+- 2026-09-27 Hunter Goodman vs Anthony Kay: 0 HR in 4 PA (24% expected), 0/2 in window
+- 2026-09-27 Austin Riley vs Janson Junk: 0 HR in 4 PA (12% expected), 0/2 in window
 - 2026-09-26 Jake Bauers vs Quinn Mathews: 0 HR in 4 PA (16% expected), 0/1 in window
 - 2026-09-26 Isaac Paredes vs Jack Perkins: 1 HR in 5 PA (17% expected), 1/4 in window
