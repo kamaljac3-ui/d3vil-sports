@@ -1,26 +1,26 @@
 # Bot results
 
-Updated 2026-09-29. 0 picks waiting on games to finish.
+Updated 2026-09-30. 0 picks waiting on games to finish.
 
 ## Last 7 days
 
-MLB: 8 hitter-games (small sample: noise until ~100+)
-- Homered in 1 (13%) vs 1.0 expected from their own HR rates: 1.00x, z +0.0
-- Off the flagged starter: HR in 1 of 8 games he started
-- Launch window: 13% of 16 batted balls at 25-35 deg vs 20% predicted
-MLB live (pitching changes): 5 picks, 4 faced the new pitcher (small sample: noise until ~100+)
-- Homered off him in 0 vs 0.1 expected over 4 PA: 0.00x, z -0.3
+MLB: 9 hitter-games (small sample: noise until ~100+)
+- Homered in 1 (11%) vs 1.1 expected from their own HR rates: 0.88x, z -0.1
+- Off the flagged starter: HR in 1 of 9 games he started
+- Launch window: 11% of 19 batted balls at 25-35 deg vs 20% predicted
+MLB live (pitching changes): 8 picks, 6 faced the new pitcher (small sample: noise until ~100+)
+- Homered off him in 0 vs 0.2 expected over 6 PA: 0.00x, z -0.4
 
 NBA: no graded picks yet.
 
 ## All time
 
-MLB: 8 hitter-games (small sample: noise until ~100+)
-- Homered in 1 (13%) vs 1.0 expected from their own HR rates: 1.00x, z +0.0
-- Off the flagged starter: HR in 1 of 8 games he started
-- Launch window: 13% of 16 batted balls at 25-35 deg vs 20% predicted
-MLB live (pitching changes): 5 picks, 4 faced the new pitcher (small sample: noise until ~100+)
-- Homered off him in 0 vs 0.1 expected over 4 PA: 0.00x, z -0.3
+MLB: 9 hitter-games (small sample: noise until ~100+)
+- Homered in 1 (11%) vs 1.1 expected from their own HR rates: 0.88x, z -0.1
+- Off the flagged starter: HR in 1 of 9 games he started
+- Launch window: 11% of 19 batted balls at 25-35 deg vs 20% predicted
+MLB live (pitching changes): 8 picks, 6 faced the new pitcher (small sample: noise until ~100+)
+- Homered off him in 0 vs 0.2 expected over 6 PA: 0.00x, z -0.4
 
 NBA: no graded picks yet.
 
@@ -32,6 +32,10 @@ NBA: no graded picks yet.
 
 ## Recent picks
 
+- 2026-09-29 Isaac Paredes vs Sean Newcomb (live, Bottom 5): 0 HR in 0 PA vs him (0% expected)
+- 2026-09-29 Isaac Paredes vs Jordan Hicks (live, Bottom 4): 0 HR in 1 PA vs him (4% expected)
+- 2026-09-29 Isaac Paredes vs Hagen Smith: 0 HR in 4 PA (14% expected), 0/3 in window
+- 2026-09-29 Isaac Paredes vs Grant Taylor (live, Bottom 7): 0 HR in 1 PA vs him (4% expected)
 - 2026-09-27 Tristan Peters vs Kyle Freeland: 0 HR in 1 PA (3% expected), 0/1 in window
 - 2026-09-27 Ozzie Albies vs Janson Junk: 0 HR in 2 PA (6% expected), 0/1 in window
 - 2026-09-27 Luke Keaschall vs MacKenzie Gore: 0 HR in 5 PA (9% expected), 0/2 in window
