@@ -1,26 +1,26 @@
 # Bot results
 
-Updated 2026-09-30. 0 picks waiting on games to finish.
+Updated 2026-10-01. 0 picks waiting on games to finish.
 
 ## Last 7 days
 
-MLB: 9 hitter-games (small sample: noise until ~100+)
-- Homered in 1 (11%) vs 1.1 expected from their own HR rates: 0.88x, z -0.1
-- Off the flagged starter: HR in 1 of 9 games he started
-- Launch window: 11% of 19 batted balls at 25-35 deg vs 20% predicted
-MLB live (pitching changes): 8 picks, 6 faced the new pitcher (small sample: noise until ~100+)
-- Homered off him in 0 vs 0.2 expected over 6 PA: 0.00x, z -0.4
+MLB: 11 hitter-games (small sample: noise until ~100+)
+- Homered in 1 (9%) vs 1.4 expected from their own HR rates: 0.73x, z -0.3
+- Off the flagged starter: HR in 1 of 11 games he started
+- Launch window: 9% of 22 batted balls at 25-35 deg vs 20% predicted
+MLB live (pitching changes): 11 picks, 8 faced the new pitcher (small sample: noise until ~100+)
+- Homered off him in 0 vs 0.3 expected over 8 PA: 0.00x, z -0.5
 
 NBA: no graded picks yet.
 
 ## All time
 
-MLB: 9 hitter-games (small sample: noise until ~100+)
-- Homered in 1 (11%) vs 1.1 expected from their own HR rates: 0.88x, z -0.1
-- Off the flagged starter: HR in 1 of 9 games he started
-- Launch window: 11% of 19 batted balls at 25-35 deg vs 20% predicted
-MLB live (pitching changes): 8 picks, 6 faced the new pitcher (small sample: noise until ~100+)
-- Homered off him in 0 vs 0.2 expected over 6 PA: 0.00x, z -0.4
+MLB: 11 hitter-games (small sample: noise until ~100+)
+- Homered in 1 (9%) vs 1.4 expected from their own HR rates: 0.73x, z -0.3
+- Off the flagged starter: HR in 1 of 11 games he started
+- Launch window: 9% of 22 batted balls at 25-35 deg vs 20% predicted
+MLB live (pitching changes): 11 picks, 8 faced the new pitcher (small sample: noise until ~100+)
+- Homered off him in 0 vs 0.3 expected over 8 PA: 0.00x, z -0.5
 
 NBA: no graded picks yet.
 
@@ -32,6 +32,11 @@ NBA: no graded picks yet.
 
 ## Recent picks
 
+- 2026-09-30 Tristan Peters vs Hunter Brown: 0 HR in 4 PA (10% expected), 0/2 in window
+- 2026-09-30 Isaac Paredes vs Sean Burke: 0 HR in 4 PA (14% expected), 0/1 in window
+- 2026-09-30 Isaac Paredes vs Huascar Brazobán (live, Bottom 5): 0 HR in 0 PA vs him (0% expected)
+- 2026-09-30 Isaac Paredes vs Erick Fedde (live, Bottom 8): 0 HR in 1 PA vs him (4% expected)
+- 2026-09-30 Isaac Paredes vs Anthony Kay (live, Bottom 5): 0 HR in 1 PA vs him (4% expected)
 - 2026-09-29 Isaac Paredes vs Sean Newcomb (live, Bottom 5): 0 HR in 0 PA vs him (0% expected)
 - 2026-09-29 Isaac Paredes vs Jordan Hicks (live, Bottom 4): 0 HR in 1 PA vs him (4% expected)
 - 2026-09-29 Isaac Paredes vs Hagen Smith: 0 HR in 4 PA (14% expected), 0/3 in window
