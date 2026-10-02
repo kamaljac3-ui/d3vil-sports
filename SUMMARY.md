@@ -1,6 +1,6 @@
 # Bot results
 
-Updated 2026-10-01. 0 picks waiting on games to finish.
+Updated 2026-10-02. 0 picks waiting on games to finish.
 
 ## Last 7 days
 
@@ -8,8 +8,8 @@ MLB: 11 hitter-games (small sample: noise until ~100+)
 - Homered in 1 (9%) vs 1.4 expected from their own HR rates: 0.73x, z -0.3
 - Off the flagged starter: HR in 1 of 11 games he started
 - Launch window: 9% of 22 batted balls at 25-35 deg vs 20% predicted
-MLB live (pitching changes): 11 picks, 8 faced the new pitcher (small sample: noise until ~100+)
-- Homered off him in 0 vs 0.3 expected over 8 PA: 0.00x, z -0.5
+MLB live (pitching changes): 15 picks, 10 faced the new pitcher (small sample: noise until ~100+)
+- Homered off him in 0 vs 0.3 expected over 10 PA: 0.00x, z -0.6
 
 NBA: no graded picks yet.
 
@@ -19,8 +19,8 @@ MLB: 11 hitter-games (small sample: noise until ~100+)
 - Homered in 1 (9%) vs 1.4 expected from their own HR rates: 0.73x, z -0.3
 - Off the flagged starter: HR in 1 of 11 games he started
 - Launch window: 9% of 22 batted balls at 25-35 deg vs 20% predicted
-MLB live (pitching changes): 11 picks, 8 faced the new pitcher (small sample: noise until ~100+)
-- Homered off him in 0 vs 0.3 expected over 8 PA: 0.00x, z -0.5
+MLB live (pitching changes): 15 picks, 10 faced the new pitcher (small sample: noise until ~100+)
+- Homered off him in 0 vs 0.3 expected over 10 PA: 0.00x, z -0.6
 
 NBA: no graded picks yet.
 
@@ -32,6 +32,10 @@ NBA: no graded picks yet.
 
 ## Recent picks
 
+- 2026-10-01 Ozzie Albies vs Jhoan Duran (live, Bottom 8): 0 HR in 1 PA vs him (3% expected)
+- 2026-10-01 J.T. Realmuto vs Robert Suarez (live, Top 6): 0 HR in 0 PA vs him (0% expected)
+- 2026-10-01 J.T. Realmuto vs Didier Fuentes (live, Top 7): 0 HR in 1 PA vs him (2% expected)
+- 2026-10-01 J.T. Realmuto vs Chris Sale (live, Top 8): 0 HR in 0 PA vs him (0% expected)
 - 2026-09-30 Tristan Peters vs Hunter Brown: 0 HR in 4 PA (10% expected), 0/2 in window
 - 2026-09-30 Isaac Paredes vs Sean Burke: 0 HR in 4 PA (14% expected), 0/1 in window
 - 2026-09-30 Isaac Paredes vs Huascar Brazobán (live, Bottom 5): 0 HR in 0 PA vs him (0% expected)
