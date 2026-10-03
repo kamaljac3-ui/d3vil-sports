@@ -1,0 +1,58 @@
+name: Kit Stats
+
+# Pulls subscriber count and per-send open/click rates from Kit and saves them
+# as CSVs on the kit-stats branch (not main, so no Pages deploy or newsletter
+# send). A Google Sheet reads them live with =IMPORTDATA on the raw URLs:
+#   https://raw.githubusercontent.com/kamaljac3-ui/d3vil-sports/kit-stats/summary.csv
+#   https://raw.githubusercontent.com/kamaljac3-ui/d3vil-sports/kit-stats/broadcasts.csv
+# Totals and rates only — no subscriber emails. Added 2026-10-02.
+
+on:
+  schedule:
+    - cron: "0 13 * * 1"   # Mondays 9 AM EDT / 8 AM EST
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "1 = print the numbers, don't save them"
+        default: "0"
+
+permissions:
+  contents: write   # pushes the CSVs to the kit-stats branch
+
+concurrency:
+  group: kit-stats
+  cancel-in-progress: false
+
+jobs:
+  stats:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Check out kit-stats branch
+        run: |
+          if git ls-remote --exit-code --heads origin kit-stats >/dev/null; then
+            git fetch -q origin kit-stats:kit-stats
+            git worktree add -q kit-stats-out kit-stats
+          else
+            git worktree add -q --orphan -b kit-stats kit-stats-out
+          fi
+      - name: Pull stats from Kit
+        env:
+          KIT_API_KEY: ${{ secrets.KIT_API_KEY }}
+          OUT_DIR: kit-stats-out
+          DRY_RUN: ${{ github.event.inputs.dry_run || '0' }}
+        run: node scripts/kit-stats.js
+      - name: Save CSVs
+        if: ${{ (github.event.inputs.dry_run || '0') != '1' }}
+        working-directory: kit-stats-out
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet && { echo "no changes"; exit 0; }
+          git commit -q -m "kit stats: $(TZ=America/New_York date +%F)"
+          git push -q origin kit-stats
