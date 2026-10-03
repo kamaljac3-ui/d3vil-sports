@@ -57,6 +57,14 @@ const pct = (rate, num, den) => {
 const brandOf = (subject = "") =>
   /world news/i.test(subject) ? "World News" : /sports|d3vil/i.test(subject) ? "Sports" : "Other";
 
+// Subjects come back with HTML entities (&rsquo;, &amp;) — make them readable.
+const ENTITIES = { amp: "&", quot: '"', apos: "'", lt: "<", gt: ">", nbsp: " ",
+  rsquo: "’", lsquo: "‘", rdquo: "”", ldquo: "“", mdash: "—", ndash: "–", hellip: "…" };
+const decode = (s = "") =>
+  s.replace(/&(#x?[0-9a-f]+|[a-z]+);/gi, (m, e) =>
+    e[0] === "#" ? String.fromCodePoint(e[1].toLowerCase() === "x" ? parseInt(e.slice(2), 16) : +e.slice(1))
+      : ENTITIES[e.toLowerCase()] ?? m);
+
 const csvCell = (v) => {
   const s = v == null ? "" : String(v);
   return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
@@ -114,7 +122,7 @@ async function main() {
       id: b.id,
       sent: (b.send_at || b.published_at || b.created_at || "").slice(0, 10),
       brand: brandOf(b.subject),
-      subject: b.subject || "",
+      subject: decode(b.subject),
       recipients,
       opens: st.emails_opened ?? null,
       open_rate: pct(st.open_rate, st.emails_opened, recipients),
