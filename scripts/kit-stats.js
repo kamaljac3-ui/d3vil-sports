@@ -139,7 +139,8 @@ async function main() {
     "world_news_sends", "world_news_open_rate", "world_news_click_rate",
   ];
   const summaryRow = [
-    TODAY, totalSubscribers, growth.new_subscribers ?? "", growth.cancellations ?? "",
+    TODAY, totalSubscribers, growth.new_subscribers ?? "",
+    growth.cancellations != null ? Math.abs(growth.cancellations) : "", // Kit reports these as negative
     growth.net_new_subscribers ?? "",
     all.sends, all.open, all.click,
     sports.sends, sports.open, sports.click,
