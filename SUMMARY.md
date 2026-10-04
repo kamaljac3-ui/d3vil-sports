@@ -1,26 +1,26 @@
 # Bot results
 
-Updated 2026-10-03. 0 picks waiting on games to finish.
+Updated 2026-10-04. 0 picks waiting on games to finish.
 
 ## Last 7 days
 
 MLB: 11 hitter-games (small sample: noise until ~100+)
-- Homered in 1 (9%) vs 1.4 expected from their own HR rates: 0.73x, z -0.3
-- Off the flagged starter: HR in 1 of 11 games he started
-- Launch window: 9% of 22 batted balls at 25-35 deg vs 20% predicted
-MLB live (pitching changes): 15 picks, 10 faced the new pitcher (small sample: noise until ~100+)
-- Homered off him in 0 vs 0.3 expected over 10 PA: 0.00x, z -0.6
+- Homered in 0 (0%) vs 1.4 expected from their own HR rates: 0.00x, z -1.3
+- Off the flagged starter: HR in 0 of 11 games he started
+- Launch window: 5% of 22 batted balls at 25-35 deg vs 19% predicted
+MLB live (pitching changes): 16 picks, 11 faced the new pitcher (small sample: noise until ~100+)
+- Homered off him in 1 vs 0.4 expected over 11 PA: 2.83x, z +1.1
 
 NBA: no graded picks yet.
 
 ## All time
 
-MLB: 11 hitter-games (small sample: noise until ~100+)
-- Homered in 1 (9%) vs 1.4 expected from their own HR rates: 0.73x, z -0.3
-- Off the flagged starter: HR in 1 of 11 games he started
-- Launch window: 9% of 22 batted balls at 25-35 deg vs 20% predicted
-MLB live (pitching changes): 15 picks, 10 faced the new pitcher (small sample: noise until ~100+)
-- Homered off him in 0 vs 0.3 expected over 10 PA: 0.00x, z -0.6
+MLB: 13 hitter-games (small sample: noise until ~100+)
+- Homered in 1 (8%) vs 1.7 expected from their own HR rates: 0.59x, z -0.6
+- Off the flagged starter: HR in 1 of 13 games he started
+- Launch window: 7% of 27 batted balls at 25-35 deg vs 19% predicted
+MLB live (pitching changes): 16 picks, 11 faced the new pitcher (small sample: noise until ~100+)
+- Homered off him in 1 vs 0.4 expected over 11 PA: 2.83x, z +1.1
 
 NBA: no graded picks yet.
 
@@ -32,6 +32,9 @@ NBA: no graded picks yet.
 
 ## Recent picks
 
+- 2026-10-03 Ozzie Albies vs Tanner Scott (live, Top 9): 1 HR in 1 PA vs him (3% expected)
+- 2026-10-03 Matt Olson vs Tarik Skubal: 0 HR in 4 PA (20% expected), 0/3 in window
+- 2026-10-03 Austin Riley vs Tarik Skubal: 0 HR in 4 PA (12% expected), 0/2 in window
 - 2026-10-01 Ozzie Albies vs Jhoan Duran (live, Bottom 8): 0 HR in 1 PA vs him (3% expected)
 - 2026-10-01 J.T. Realmuto vs Robert Suarez (live, Top 6): 0 HR in 0 PA vs him (0% expected)
 - 2026-10-01 J.T. Realmuto vs Didier Fuentes (live, Top 7): 0 HR in 1 PA vs him (2% expected)
@@ -57,5 +60,3 @@ NBA: no graded picks yet.
 - 2026-09-27 Isaac Paredes vs Chris Roycroft (live, Top 6): 0 HR in 1 PA vs him (4% expected)
 - 2026-09-27 Hunter Goodman vs Anthony Kay: 0 HR in 4 PA (24% expected), 0/2 in window
 - 2026-09-27 Austin Riley vs Janson Junk: 0 HR in 4 PA (12% expected), 0/2 in window
-- 2026-09-26 Jake Bauers vs Quinn Mathews: 0 HR in 4 PA (16% expected), 0/1 in window
-- 2026-09-26 Isaac Paredes vs Jack Perkins: 1 HR in 5 PA (17% expected), 1/4 in window
