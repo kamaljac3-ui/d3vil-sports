@@ -13,8 +13,14 @@ Alerts go **only to ntfy**, never to the Kit newsletter.
 
 ## When it alerts
 
-`.github/workflows/nfl-props-alerts.yml` runs every 15 minutes, 11:00–01:59 UTC. The script converts the time to Eastern
-itself with `Intl`, so the Nov 1 daylight-saving change needs no cron edits. When nothing is due it exits in a few seconds.
+**Schedule:** `.github/workflows/nfl-props-alerts.yml` starts a run every 2 hours.
+- Each run stays up to 5 hours (`LOOP_MIN=300`) and sleeps until the next alert window, rechecking every 5 minutes
+  while one is open.
+- It exits early when nothing is due before it would end.
+- This replaced a 15-minute cron that GitHub only ran about every 3 hours on Sunday Sep 27, 2026, missing 3 of 4
+  game-day windows.
+- The script converts the time to Eastern itself with `Intl`, so the Nov 1 daylight-saving change needs no cron edits.
+- Manual runs check once and exit.
 
 | When (Eastern) | Alert |
 |---|---|

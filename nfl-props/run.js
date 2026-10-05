@@ -211,8 +211,9 @@ async function gameday(ctx,g){
   return ok;
 }
 
-// ---------- main ----------
-(async()=>{
+// ---------- one check: send whatever is due now ----------
+// Returns ms until the next thing worth waking up for (game-day window or today's weekly alert), or null.
+async function tick(){
   const now=Date.now(),et=etParts(new Date(now));
   const S=+et.date.slice(0,4)-(+et.date.slice(5,7)<3?1:0);
   const inWindow=g=>{const m=(g.kick-now)/6e4;return m>=CFG.GD_MIN&&m<=CFG.GD_MAX;};
@@ -220,11 +221,16 @@ async function gameday(ctx,g){
   let sched=await scheduleFor(S,6);
   if(sched.some(g=>g.result===""&&g.kick>now&&g.kick-now<3*36e5))sched=await scheduleFor(S,1);
   const upcoming=sched.filter(g=>g.result===""&&g.kick>now).sort((a,b)=>a.kick-b.kick);
-  if(!upcoming.length){log(`${et.date}: no upcoming ${S} games`);return;}
+  if(!upcoming.length){log(`${et.date}: no upcoming ${S} games`);return null;}
   const week=upcoming[0].week;
-  if(upcoming[0].kick-now>9*24*36e5){log(`${et.date}: next game is more than 9 days away (week ${week})`);return;}
+  if(upcoming[0].kick-now>9*24*36e5){log(`${et.date}: next game is more than 9 days away (week ${week})`);return null;}
   const weekGames=upcoming.filter(g=>g.week===week);
   const sentKey=`sent-${S}-w${week}.json`,sent=readState(sentKey)||{games:{}};
+  // when to wake next: the next game's alert window, or today's Wednesday/Friday alert hour
+  const waits=[Math.max(0,upcoming[0].kick-CFG.GD_MAX*6e4-now)];
+  for(const [day,hr,k] of [["Wed",CFG.WED_HOUR,"wed"],["Fri",CFG.FRI_HOUR,"fri"]])
+    if(et.wd===day&&!sent[k])waits.push(Math.max(0,etToUtc(et.date,`${hr}:00`).getTime()-now));
+  const hint=Math.min(...waits);
 
   let kind=null,gd=[];
   if(MODE==="auto"){
@@ -237,7 +243,7 @@ async function gameday(ctx,g){
     gd=pick.length?pick:upcoming.slice(0,1);
   }else throw new Error(`Unknown MODE "${MODE}" (auto, wed, fri, gameday)`);
   log(`${et.wd} ${et.date} ${et.h}:${String(et.m).padStart(2,"0")} ET, week ${week}, mode=${MODE}${DRY?" (dry run)":""}: weekly=${kind||"-"}, game-day=${gd.map(g=>g.game_id).join(",")||"-"}`);
-  if(!kind&&!gd.length)return;
+  if(!kind&&!gd.length)return hint;
 
   const DB=await data.load(S);
   const ctx={DB,S,week,depth:await data.depthCharts(S),inj:await data.injuryReport(S,week),sl:await data.sleeper(gd.length?1:12)};
@@ -251,10 +257,30 @@ async function gameday(ctx,g){
     if(LIVE&&ok&&MODE==="auto"){const k=`sent-${S}-w${g.week}.json`,s=readState(k)||{games:{}};s.games[g.game_id]=true;writeState(k,s);}
   }
   if(odds.enabled()){const u=odds.usage();log(`Odds API credits: used ${u.used} this month, ${u.remaining??"?"} remaining`);}
-})().catch(async e=>{
-  console.error(e);
-  // at most one error push every 6 hours, so a broken feed doesn't buzz the phone every 15 minutes
+  return hint;
+}
+
+// ---------- run loop ----------
+// Scheduled runs keep going for LOOP_MIN minutes, waking for each alert window. GitHub runs frequent crons
+// only every few hours on busy days (Sep 27, 2026: 3 of 4 game-day windows missed with a 15-minute cron),
+// so a few long, overlapping runs replace them. Manual runs (LOOP_MIN=0) check once and exit.
+const LOOP_MIN=env("LOOP_MIN",0),LOOP_EVERY=env("LOOP_EVERY",5);
+async function errorAlert(e){
+  console.error(e);process.exitCode=1;
+  // at most one error push every 6 hours, so a broken feed doesn't buzz the phone all day
   const last=readState("error-alert.json",6);
   if(!last&&LIVE){await ntfy("NFL props bot error",String(e.message||e),2,["warning"]).catch(()=>{});writeState("error-alert.json",true);}
-  process.exit(1);
-});
+}
+(async()=>{
+  const t0=Date.now();
+  for(;;){
+    let next=null;
+    try{next=await tick();}catch(e){await errorAlert(e);if(!LOOP_MIN)return;next=0;}
+    const left=LOOP_MIN*6e4-(Date.now()-t0);
+    if(left<=LOOP_EVERY*6e4)break;
+    if(next==null||next>left-6e4){log(`nothing due in the remaining ${Math.round(left/6e4)} min of this run`);break;}
+    const wait=next>LOOP_EVERY*6e4?next:LOOP_EVERY*6e4;   // sleep until the next window opens, else re-check in a few minutes
+    log(`next check in ${Math.round(wait/6e4)} min`);await new Promise(r=>setTimeout(r,wait));
+  }
+})().catch(errorAlert);
+

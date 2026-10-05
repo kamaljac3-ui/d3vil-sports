@@ -114,10 +114,12 @@ function gameBlock(g,P,L,notes,stale){
   return {text:lines.join("\n"),edges,k,stale:stale?stale.picks.length:0};
 }
 
-(async()=>{
+// ---------- one check: send the slot that is due now ----------
+// Returns ms until the next unsent slot's alert window opens, or null.
+async function tick(){
   if(MODE==="test"){   // just prove the ntfy topic reaches the phone (no data, no credits, no state)
     const ok=await ntfy("NFL alerts test","If you can read this, NFL alerts are reaching this ntfy feed.",3,["football","white_check_mark"]);
-    log(ok?"test alert sent":"test alert failed");if(!ok)process.exit(1);return;}
+    log(ok?"test alert sent":"test alert failed");if(!ok)process.exitCode=1;return null;}
   const now=Date.now(),et=etParts(new Date(now));
   const S=+et.date.slice(0,4)-(+et.date.slice(5,7)<3?1:0);
   const cachedSched=async h=>{const hit=readState(`sched-${S}.json`,h);if(hit)return hit;
@@ -125,15 +127,16 @@ function gameBlock(g,P,L,notes,stale){
   let sched=await cachedSched(6);
   if(sched.some(g=>g.season===S&&g.result===""&&g.kick>now&&g.kick-now<3*36e5))sched=await cachedSched(1);
   const upcoming=sched.filter(g=>g.season===S&&g.result===""&&g.kick>now).sort((a,b)=>a.kick-b.kick);
-  if(!upcoming.length){log(`${et.date}: no upcoming ${S} games`);return;}
+  if(!upcoming.length){log(`${et.date}: no upcoming ${S} games`);return null;}
   const sent=readState(`sent-${S}.json`)||{};
+  const nextSlot=upcoming.find(g=>!sent[g.kick]),hint=nextSlot?Math.max(0,nextSlot.kick-CFG.GD_MAX*6e4-now):null;
   // a slot = every game sharing one kickoff time
   let kick=null;
   if(MODE==="auto"){const due=upcoming.find(g=>{const m=(g.kick-now)/6e4;return m>=CFG.GD_MIN&&m<=CFG.GD_MAX&&!sent[g.kick];});kick=due&&due.kick;}
   else if(MODE==="slate")kick=upcoming[0].kick;
   else throw new Error(`Unknown MODE "${MODE}" (auto, slate)`);
   log(`${et.wd} ${et.date} ${et.h}:${String(et.m).padStart(2,"0")} ET, mode=${MODE}${DRY?" (dry run)":""}: slot=${kick?new Date(kick).toISOString():"-"}`);
-  if(!kick)return;
+  if(!kick)return hint;
 
   const games=upcoming.filter(g=>g.kick===kick),week=games[0].week;
   const R=M.ratings(sched,S,week);
@@ -164,9 +167,30 @@ function gameBlock(g,P,L,notes,stale){
   if(LIVE&&ok&&picks.length){const date=et.date,key=`picks-${date}.json`,at=new Date().toISOString();
     writeState(key,(readState(key)||[]).concat(picks.map(p=>({sport:"nfl",bot:"nfl-lines",date,at,...p}))));}
   if(odds.enabled()){const u=odds.usage();log(`Odds API credits: used ${u.used} this month, ${u.remaining??"?"} remaining`);}
-})().catch(async e=>{
-  console.error(e);
+  return hint;
+}
+
+// ---------- run loop ----------
+// Scheduled runs keep going for LOOP_MIN minutes, waking for each alert window. GitHub runs frequent crons
+// only every few hours on busy days (Sep 27, 2026: 3 of 4 game-day windows missed with a 15-minute cron),
+// so a few long, overlapping runs replace them. Manual runs (LOOP_MIN=0) check once and exit.
+const LOOP_MIN=env("LOOP_MIN",0),LOOP_EVERY=env("LOOP_EVERY",5);
+async function errorAlert(e){
+  console.error(e);process.exitCode=1;
+  // at most one error push every 6 hours, so a broken feed doesn't buzz the phone all day
   const last=readState("error-alert.json",6);
   if(!last&&LIVE){await ntfy("NFL lines bot error",String(e.message||e),2,["warning"]).catch(()=>{});writeState("error-alert.json",true);}
-  process.exit(1);
-});
+}
+(async()=>{
+  const t0=Date.now();
+  for(;;){
+    let next=null;
+    try{next=await tick();}catch(e){await errorAlert(e);if(!LOOP_MIN)return;next=0;}
+    const left=LOOP_MIN*6e4-(Date.now()-t0);
+    if(left<=LOOP_EVERY*6e4)break;
+    if(next==null||next>left-6e4){log(`nothing due in the remaining ${Math.round(left/6e4)} min of this run`);break;}
+    const wait=next>LOOP_EVERY*6e4?next:LOOP_EVERY*6e4;   // sleep until the next window opens, else re-check in a few minutes
+    log(`next check in ${Math.round(wait/6e4)} min`);await new Promise(r=>setTimeout(r,wait));
+  }
+})().catch(errorAlert);
+

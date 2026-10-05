@@ -2,9 +2,11 @@ name: NFL Lines
 
 on:
   schedule:
-    # Every 15 min, 11:00-01:59 UTC. The script sends each kickoff slot once, 75-110 min
-    # before kickoff (Eastern time via Intl, so DST needs no cron changes), and exits fast otherwise.
-    - cron: "4,19,34,49 11-23,0-1 * * *"
+    # Every 2 hours, each run staying up to 5 h and waking for each alert window (LOOP_MIN), exiting early
+    # when nothing is due before it would end. Every window is covered by at least two runs, because GitHub
+    # skips frequent crons on busy days: on Sep 27, 2026 a 15-minute cron ran ~every 3 h and missed 3 of 4
+    # game-day windows. Eastern time is handled in the script, so DST needs no cron changes.
+    - cron: "17 */2 * * *"
   workflow_dispatch:
     inputs:
       mode:
@@ -21,7 +23,7 @@ concurrency:
 jobs:
   run:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 330
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -38,6 +40,7 @@ jobs:
         env:
           NP_CACHE: nfl-lines/.cache
           MODE: ${{ github.event.inputs.mode || 'auto' }}
+          LOOP_MIN: ${{ github.event_name == 'schedule' && '300' || '0' }}
           DRY_RUN: ${{ github.event.inputs.dry_run || '0' }}
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC_NFL || secrets.NTFY_TOPIC }}   # NFL feed; falls back to the shared topic until NTFY_TOPIC_NFL exists
           NTFY_SERVER: ${{ secrets.NTFY_SERVER }}

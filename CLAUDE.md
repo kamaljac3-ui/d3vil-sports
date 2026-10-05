@@ -34,8 +34,8 @@ It's served by GitHub Pages from `main`.
 | `nba-news-alerts.yml` | NBA News | cron 15:30 + 21:30 UTC (Oct–Jun) + manual | Polls injury reports for about 6 h per run. Teammate-boost alerts on new Out/Doubtful rulings, ntfy only. |
 | `mlb-live-alerts.yml` | MLB Live | cron 17:30 + 23:20 UTC (Mar–Nov) + manual | Polls live games for up to about 6 h per run. Pitching-change alerts, ntfy only. |
 | `results-tracker.yml` | Bot Results Tracker | cron daily 11:00 UTC + manual | Grades sent picks and pushes the ledger to the `bot-results` branch. Sends a weekly ntfy scorecard on Mondays. |
-| `nfl-props-alerts.yml` | NFL Props Edges | cron every 15 min + manual | NFL props bot, ntfy only. |
-| `nfl-lines-alerts.yml` | NFL Lines | cron every 15 min + manual | NFL game-lines bot, ntfy only. |
+| `nfl-props-alerts.yml` | NFL Props Edges | cron every 2 h, each run looping up to 5 h + manual | NFL props bot, ntfy only. |
+| `nfl-lines-alerts.yml` | NFL Lines | cron every 2 h, each run looping up to 5 h + manual | NFL game-lines bot, ntfy only. |
 | `cfb-lines-alerts.yml` | CFB Lines | cron every 15 min (Aug–Jan) + manual | College football spread/total bot. Sends to its **own** ntfy topic (`NTFY_TOPIC_CFB`), not the shared one. |
 
 **Consequences of every push to `main`:**
@@ -123,7 +123,7 @@ It's served by GitHub Pages from `main`.
   (defense by position, man/zone, pressure vs. the offensive line, blitz, stacked box) × environment (implied total,
   game script, wind/rain).
 - **Backtest:** `node nfl-props/backtest.js` (2025, weeks 4–18). Rerun it after any model change and update the README table.
-- **Schedule:** the cron runs every 15 min from 11:00 to 01:59 UTC. `MODE=auto` decides from Eastern time:
+- **Schedule:** a cron every 2 h starts a run that loops for up to 5 h (see lesson 7). `MODE=auto` decides from Eastern time:
   - Wednesday from 11 AM: first projections
   - Friday from 5 PM: update (plus odds)
   - 75–110 min before each kickoff: one alert per game
@@ -173,8 +173,12 @@ College football spreads and totals. **`cfb-lines/README.md` is the full referen
 5. Keep all thresholds and tunables as env settings with defaults in code. Don't hard-code them.
 6. **Times.** GitHub cron is UTC only. Compute "today" and kickoff-relative windows in `America/New_York` with
    `Intl`, and don't hard-code a UTC offset. For DST (Nov 1, 2026), schedule cron generously and gate inside the script.
-7. Scheduled workflows can start several minutes late, and brand-new schedules sometimes take a while to first fire.
-   Use windows ("is kickoff 75–120 min away") rather than exact times.
+7. **Don't rely on frequent crons for time-critical alerts.** GitHub skips them on busy days. On Sunday Sep 27, 2026,
+   the NFL bots' 15-minute crons ran only about every 3 hours, and 3 of 4 game-day windows were missed.
+   - **The fix:** schedule a run every 2 hours that stays up to 5 h (`LOOP_MIN`). `tick()` returns how long until the
+     next alert window, and the run sleeps until then, rechecking every `LOOP_EVERY` minutes while a window is open.
+   - This covers every window with at least two runs. `mlb-live` uses the same long-run idea.
+   - Still use windows ("is kickoff 75–110 min away"), never exact times.
 8. Each bot lives in its own folder with its own workflow, README, cache prefix and concurrency group.
    Don't change a working bot while building another.
 
