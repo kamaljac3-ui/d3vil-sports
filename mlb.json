@@ -1740,5 +1740,82 @@
    "pHRvs": 0.03013698630136985,
    "gradedOn": "2026-10-08"
   }
+ },
+ {
+  "id": "2026-10-08|849832|671976",
+  "sport": "mlb",
+  "date": "2026-10-08",
+  "at": "2026-10-08T19:34:41.454Z",
+  "name": "Tristan Peters",
+  "team": "CWS",
+  "pitcher": "Parker Messick",
+  "win": 0.1878957200353302,
+  "hr": 0.03936096704085248,
+  "edge": 0.058737515958162234,
+  "hrEdge": -0.029731303039533453,
+  "gap": 9.570770406845408,
+  "prim": "4-seam",
+  "hitterId": "671976",
+  "pitcherId": "800048",
+  "gamePk": 849832,
+  "envMult": 0.9481351951755738,
+  "wx": "2 mph in from CF, 60°F, forecast",
+  "modes": [
+   "morning"
+  ],
+  "result": {
+   "status": "final",
+   "pa": 3,
+   "hr": 0,
+   "paVsSP": 0,
+   "hrVsSP": 0,
+   "bbe": 2,
+   "inWin": 0,
+   "starterMatched": true,
+   "baseHrPA": 0.025380710659898477,
+   "pHR": 0.07422594031710417,
+   "pHRvs": 0,
+   "gradedOn": "2026-10-09"
+  }
+ },
+ {
+  "id": "2026-10-08|849832|671976|live|671922",
+  "sport": "mlb",
+  "kind": "live",
+  "date": "2026-10-08",
+  "at": "2026-10-09T03:11:57.947Z",
+  "due": 4,
+  "name": "Tristan Peters",
+  "team": "CWS",
+  "pitcher": "Cade Smith",
+  "hitterId": "671976",
+  "pitcherId": "671922",
+  "gamePk": 849832,
+  "inning": "Bottom 8",
+  "win": 0.19615837063699088,
+  "hr": 0.09347130865582644,
+  "edge": 0.06700016655982291,
+  "hrEdge": 0.024379038575440506,
+  "gap": 9.301971131252706,
+  "prim": "4-seam",
+  "envMult": 0.9549162484601629,
+  "wx": "3 mph in from CF, 65°F",
+  "modes": [
+   "live"
+  ],
+  "result": {
+   "status": "final",
+   "pa": 3,
+   "hr": 0,
+   "paVsSP": 1,
+   "hrVsSP": 0,
+   "bbe": 2,
+   "inWin": 0,
+   "starterMatched": false,
+   "baseHrPA": 0.025380710659898477,
+   "pHR": 0.07422594031710417,
+   "pHRvs": 0.025380710659898442,
+   "gradedOn": "2026-10-09"
+  }
  }
 ]
