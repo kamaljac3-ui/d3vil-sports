@@ -1,24 +1,24 @@
 # Bot results
 
-Updated 2026-10-11. 0 picks waiting on games to finish.
+Updated 2026-10-12. 0 picks waiting on games to finish.
 
 ## Last 7 days
 
-MLB: 7 hitter-games (small sample: noise until ~100+)
-- Homered in 0 (0%) vs 0.8 expected from their own HR rates: 0.00x, z -0.9
-- Off the flagged starter: HR in 0 of 7 games he started
-- Launch window: 15% of 13 batted balls at 25-35 deg vs 17% predicted
-MLB live (pitching changes): 12 picks, 8 faced the new pitcher (small sample: noise until ~100+)
-- Homered off him in 0 vs 0.2 expected over 8 PA: 0.00x, z -0.5
+MLB: 6 hitter-games (small sample: noise until ~100+)
+- Homered in 0 (0%) vs 0.7 expected from their own HR rates: 0.00x, z -0.9
+- Off the flagged starter: HR in 0 of 6 games he started
+- Launch window: 20% of 10 batted balls at 25-35 deg vs 17% predicted
+MLB live (pitching changes): 8 picks, 6 faced the new pitcher (small sample: noise until ~100+)
+- Homered off him in 0 vs 0.2 expected over 6 PA: 0.00x, z -0.4
 
 NBA: no graded picks yet.
 
 ## All time
 
-MLB: 20 hitter-games (small sample: noise until ~100+)
-- Homered in 1 (5%) vs 2.5 expected from their own HR rates: 0.40x, z -1.0
-- Off the flagged starter: HR in 1 of 20 games he started
-- Launch window: 10% of 40 batted balls at 25-35 deg vs 19% predicted
+MLB: 21 hitter-games (small sample: noise until ~100+)
+- Homered in 1 (5%) vs 2.6 expected from their own HR rates: 0.38x, z -1.1
+- Off the flagged starter: HR in 1 of 21 games he started
+- Launch window: 10% of 41 batted balls at 25-35 deg vs 18% predicted
 MLB live (pitching changes): 28 picks, 19 faced the new pitcher (small sample: noise until ~100+)
 - Homered off him in 1 vs 0.6 expected over 19 PA: 1.71x, z +0.6
 
@@ -32,6 +32,7 @@ NBA: no graded picks yet.
 
 ## Recent picks
 
+- 2026-10-11 Jake Bauers vs Tarik Skubal: 0 HR in 4 PA (16% expected), 0/1 in window
 - 2026-10-10 Tristan Peters vs Gavin Williams: 0 HR in 4 PA (10% expected), 0/2 in window
 - 2026-10-10 Tristan Peters vs Cade Smith (live, Top 8): 0 HR in 1 PA vs him (3% expected)
 - 2026-10-08 Tristan Peters vs Parker Messick: 0 HR in 3 PA (7% expected), 0/2 in window
@@ -45,9 +46,3 @@ NBA: no graded picks yet.
 - 2026-10-06 Ozzie Albies vs Tanner Scott (live, Bottom 8): 0 HR in 0 PA vs him (0% expected)
 - 2026-10-06 Ozzie Albies vs Edwin Díaz (live, Bottom 9): 0 HR in 1 PA vs him (3% expected)
 - 2026-10-06 Austin Riley vs Edwin Díaz (live, Bottom 9): 0 HR in 0 PA vs him (0% expected)
-- 2026-10-04 Ozzie Albies vs Edwin Díaz (live, Top 6): 0 HR in 0 PA vs him (0% expected)
-- 2026-10-04 Ozzie Albies vs Edgardo Henriquez (live, Top 7): 0 HR in 1 PA vs him (3% expected)
-- 2026-10-04 Ozzie Albies vs Brock Stewart (live, Top 4): 0 HR in 0 PA vs him (0% expected)
-- 2026-10-04 Jake Bauers vs Michael King: 0 HR in 4 PA (16% expected), 0/2 in window
-- 2026-10-04 Austin Riley vs Edwin Díaz (live, Top 6): 0 HR in 1 PA vs him (3% expected)
-- 2026-10-04 Austin Riley vs Blake Snell: 0 HR in 4 PA (12% expected), 0/2 in window

@@ -1895,5 +1895,43 @@
    "pHRvs": 0.025380710659898442,
    "gradedOn": "2026-10-11"
   }
+ },
+ {
+  "id": "2026-10-11|849809|641343",
+  "sport": "mlb",
+  "date": "2026-10-11",
+  "at": "2026-10-11T18:31:42.898Z",
+  "name": "Jake Bauers",
+  "team": "MIL",
+  "pitcher": "Tarik Skubal",
+  "win": 0.1256362836986826,
+  "hr": 0.22943095047520537,
+  "edge": 0.03520159866867835,
+  "hrEdge": -0.021207096775694018,
+  "gap": 6.218743978596654,
+  "prim": "4-seam",
+  "hitterId": "641343",
+  "pitcherId": "669373",
+  "gamePk": 849809,
+  "envMult": 0.9446015019685707,
+  "wx": "5 mph in from RF, 66°F, forecast, roof may close",
+  "modes": [
+   "morning",
+   "lineups"
+  ],
+  "result": {
+   "status": "final",
+   "pa": 4,
+   "hr": 0,
+   "paVsSP": 2,
+   "hrVsSP": 0,
+   "bbe": 1,
+   "inWin": 0,
+   "starterMatched": true,
+   "baseHrPA": 0.04277286135693215,
+   "pHR": 0.16042400710323912,
+   "pHRvs": 0.08371620504520494,
+   "gradedOn": "2026-10-12"
+  }
  }
 ]
