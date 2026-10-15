@@ -1,15 +1,15 @@
 # Bot results
 
-Updated 2026-10-14. 0 picks waiting on games to finish.
+Updated 2026-10-15. 0 picks waiting on games to finish.
 
 ## Last 7 days
 
-MLB: 5 hitter-games (small sample: noise until ~100+)
-- Homered in 0 (0%) vs 0.5 expected from their own HR rates: 0.00x, z -0.8
-- Off the flagged starter: HR in 0 of 5 games he started
-- Launch window: 13% of 8 batted balls at 25-35 deg vs 17% predicted
-MLB live (pitching changes): 5 picks, 5 faced the new pitcher (small sample: noise until ~100+)
-- Homered off him in 0 vs 0.1 expected over 5 PA: 0.00x, z -0.4
+MLB: 3 hitter-games (small sample: noise until ~100+)
+- Homered in 0 (0%) vs 0.3 expected from their own HR rates: 0.00x, z -0.6
+- Off the flagged starter: HR in 0 of 3 games he started
+- Launch window: 0% of 5 batted balls at 25-35 deg vs 17% predicted
+MLB live (pitching changes): 2 picks, 2 faced the new pitcher (small sample: noise until ~100+)
+- Homered off him in 0 vs 0.1 expected over 2 PA: 0.00x, z -0.2
 
 NBA: no graded picks yet.
 
@@ -37,8 +37,3 @@ NBA: no graded picks yet.
 - 2026-10-10 Tristan Peters vs Cade Smith (live, Top 8): 0 HR in 1 PA vs him (3% expected)
 - 2026-10-08 Tristan Peters vs Parker Messick: 0 HR in 3 PA (7% expected), 0/2 in window
 - 2026-10-08 Tristan Peters vs Cade Smith (live, Bottom 8): 0 HR in 1 PA vs him (3% expected)
-- 2026-10-07 Tristan Peters vs Daniel Espino: 0 HR in 4 PA (10% expected), 0/1 in window
-- 2026-10-07 Tristan Peters vs Cade Smith (live, Bottom 8): 0 HR in 1 PA vs him (3% expected)
-- 2026-10-07 Ozzie Albies vs Tanner Scott (live, Bottom 8): 0 HR in 1 PA vs him (3% expected)
-- 2026-10-07 Austin Riley vs Tyler Glasnow: 0 HR in 4 PA (12% expected), 1/2 in window
-- 2026-10-07 Austin Riley vs Edwin Díaz (live, Bottom 9): 0 HR in 1 PA vs him (3% expected)
