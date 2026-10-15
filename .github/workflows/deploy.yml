@@ -97,7 +97,10 @@ jobs:
     # sees this commit, so this job also deploys Pages itself at the end
     # rather than relying on a second run — hence pages/id-token perms
     # and its own environment block, mirroring the `deploy` job above.
-    if: github.event_name == 'push'
+    # PAUSED 2026-10-14 (kamal): ElevenLabs credits go to two AI-voice Shorts a day instead.
+    # To bring the recap back, drop "false &&" below; the next Sunday run regenerates the
+    # homepage player block, which also un-hides it.
+    if: false && github.event_name == 'push'
     needs: deploy
     runs-on: ubuntu-latest
     environment:

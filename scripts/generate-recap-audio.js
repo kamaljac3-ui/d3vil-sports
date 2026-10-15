@@ -148,7 +148,7 @@ function updateHomepage(dateLabel, mp3Path) {
 
   if (html.includes('id="recap-box"')) {
     html = html.replace(
-      /<div class="recap-box" id="recap-box">[\s\S]*?<\/script>/,
+      /<div class="recap-box" id="recap-box"[^>]*>[\s\S]*?<\/script>/,   // [^>]* also matches the paused (display:none) box
       playerBlock.trim()
     );
   } else {
