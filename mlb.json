@@ -1933,5 +1933,45 @@
    "pHRvs": 0.08371620504520494,
    "gradedOn": "2026-10-12"
   }
+ },
+ {
+  "id": "2026-10-15|849810|641343|live|621242",
+  "sport": "mlb",
+  "kind": "live",
+  "date": "2026-10-15",
+  "at": "2026-10-16T02:21:37.253Z",
+  "due": 4,
+  "name": "Jake Bauers",
+  "team": "MIL",
+  "pitcher": "Edwin Díaz",
+  "hitterId": "641343",
+  "pitcherId": "621242",
+  "gamePk": 849810,
+  "inning": "Top 7",
+  "win": 0.13781246586312504,
+  "hr": 0.2936120513176768,
+  "edge": 0.04737778083312079,
+  "hrEdge": 0.04297400406677743,
+  "gap": 7.346410948147699,
+  "prim": "4-seam",
+  "envMult": 1.0282252623791037,
+  "wx": "calm, 90°F",
+  "modes": [
+   "live"
+  ],
+  "result": {
+   "status": "final",
+   "pa": 4,
+   "hr": 0,
+   "paVsSP": 1,
+   "hrVsSP": 0,
+   "bbe": 2,
+   "inWin": 0,
+   "starterMatched": false,
+   "baseHrPA": 0.04277286135693215,
+   "pHR": 0.16042400710323912,
+   "pHRvs": 0.042772861356932146,
+   "gradedOn": "2026-10-16"
+  }
  }
 ]
