@@ -1,15 +1,15 @@
 # Bot results
 
-Updated 2026-10-17. 0 picks waiting on games to finish.
+Updated 2026-10-18. 0 picks waiting on games to finish.
 
 ## Last 7 days
 
-MLB: 2 hitter-games (small sample: noise until ~100+)
-- Homered in 0 (0%) vs 0.3 expected from their own HR rates: 0.00x, z -0.5
-- Off the flagged starter: HR in 0 of 2 games he started
-- Launch window: 0% of 3 batted balls at 25-35 deg vs 16% predicted
-MLB live (pitching changes): 2 picks, 2 faced the new pitcher (small sample: noise until ~100+)
-- Homered off him in 0 vs 0.1 expected over 2 PA: 0.00x, z -0.3
+MLB: 1 hitter-games (small sample: noise until ~100+)
+- Homered in 0 (0%) vs 0.2 expected from their own HR rates: 0.00x, z -0.4
+- Off the flagged starter: HR in 0 of 1 games he started
+- Launch window: 0% of 1 batted balls at 25-35 deg vs 13% predicted
+MLB live (pitching changes): 1 picks, 1 faced the new pitcher (small sample: noise until ~100+)
+- Homered off him in 0 vs 0.0 expected over 1 PA: 0.00x, z -0.2
 
 NBA: no graded picks yet.
 
@@ -34,5 +34,3 @@ NBA: no graded picks yet.
 
 - 2026-10-15 Jake Bauers vs Edwin Díaz (live, Top 7): 0 HR in 1 PA vs him (4% expected)
 - 2026-10-11 Jake Bauers vs Tarik Skubal: 0 HR in 4 PA (16% expected), 0/1 in window
-- 2026-10-10 Tristan Peters vs Gavin Williams: 0 HR in 4 PA (10% expected), 0/2 in window
-- 2026-10-10 Tristan Peters vs Cade Smith (live, Top 8): 0 HR in 1 PA vs him (3% expected)
