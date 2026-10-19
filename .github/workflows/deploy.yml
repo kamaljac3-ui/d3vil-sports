@@ -76,8 +76,32 @@ jobs:
             echo "file=$CHANGED" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Send newsletter
+      # Debounce (added 2026-10-19): the daily routine publishes, then self-reviews and
+      # pushes a correction ~5 minutes later, and every push that touches today's post used to
+      # send its own email -- so subscribers got two per site per day. Now each run waits for
+      # the burst to settle, then only the run holding the LATEST version of today's post
+      # sends; earlier runs see a newer version on main and stand down. One email, final text.
+      # A correction pushed more than ~20 minutes after the previous push still sends again.
+      - name: Wait for the push burst to settle
         if: steps.detect.outputs.found == 'true'
+        run: sleep 1200
+
+      - name: Stand down if a newer version of today's post exists
+        id: settle
+        if: steps.detect.outputs.found == 'true'
+        run: |
+          FILE="${{ steps.detect.outputs.file }}"
+          git fetch --quiet origin main
+          if git show "origin/main:$FILE" 2>/dev/null | cmp -s - "$FILE"; then
+            echo "This run holds the latest version of $FILE - sending."
+            echo "superseded=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "A newer version of $FILE is on main (or it was removed) - a later run will send, standing down."
+            echo "superseded=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Send newsletter
+        if: steps.detect.outputs.found == 'true' && steps.settle.outputs.superseded == 'false'
         env:
           KIT_API_KEY: ${{ secrets.KIT_API_KEY }}
           POST_FILE: ${{ steps.detect.outputs.file }}
