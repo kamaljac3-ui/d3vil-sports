@@ -1,13 +1,10 @@
 # Bot results
 
-Updated 2026-10-18. 0 picks waiting on games to finish.
+Updated 2026-10-19. 0 picks waiting on games to finish.
 
 ## Last 7 days
 
-MLB: 1 hitter-games (small sample: noise until ~100+)
-- Homered in 0 (0%) vs 0.2 expected from their own HR rates: 0.00x, z -0.4
-- Off the flagged starter: HR in 0 of 1 games he started
-- Launch window: 0% of 1 batted balls at 25-35 deg vs 13% predicted
+MLB: no graded picks yet.
 MLB live (pitching changes): 1 picks, 1 faced the new pitcher (small sample: noise until ~100+)
 - Homered off him in 0 vs 0.0 expected over 1 PA: 0.00x, z -0.2
 
@@ -33,4 +30,3 @@ NBA: no graded picks yet.
 ## Recent picks
 
 - 2026-10-15 Jake Bauers vs Edwin Díaz (live, Top 7): 0 HR in 1 PA vs him (4% expected)
-- 2026-10-11 Jake Bauers vs Tarik Skubal: 0 HR in 4 PA (16% expected), 0/1 in window
