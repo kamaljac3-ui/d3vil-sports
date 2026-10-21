@@ -1,6 +1,6 @@
 # Bot results
 
-Updated 2026-10-20. 0 picks waiting on games to finish.
+Updated 2026-10-21. 0 picks waiting on games to finish.
 
 ## Last 7 days
 
@@ -8,7 +8,8 @@ MLB: no graded picks yet.
 MLB live (pitching changes): 1 picks, 1 faced the new pitcher (small sample: noise until ~100+)
 - Homered off him in 0 vs 0.0 expected over 1 PA: 0.00x, z -0.2
 
-NBA: no graded picks yet.
+NBA: 4 picks (small sample: noise until ~100+)
+- Prop lines: 2-2 (50%), -0.2 units at -110 (break-even 52.4%)
 
 ## All time
 
@@ -19,7 +20,8 @@ MLB: 21 hitter-games (small sample: noise until ~100+)
 MLB live (pitching changes): 29 picks, 20 faced the new pitcher (small sample: noise until ~100+)
 - Homered off him in 1 vs 0.6 expected over 20 PA: 1.59x, z +0.5
 
-NBA: no graded picks yet.
+NBA: 4 picks (small sample: noise until ~100+)
+- Prop lines: 2-2 (50%), -0.2 units at -110 (break-even 52.4%)
 
 ## How to read this
 
@@ -29,4 +31,8 @@ NBA: no graded picks yet.
 
 ## Recent picks
 
+- 2026-10-20 VJ Edgecombe AST (prop, o2.5): 1
+- 2026-10-20 Miles McBride PTS (prop, o6.5): 3
+- 2026-10-20 Karl-Anthony Towns AST (prop, u4.5): 1
+- 2026-10-20 Anfernee Simons PTS (prop, o7.5): 13
 - 2026-10-15 Jake Bauers vs Edwin Díaz (live, Top 7): 0 HR in 1 PA vs him (4% expected)

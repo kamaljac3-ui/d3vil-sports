@@ -1,1 +1,122 @@
-[]
+[
+ {
+  "id": "2026-10-20|401909089|anferneesimons|prop|pts",
+  "sport": "nba",
+  "date": "2026-10-20",
+  "at": "2026-10-20T23:07:20.595Z",
+  "kind": "prop",
+  "name": "Anfernee Simons",
+  "key": "anferneesimons",
+  "team": "PHI",
+  "opp": "NYK",
+  "mpg": 24.945454,
+  "stat": "pts",
+  "proj": 13.247367783061055,
+  "line": 7.5,
+  "po": 0.9246185143281541,
+  "gameId": "401909089",
+  "tip": "2026-10-20T23:00Z",
+  "modes": [
+   "pregame"
+  ],
+  "result": {
+   "status": "final",
+   "min": 25,
+   "pts": 13,
+   "reb": 2,
+   "ast": 0,
+   "fg3m": 3,
+   "gradedOn": "2026-10-21"
+  }
+ },
+ {
+  "id": "2026-10-20|401909089|milesmcbride|prop|pts",
+  "sport": "nba",
+  "date": "2026-10-20",
+  "at": "2026-10-20T23:07:20.595Z",
+  "kind": "prop",
+  "name": "Miles McBride",
+  "key": "milesmcbride",
+  "team": "NYK",
+  "opp": "PHI",
+  "mpg": 26.341463,
+  "stat": "pts",
+  "proj": 11.734278798664226,
+  "line": 6.5,
+  "po": 0.904659877367469,
+  "gameId": "401909089",
+  "tip": "2026-10-20T23:00Z",
+  "modes": [
+   "pregame"
+  ],
+  "result": {
+   "status": "final",
+   "min": 14,
+   "pts": 3,
+   "reb": 1,
+   "ast": 1,
+   "fg3m": 1,
+   "gradedOn": "2026-10-21"
+  }
+ },
+ {
+  "id": "2026-10-20|401909089|karlanthonytowns|prop|ast",
+  "sport": "nba",
+  "date": "2026-10-20",
+  "at": "2026-10-20T23:07:20.595Z",
+  "kind": "prop",
+  "name": "Karl-Anthony Towns",
+  "key": "karlanthonytowns",
+  "team": "NYK",
+  "opp": "PHI",
+  "mpg": 30.96,
+  "stat": "ast",
+  "proj": 2.952608932279768,
+  "line": 4.5,
+  "po": 0.15113115338986327,
+  "gameId": "401909089",
+  "tip": "2026-10-20T23:00Z",
+  "modes": [
+   "pregame"
+  ],
+  "result": {
+   "status": "final",
+   "min": 24,
+   "pts": 19,
+   "reb": 12,
+   "ast": 1,
+   "fg3m": 3,
+   "gradedOn": "2026-10-21"
+  }
+ },
+ {
+  "id": "2026-10-20|401909089|vjedgecombe|prop|ast",
+  "sport": "nba",
+  "date": "2026-10-20",
+  "at": "2026-10-20T23:07:20.595Z",
+  "kind": "prop",
+  "name": "VJ Edgecombe",
+  "key": "vjedgecombe",
+  "team": "PHI",
+  "opp": "NYK",
+  "mpg": 34.97333,
+  "stat": "ast",
+  "proj": 3.725318747519894,
+  "line": 2.5,
+  "po": 0.7930013627613869,
+  "gameId": "401909089",
+  "tip": "2026-10-20T23:00Z",
+  "modes": [
+   "pregame"
+  ],
+  "result": {
+   "status": "final",
+   "min": 35,
+   "pts": 9,
+   "reb": 4,
+   "ast": 1,
+   "fg3m": 0,
+   "gradedOn": "2026-10-21"
+  }
+ }
+]
