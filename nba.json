@@ -118,5 +118,959 @@
    "fg3m": 0,
    "gradedOn": "2026-10-21"
   }
+ },
+ {
+  "id": "2026-10-21|401909835|traeyoung|boost|pts",
+  "sport": "nba",
+  "date": "2026-10-21",
+  "at": "2026-10-21T19:07:54.011Z",
+  "kind": "boost",
+  "name": "Trae Young",
+  "key": "traeyoung",
+  "team": "WAS",
+  "opp": "MIL",
+  "mpg": 25.6,
+  "stat": "pts",
+  "proj": 20.400821528652678,
+  "avg": 17.933332,
+  "gameId": "401909835",
+  "tip": "2026-10-21T23:00Z",
+  "modes": [
+   "morning"
+  ],
+  "result": {
+   "status": "final",
+   "min": 38,
+   "pts": 20,
+   "reb": 0,
+   "ast": 13,
+   "fg3m": 0,
+   "gradedOn": "2026-10-22"
+  }
+ },
+ {
+  "id": "2026-10-21|401909835|traeyoung|boost|ast",
+  "sport": "nba",
+  "date": "2026-10-21",
+  "at": "2026-10-21T19:07:54.011Z",
+  "kind": "boost",
+  "name": "Trae Young",
+  "key": "traeyoung",
+  "team": "WAS",
+  "opp": "MIL",
+  "mpg": 25.6,
+  "stat": "ast",
+  "proj": 9.10073890503011,
+  "avg": 8,
+  "gameId": "401909835",
+  "tip": "2026-10-21T23:00Z",
+  "modes": [
+   "morning"
+  ],
+  "result": {
+   "status": "final",
+   "min": 38,
+   "pts": 20,
+   "reb": 0,
+   "ast": 13,
+   "fg3m": 0,
+   "gradedOn": "2026-10-22"
+  }
+ },
+ {
+  "id": "2026-10-21|401909835|alexsarr|boost|pts",
+  "sport": "nba",
+  "date": "2026-10-21",
+  "at": "2026-10-21T19:07:54.011Z",
+  "kind": "boost",
+  "name": "Alex Sarr",
+  "key": "alexsarr",
+  "team": "WAS",
+  "opp": "MIL",
+  "mpg": 27.1875,
+  "stat": "pts",
+  "proj": 18.513170280762335,
+  "avg": 16.3125,
+  "gameId": "401909835",
+  "tip": "2026-10-21T23:00Z",
+  "modes": [
+   "morning"
+  ],
+  "result": {
+   "status": "final",
+   "min": 24,
+   "pts": 6,
+   "reb": 9,
+   "ast": 2,
+   "fg3m": 0,
+   "gradedOn": "2026-10-22"
+  }
+ },
+ {
+  "id": "2026-10-21|401909842|dariusgarland|boost|pts",
+  "sport": "nba",
+  "date": "2026-10-21",
+  "at": "2026-10-21T19:07:54.011Z",
+  "kind": "boost",
+  "name": "Darius Garland",
+  "key": "dariusgarland",
+  "team": "LAC",
+  "opp": "SAC",
+  "mpg": 29.866667,
+  "stat": "pts",
+  "proj": 21.223273319340436,
+  "avg": 18.777779,
+  "gameId": "401909842",
+  "tip": "2026-10-22T02:30Z",
+  "modes": [
+   "morning"
+  ],
+  "result": {
+   "status": "final",
+   "min": 32,
+   "pts": 30,
+   "reb": 1,
+   "ast": 4,
+   "fg3m": 3,
+   "gradedOn": "2026-10-22"
+  }
+ },
+ {
+  "id": "2026-10-21|401909835|anthonydavis|boost|pts",
+  "sport": "nba",
+  "date": "2026-10-21",
+  "at": "2026-10-21T19:07:54.011Z",
+  "kind": "boost",
+  "name": "Anthony Davis",
+  "key": "anthonydavis",
+  "team": "WAS",
+  "opp": "MIL",
+  "mpg": 31.3,
+  "stat": "pts",
+  "proj": 22.953790535716408,
+  "avg": 20.35,
+  "gameId": "401909835",
+  "tip": "2026-10-21T23:00Z",
+  "modes": [
+   "morning"
+  ],
+  "result": {
+   "status": "final",
+   "min": 34,
+   "pts": 34,
+   "reb": 12,
+   "ast": 4,
+   "fg3m": 1,
+   "gradedOn": "2026-10-22"
+  }
+ },
+ {
+  "id": "2026-10-21|401909839|pascalsiakam|boost|pts",
+  "sport": "nba",
+  "date": "2026-10-21",
+  "at": "2026-10-21T19:07:54.011Z",
+  "kind": "boost",
+  "name": "Pascal Siakam",
+  "key": "pascalsiakam",
+  "team": "IND",
+  "opp": "NOP",
+  "mpg": 33.177418,
+  "stat": "pts",
+  "proj": 26.553285162595895,
+  "avg": 23.951612,
+  "gameId": "401909839",
+  "tip": "2026-10-22T00:00Z",
+  "modes": [
+   "morning"
+  ],
+  "result": {
+   "status": "final",
+   "min": 35,
+   "pts": 30,
+   "reb": 8,
+   "ast": 1,
+   "fg3m": 1,
+   "gradedOn": "2026-10-22"
+  }
+ },
+ {
+  "id": "2026-10-21|401909091|timhardaway|prop|pts",
+  "sport": "nba",
+  "date": "2026-10-21",
+  "at": "2026-10-21T23:33:25.603Z",
+  "kind": "prop",
+  "name": "Tim Hardaway Jr.",
+  "key": "timhardaway",
+  "team": "MIA",
+  "opp": "MIN",
+  "mpg": 26.5875,
+  "stat": "pts",
+  "proj": 12.679148211685947,
+  "line": 9.5,
+  "po": 0.786631420726964,
+  "gameId": "401909091",
+  "tip": "2026-10-21T23:30Z",
+  "modes": [
+   "pregame"
+  ],
+  "result": {
+   "status": "final",
+   "min": 18,
+   "pts": 3,
+   "reb": 4,
+   "ast": 1,
+   "fg3m": 1,
+   "gradedOn": "2026-10-22"
+  }
+ },
+ {
+  "id": "2026-10-21|401909091|davionmitchell|prop|fg3m",
+  "sport": "nba",
+  "date": "2026-10-21",
+  "at": "2026-10-21T23:33:25.603Z",
+  "kind": "prop",
+  "name": "Davion Mitchell",
+  "key": "davionmitchell",
+  "team": "MIA",
+  "opp": "MIN",
+  "mpg": 28.571428,
+  "stat": "fg3m",
+  "proj": 1.2086570652518294,
+  "line": 0.5,
+  "po": 0.784475287079918,
+  "gameId": "401909091",
+  "tip": "2026-10-21T23:30Z",
+  "modes": [
+   "pregame"
+  ],
+  "result": {
+   "status": "final",
+   "min": 33,
+   "pts": 11,
+   "reb": 0,
+   "ast": 11,
+   "fg3m": 1,
+   "gradedOn": "2026-10-22"
+  }
+ },
+ {
+  "id": "2026-10-21|401909091|timhardaway|prop|fg3m",
+  "sport": "nba",
+  "date": "2026-10-21",
+  "at": "2026-10-21T23:33:25.603Z",
+  "kind": "prop",
+  "name": "Tim Hardaway Jr.",
+  "key": "timhardaway",
+  "team": "MIA",
+  "opp": "MIN",
+  "mpg": 26.5875,
+  "stat": "fg3m",
+  "proj": 2.632186468413023,
+  "line": 1.5,
+  "po": 0.7829096895488279,
+  "gameId": "401909091",
+  "tip": "2026-10-21T23:30Z",
+  "modes": [
+   "pregame"
+  ],
+  "result": {
+   "status": "final",
+   "min": 18,
+   "pts": 3,
+   "reb": 4,
+   "ast": 1,
+   "fg3m": 1,
+   "gradedOn": "2026-10-22"
+  }
+ },
+ {
+  "id": "2026-10-21|401909091|giannisantetokounmpo|prop|ast",
+  "sport": "nba",
+  "date": "2026-10-21",
+  "at": "2026-10-21T23:33:25.603Z",
+  "kind": "prop",
+  "name": "Giannis Antetokounmpo",
+  "key": "giannisantetokounmpo",
+  "team": "MIA",
+  "opp": "MIN",
+  "mpg": 28.86111,
+  "stat": "ast",
+  "proj": 5.1181405954867865,
+  "line": 6.5,
+  "po": 0.23869492522002655,
+  "gameId": "401909091",
+  "tip": "2026-10-21T23:30Z",
+  "modes": [
+   "pregame"
+  ],
+  "result": {
+   "status": "final",
+   "min": 30,
+   "pts": 35,
+   "reb": 6,
+   "ast": 1,
+   "fg3m": 0,
+   "gradedOn": "2026-10-22"
+  }
+ },
+ {
+  "id": "2026-10-21|401909836|graysonallen|prop|ast",
+  "sport": "nba",
+  "date": "2026-10-21",
+  "at": "2026-10-21T23:33:25.843Z",
+  "kind": "prop",
+  "name": "Grayson Allen",
+  "key": "graysonallen",
+  "team": "CHA",
+  "opp": "BKN",
+  "mpg": 28.764706,
+  "stat": "ast",
+  "proj": 3.864597984072569,
+  "line": 2.5,
+  "po": 0.8185181331291311,
+  "gameId": "401909836",
+  "tip": "2026-10-21T23:30Z",
+  "modes": [
+   "pregame"
+  ],
+  "result": {
+   "status": "final",
+   "min": 29,
+   "pts": 21,
+   "reb": 3,
+   "ast": 4,
+   "fg3m": 5,
+   "gradedOn": "2026-10-22"
+  }
+ },
+ {
+  "id": "2026-10-21|401909836|graysonallen|prop|pts",
+  "sport": "nba",
+  "date": "2026-10-21",
+  "at": "2026-10-21T23:33:25.843Z",
+  "kind": "prop",
+  "name": "Grayson Allen",
+  "key": "graysonallen",
+  "team": "CHA",
+  "opp": "BKN",
+  "mpg": 28.764706,
+  "stat": "pts",
+  "proj": 16.667316995608783,
+  "line": 12.5,
+  "po": 0.814061221827791,
+  "gameId": "401909836",
+  "tip": "2026-10-21T23:30Z",
+  "modes": [
+   "pregame"
+  ],
+  "result": {
+   "status": "final",
+   "min": 29,
+   "pts": 21,
+   "reb": 3,
+   "ast": 4,
+   "fg3m": 5,
+   "gradedOn": "2026-10-22"
+  }
+ },
+ {
+  "id": "2026-10-21|401909836|nazreid|prop|pts",
+  "sport": "nba",
+  "date": "2026-10-21",
+  "at": "2026-10-21T23:33:25.843Z",
+  "kind": "prop",
+  "name": "Naz Reid",
+  "key": "nazreid",
+  "team": "CHA",
+  "opp": "BKN",
+  "mpg": 26.064936,
+  "stat": "pts",
+  "proj": 13.962890240210257,
+  "line": 17.5,
+  "po": 0.18827315260704336,
+  "gameId": "401909836",
+  "tip": "2026-10-21T23:30Z",
+  "modes": [
+   "pregame"
+  ],
+  "result": {
+   "status": "final",
+   "min": 33,
+   "pts": 20,
+   "reb": 11,
+   "ast": 7,
+   "fg3m": 4,
+   "gradedOn": "2026-10-22"
+  }
+ },
+ {
+  "id": "2026-10-21|401909836|royceoneale|prop|reb",
+  "sport": "nba",
+  "date": "2026-10-21",
+  "at": "2026-10-21T23:33:25.843Z",
+  "kind": "prop",
+  "name": "Royce O'Neale",
+  "key": "royceoneale",
+  "team": "CHA",
+  "opp": "BKN",
+  "mpg": 28.371796,
+  "stat": "reb",
+  "proj": 5.008333107204789,
+  "line": 3.5,
+  "po": 0.7989743102860567,
+  "gameId": "401909836",
+  "tip": "2026-10-21T23:30Z",
+  "modes": [
+   "pregame"
+  ],
+  "result": {
+   "status": "final",
+   "min": 17,
+   "pts": 8,
+   "reb": 4,
+   "ast": 0,
+   "fg3m": 2,
+   "gradedOn": "2026-10-22"
+  }
+ },
+ {
+  "id": "2026-10-21|401909837|trejones|prop|pts",
+  "sport": "nba",
+  "date": "2026-10-21",
+  "at": "2026-10-21T23:33:26.051Z",
+  "kind": "prop",
+  "name": "Tre Jones",
+  "key": "trejones",
+  "team": "CHI",
+  "opp": "TOR",
+  "mpg": 26.953846,
+  "stat": "pts",
+  "proj": 14.57613447005632,
+  "line": 8.5,
+  "po": 0.931725723946464,
+  "gameId": "401909837",
+  "tip": "2026-10-21T23:30Z",
+  "modes": [
+   "pregame"
+  ],
+  "result": {
+   "status": "final",
+   "min": 13,
+   "pts": 13,
+   "reb": 3,
+   "ast": 0,
+   "fg3m": 0,
+   "gradedOn": "2026-10-22"
+  }
+ },
+ {
+  "id": "2026-10-21|401909837|isaacokoro|prop|pts",
+  "sport": "nba",
+  "date": "2026-10-21",
+  "at": "2026-10-21T23:33:26.051Z",
+  "kind": "prop",
+  "name": "Isaac Okoro",
+  "key": "isaacokoro",
+  "team": "CHI",
+  "opp": "TOR",
+  "mpg": 26.904762,
+  "stat": "pts",
+  "proj": 9.610311692524347,
+  "line": 5.5,
+  "po": 0.8479258072010724,
+  "gameId": "401909837",
+  "tip": "2026-10-21T23:30Z",
+  "modes": [
+   "pregame"
+  ],
+  "result": {
+   "status": "final",
+   "min": 18,
+   "pts": 4,
+   "reb": 0,
+   "ast": 1,
+   "fg3m": 0,
+   "gradedOn": "2026-10-22"
+  }
+ },
+ {
+  "id": "2026-10-21|401909837|trejones|prop|ast",
+  "sport": "nba",
+  "date": "2026-10-21",
+  "at": "2026-10-21T23:33:26.051Z",
+  "kind": "prop",
+  "name": "Tre Jones",
+  "key": "trejones",
+  "team": "CHI",
+  "opp": "TOR",
+  "mpg": 26.953846,
+  "stat": "ast",
+  "proj": 5.5816705511349864,
+  "line": 3.5,
+  "po": 0.8368123797260156,
+  "gameId": "401909837",
+  "tip": "2026-10-21T23:30Z",
+  "modes": [
+   "pregame"
+  ],
+  "result": {
+   "status": "final",
+   "min": 13,
+   "pts": 13,
+   "reb": 3,
+   "ast": 0,
+   "fg3m": 0,
+   "gradedOn": "2026-10-22"
+  }
+ },
+ {
+  "id": "2026-10-21|401909837|trejones|prop|reb",
+  "sport": "nba",
+  "date": "2026-10-21",
+  "at": "2026-10-21T23:33:26.051Z",
+  "kind": "prop",
+  "name": "Tre Jones",
+  "key": "trejones",
+  "team": "CHI",
+  "opp": "TOR",
+  "mpg": 26.953846,
+  "stat": "reb",
+  "proj": 3.2144160075770567,
+  "line": 1.5,
+  "po": 0.8295664879797033,
+  "gameId": "401909837",
+  "tip": "2026-10-21T23:30Z",
+  "modes": [
+   "pregame"
+  ],
+  "result": {
+   "status": "final",
+   "min": 13,
+   "pts": 13,
+   "reb": 3,
+   "ast": 0,
+   "fg3m": 0,
+   "gradedOn": "2026-10-22"
+  }
+ },
+ {
+  "id": "2026-10-21|401909838|camspencer|prop|pts",
+  "sport": "nba",
+  "date": "2026-10-21",
+  "at": "2026-10-21T23:33:26.246Z",
+  "kind": "prop",
+  "name": "Cam Spencer",
+  "key": "camspencer",
+  "team": "MEM",
+  "opp": "UTA",
+  "mpg": 23.805555,
+  "stat": "pts",
+  "proj": 12.000035580810314,
+  "line": 6.5,
+  "po": 0.9154356145776934,
+  "gameId": "401909838",
+  "tip": "2026-10-22T00:00Z",
+  "modes": [
+   "pregame"
+  ],
+  "result": {
+   "status": "final",
+   "min": 16,
+   "pts": 3,
+   "reb": 3,
+   "ast": 2,
+   "fg3m": 1,
+   "gradedOn": "2026-10-22"
+  }
+ },
+ {
+  "id": "2026-10-21|401909838|isaiahcollier|prop|pts",
+  "sport": "nba",
+  "date": "2026-10-21",
+  "at": "2026-10-21T23:33:26.246Z",
+  "kind": "prop",
+  "name": "Isaiah Collier",
+  "key": "isaiahcollier",
+  "team": "UTA",
+  "opp": "MEM",
+  "mpg": 25.711864,
+  "stat": "pts",
+  "proj": 10.683735875085983,
+  "line": 5.5,
+  "po": 0.9025008347846527,
+  "gameId": "401909838",
+  "tip": "2026-10-22T00:00Z",
+  "modes": [
+   "pregame"
+  ],
+  "result": {
+   "status": "final",
+   "min": 16,
+   "pts": 7,
+   "reb": 3,
+   "ast": 3,
+   "fg3m": 0,
+   "gradedOn": "2026-10-22"
+  }
+ },
+ {
+  "id": "2026-10-21|401909838|camspencer|prop|ast",
+  "sport": "nba",
+  "date": "2026-10-21",
+  "at": "2026-10-21T23:33:26.246Z",
+  "kind": "prop",
+  "name": "Cam Spencer",
+  "key": "camspencer",
+  "team": "MEM",
+  "opp": "UTA",
+  "mpg": 23.805555,
+  "stat": "ast",
+  "proj": 6.015055333188971,
+  "line": 3.5,
+  "po": 0.8644065569726442,
+  "gameId": "401909838",
+  "tip": "2026-10-22T00:00Z",
+  "modes": [
+   "pregame"
+  ],
+  "result": {
+   "status": "final",
+   "min": 16,
+   "pts": 3,
+   "reb": 3,
+   "ast": 2,
+   "fg3m": 1,
+   "gradedOn": "2026-10-22"
+  }
+ },
+ {
+  "id": "2026-10-21|401909838|isaiahcollier|prop|ast",
+  "sport": "nba",
+  "date": "2026-10-21",
+  "at": "2026-10-21T23:33:26.246Z",
+  "kind": "prop",
+  "name": "Isaiah Collier",
+  "key": "isaiahcollier",
+  "team": "UTA",
+  "opp": "MEM",
+  "mpg": 25.711864,
+  "stat": "ast",
+  "proj": 6.568633885700265,
+  "line": 4.5,
+  "po": 0.7963779358353748,
+  "gameId": "401909838",
+  "tip": "2026-10-22T00:00Z",
+  "modes": [
+   "pregame"
+  ],
+  "result": {
+   "status": "final",
+   "min": 16,
+   "pts": 7,
+   "reb": 3,
+   "ast": 3,
+   "fg3m": 0,
+   "gradedOn": "2026-10-22"
+  }
+ },
+ {
+  "id": "2026-10-21|401909839|saddiqbey|prop|pts",
+  "sport": "nba",
+  "date": "2026-10-21",
+  "at": "2026-10-21T23:33:26.425Z",
+  "kind": "prop",
+  "name": "Saddiq Bey",
+  "key": "saddiqbey",
+  "team": "NOP",
+  "opp": "IND",
+  "mpg": 31.194445,
+  "stat": "pts",
+  "proj": 18.669612810633343,
+  "line": 10.5,
+  "po": 0.9409521802908555,
+  "gameId": "401909839",
+  "tip": "2026-10-22T00:00Z",
+  "modes": [
+   "pregame"
+  ],
+  "result": {
+   "status": "final",
+   "min": 24,
+   "pts": 13,
+   "reb": 5,
+   "ast": 0,
+   "fg3m": 2,
+   "gradedOn": "2026-10-22"
+  }
+ },
+ {
+  "id": "2026-10-21|401909839|bennedictmathurin|prop|pts",
+  "sport": "nba",
+  "date": "2026-10-21",
+  "at": "2026-10-21T23:33:26.425Z",
+  "kind": "prop",
+  "name": "Bennedict Mathurin",
+  "key": "bennedictmathurin",
+  "team": "NOP",
+  "opp": "IND",
+  "mpg": 30,
+  "stat": "pts",
+  "proj": 18.58637425220235,
+  "line": 12.5,
+  "po": 0.8789019455171545,
+  "gameId": "401909839",
+  "tip": "2026-10-22T00:00Z",
+  "modes": [
+   "pregame"
+  ],
+  "result": {
+   "status": "final",
+   "min": 18,
+   "pts": 11,
+   "reb": 3,
+   "ast": 2,
+   "fg3m": 0,
+   "gradedOn": "2026-10-22"
+  }
+ },
+ {
+  "id": "2026-10-21|401909839|bennedictmathurin|prop|fg3m",
+  "sport": "nba",
+  "date": "2026-10-21",
+  "at": "2026-10-21T23:33:26.425Z",
+  "kind": "prop",
+  "name": "Bennedict Mathurin",
+  "key": "bennedictmathurin",
+  "team": "NOP",
+  "opp": "IND",
+  "mpg": 30,
+  "stat": "fg3m",
+  "proj": 1.4688914495006804,
+  "line": 0.5,
+  "po": 0.8591584364604602,
+  "gameId": "401909839",
+  "tip": "2026-10-22T00:00Z",
+  "modes": [
+   "pregame"
+  ],
+  "result": {
+   "status": "final",
+   "min": 18,
+   "pts": 11,
+   "reb": 3,
+   "ast": 2,
+   "fg3m": 0,
+   "gradedOn": "2026-10-22"
+  }
+ },
+ {
+  "id": "2026-10-21|401909839|saddiqbey|prop|reb",
+  "sport": "nba",
+  "date": "2026-10-21",
+  "at": "2026-10-21T23:33:26.425Z",
+  "kind": "prop",
+  "name": "Saddiq Bey",
+  "key": "saddiqbey",
+  "team": "NOP",
+  "opp": "IND",
+  "mpg": 31.194445,
+  "stat": "reb",
+  "proj": 5.5555553,
+  "line": 3.5,
+  "po": 0.8547767855624752,
+  "gameId": "401909839",
+  "tip": "2026-10-22T00:00Z",
+  "modes": [
+   "pregame"
+  ],
+  "result": {
+   "status": "final",
+   "min": 24,
+   "pts": 13,
+   "reb": 5,
+   "ast": 0,
+   "fg3m": 2,
+   "gradedOn": "2026-10-22"
+  }
+ },
+ {
+  "id": "2026-10-21|401909840|reedsheppard|prop|pts",
+  "sport": "nba",
+  "date": "2026-10-21",
+  "at": "2026-10-21T23:33:26.626Z",
+  "kind": "prop",
+  "name": "Reed Sheppard",
+  "key": "reedsheppard",
+  "team": "HOU",
+  "opp": "DAL",
+  "mpg": 26.182926,
+  "stat": "pts",
+  "proj": 14.096730344018717,
+  "line": 8.5,
+  "po": 0.9191208430712764,
+  "gameId": "401909840",
+  "tip": "2026-10-22T00:30Z",
+  "modes": [
+   "pregame"
+  ],
+  "result": {
+   "status": "final",
+   "min": 16,
+   "pts": 3,
+   "reb": 2,
+   "ast": 4,
+   "fg3m": 1,
+   "gradedOn": "2026-10-22"
+  }
+ },
+ {
+  "id": "2026-10-21|401909840|reedsheppard|prop|fg3m",
+  "sport": "nba",
+  "date": "2026-10-21",
+  "at": "2026-10-21T23:33:26.626Z",
+  "kind": "prop",
+  "name": "Reed Sheppard",
+  "key": "reedsheppard",
+  "team": "HOU",
+  "opp": "DAL",
+  "mpg": 26.182926,
+  "stat": "fg3m",
+  "proj": 2.882844736864635,
+  "line": 1.5,
+  "po": 0.808435873596723,
+  "gameId": "401909840",
+  "tip": "2026-10-22T00:30Z",
+  "modes": [
+   "pregame"
+  ],
+  "result": {
+   "status": "final",
+   "min": 16,
+   "pts": 3,
+   "reb": 2,
+   "ast": 4,
+   "fg3m": 1,
+   "gradedOn": "2026-10-22"
+  }
+ },
+ {
+  "id": "2026-10-21|401909840|alperensengun|prop|ast",
+  "sport": "nba",
+  "date": "2026-10-21",
+  "at": "2026-10-21T23:33:26.626Z",
+  "kind": "prop",
+  "name": "Alperen Sengun",
+  "key": "alperensengun",
+  "team": "HOU",
+  "opp": "DAL",
+  "mpg": 33.305557,
+  "stat": "ast",
+  "proj": 6.436306867949992,
+  "line": 4.5,
+  "po": 0.7857286885846424,
+  "gameId": "401909840",
+  "tip": "2026-10-22T00:30Z",
+  "modes": [
+   "pregame"
+  ],
+  "result": {
+   "status": "final",
+   "min": 30,
+   "pts": 23,
+   "reb": 10,
+   "ast": 5,
+   "fg3m": 2,
+   "gradedOn": "2026-10-22"
+  }
+ },
+ {
+  "id": "2026-10-21|401909840|reedsheppard|prop|reb",
+  "sport": "nba",
+  "date": "2026-10-21",
+  "at": "2026-10-21T23:33:26.626Z",
+  "kind": "prop",
+  "name": "Reed Sheppard",
+  "key": "reedsheppard",
+  "team": "HOU",
+  "opp": "DAL",
+  "mpg": 26.182926,
+  "stat": "reb",
+  "proj": 2.902439,
+  "line": 1.5,
+  "po": 0.7820493650259455,
+  "gameId": "401909840",
+  "tip": "2026-10-22T00:30Z",
+  "modes": [
+   "pregame"
+  ],
+  "result": {
+   "status": "final",
+   "min": 16,
+   "pts": 3,
+   "reb": 2,
+   "ast": 4,
+   "fg3m": 1,
+   "gradedOn": "2026-10-22"
+  }
+ },
+ {
+  "id": "2026-10-21|401909092|brandonwilliams|boost|pts",
+  "sport": "nba",
+  "date": "2026-10-21",
+  "at": "2026-10-22T01:06:09.530Z",
+  "kind": "boost",
+  "name": "Brandon Williams",
+  "key": "brandonwilliams",
+  "team": "GSW",
+  "opp": "LAL",
+  "mpg": 22.166666,
+  "stat": "pts",
+  "proj": 15.293937688171887,
+  "avg": 13.015152,
+  "gain": 0.5723074396100003,
+  "gameId": "401909092",
+  "tip": "2026-10-22T02:00Z",
+  "modes": [
+   "news"
+  ],
+  "result": {
+   "status": "final",
+   "min": 18,
+   "pts": 14,
+   "reb": 4,
+   "ast": 3,
+   "fg3m": 1,
+   "gradedOn": "2026-10-22"
+  }
+ },
+ {
+  "id": "2026-10-21|401909092|deanthonymelton|boost|pts",
+  "sport": "nba",
+  "date": "2026-10-21",
+  "at": "2026-10-22T01:06:09.530Z",
+  "kind": "boost",
+  "name": "De'Anthony Melton",
+  "key": "deanthonymelton",
+  "team": "GSW",
+  "opp": "LAL",
+  "mpg": 22.959183,
+  "stat": "pts",
+  "proj": 14.340318181708655,
+  "avg": 12.285714,
+  "gain": 0.5092821864307062,
+  "gameId": "401909092",
+  "tip": "2026-10-22T02:00Z",
+  "modes": [
+   "news"
+  ],
+  "result": {
+   "status": "final",
+   "min": 21,
+   "pts": 0,
+   "reb": 2,
+   "ast": 2,
+   "fg3m": 0,
+   "gradedOn": "2026-10-22"
+  }
  }
 ]
