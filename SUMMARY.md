@@ -1,12 +1,10 @@
 # Bot results
 
-Updated 2026-10-22. 0 picks waiting on games to finish.
+Updated 2026-10-23. 0 picks waiting on games to finish.
 
 ## Last 7 days
 
 MLB: no graded picks yet.
-MLB live (pitching changes): 1 picks, 1 faced the new pitcher (small sample: noise until ~100+)
-- Homered off him in 0 vs 0.0 expected over 1 PA: 0.00x, z -0.2
 
 NBA: 36 picks (small sample: noise until ~100+)
 - Projection boosts: 6/8 beat their average (75%); model said +2.2, got +2.0 per pick
@@ -69,4 +67,3 @@ NBA: 36 picks (small sample: noise until ~100+)
 - 2026-10-20 Miles McBride PTS (prop, o6.5): 3
 - 2026-10-20 Karl-Anthony Towns AST (prop, u4.5): 1
 - 2026-10-20 Anfernee Simons PTS (prop, o7.5): 13
-- 2026-10-15 Jake Bauers vs Edwin Díaz (live, Top 7): 0 HR in 1 PA vs him (4% expected)
