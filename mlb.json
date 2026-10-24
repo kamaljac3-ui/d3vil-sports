@@ -1973,5 +1973,43 @@
    "pHRvs": 0.042772861356932146,
    "gradedOn": "2026-10-16"
   }
+ },
+ {
+  "id": "2026-10-23|849805|641343",
+  "sport": "mlb",
+  "date": "2026-10-23",
+  "at": "2026-10-23T18:01:59.162Z",
+  "name": "Jake Bauers",
+  "team": "MIL",
+  "pitcher": "Nick Martinez",
+  "win": 0.12241487625928468,
+  "hr": 0.2271404508947321,
+  "edge": 0.03198019122928043,
+  "hrEdge": -0.0234975963561673,
+  "gap": 5.468573006501704,
+  "prim": "Sinker",
+  "hitterId": "641343",
+  "pitcherId": "607259",
+  "gamePk": 849805,
+  "envMult": 0.93354765051862,
+  "wx": "4 mph in from CF, 55°F, forecast, roof may close",
+  "modes": [
+   "morning",
+   "lineups"
+  ],
+  "result": {
+   "status": "final",
+   "pa": 4,
+   "hr": 0,
+   "paVsSP": 2,
+   "hrVsSP": 0,
+   "bbe": 3,
+   "inWin": 0,
+   "starterMatched": true,
+   "baseHrPA": 0.04277286135693215,
+   "pHR": 0.16042400710323912,
+   "pHRvs": 0.08371620504520494,
+   "gradedOn": "2026-10-24"
+  }
  }
 ]
