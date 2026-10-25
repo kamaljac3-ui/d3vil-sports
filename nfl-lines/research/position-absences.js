@@ -8,6 +8,8 @@ const fs=require("fs"),path=require("path");
 const {parseCSV,getText,log,env}=require("../../nfl-props/lib");
 const NV="https://github.com/nflverse/nflverse-data/releases/download";
 const FROM=env("FROM",2013),TO=env("TO",2025);
+const MIN_CELL=env("MIN_CELL",25);   // hide cells with fewer games (lower it for a single season)
+const JSON_OUT=process.env.JSON_OUT||"";   // optional: write {situation, games, covers, misses} rows here
 
 // snap-count position -> [group, side, starter threshold]
 const GROUP={T:["OL","off",0.8],G:["OL","off",0.8],C:["OL","off",0.8],OL:["OL","off",0.8],
@@ -18,9 +20,9 @@ const GROUP={T:["OL","off",0.8],G:["OL","off",0.8],C:["OL","off",0.8],OL:["OL","
 const OFF=["OL","WR","TE","RB"],DEF=["DL","LB","CB","S"];
 
 const mean=a=>a.reduce((x,y)=>x+y,0)/a.length,sd=a=>{const m=mean(a);return Math.sqrt(a.reduce((x,y)=>x+(y-m)**2,0)/(a.length-1));};
-const cell=(a,d=1)=>{a=a.filter(v=>v!=null&&!isNaN(v));if(a.length<25)return "-";const m=mean(a),se=sd(a)/Math.sqrt(a.length);
+const cell=(a,d=1)=>{a=a.filter(v=>v!=null&&!isNaN(v));if(a.length<MIN_CELL)return "-";const m=mean(a),se=sd(a)/Math.sqrt(a.length);
   return `${m>=0?"+":""}${m.toFixed(d)}±${se.toFixed(d)}${Math.abs(m/se)>=2.5?" **":Math.abs(m/se)>=2?" *":""}`;};
-const cov=R=>{const c=R.map(r=>r.ats).filter(x=>x!==0);return c.length>=25?(100*c.filter(x=>x>0).length/c.length).toFixed(1)+"%":"-";};
+const cov=R=>{const c=R.map(r=>r.ats).filter(x=>x!==0);return c.length>=MIN_CELL?(100*c.filter(x=>x>0).length/c.length).toFixed(1)+"%":"-";};
 
 (async()=>{
   const G={};
@@ -68,7 +70,9 @@ const cov=R=>{const c=R.map(r=>r.ats).filter(x=>x!==0);return c.length>=25?(100*
   }
   const q=(arr,p)=>{const s=arr.filter(v=>v!=null).sort((a,b)=>a-b);return s[Math.floor(p*(s.length-1))];};
   const topRush=q(rows.map(r=>r.defRush),2/3),topRun=q(rows.map(r=>r.offRun),2/3);
-  const line=(label,R)=>`| ${label} | ${R.length} | ${cell(R.map(r=>r.pts))} | ${cell(R.map(r=>r.ats))} | ${cov(R)} | ${cov(R.filter(r=>r.S<=2019))} | ${cov(R.filter(r=>r.S>=2020))} | ${cell(R.map(r=>r.ry),0)} | ${cell(R.map(r=>r.py),0)} | ${cell(R.map(r=>r.sk),2)} |`;
+  const summary=[];
+  const line=(label,R)=>{const c=R.map(r=>r.ats).filter(x=>x!==0);summary.push({situation:label,games:R.length,covers:c.filter(x=>x>0).length,misses:c.filter(x=>x<0).length});return line0(label,R);};
+  const line0=(label,R)=>`| ${label} | ${R.length} | ${cell(R.map(r=>r.pts))} | ${cell(R.map(r=>r.ats))} | ${cov(R)} | ${cov(R.filter(r=>r.S<=2019))} | ${cov(R.filter(r=>r.S>=2020))} | ${cell(R.map(r=>r.ry),0)} | ${cell(R.map(r=>r.py),0)} | ${cell(R.map(r=>r.sk),2)} |`;
   const none=rows.filter(r=>OFF.every(g=>!r.off[g])&&DEF.every(g=>!r.def[g]));
   let md=`# Missing starters by position group, ${FROM}-${TO} regular season\n\n`+
     `Every row is scored on the OFFENSE: its points vs. the implied team total, its result vs. the spread, and its rushing yards / passing yards / sacks taken vs. both teams' season norms.\n`+
@@ -87,5 +91,6 @@ const cov=R=>{const c=R.map(r=>r.ats).filter(x=>x!==0);return c.length>=25?(100*
      line("Opp 3+ defensive starters missing (any)",rows.filter(r=>DEF.reduce((a,g)=>a+r.def[g],0)>=3)),
      line("Own 3+ offensive starters missing (any)",rows.filter(r=>OFF.reduce((a,g)=>a+r.off[g],0)>=3)),
     ].join("\n")+"\n";
-  fs.writeFileSync(path.join(__dirname,"position-absences-results.md"),md);console.log("\n"+md);
+  if(JSON_OUT)fs.writeFileSync(JSON_OUT,JSON.stringify(summary,null,1));
+  else fs.writeFileSync(path.join(__dirname,"position-absences-results.md"),md);console.log("\n"+md);
 })().catch(e=>{console.error(e);process.exit(1);});
