@@ -41,10 +41,10 @@ The sections below use the picked setting.
 
 | Flag | Picks | Beat their average | Model said (avg gain) | Actually got | Got ÷ said |
 |---|---:|---:|---:|---:|---:|
-| Projection boost: PTS | 154 | 72.1% | +2.56 | **+4.91** | 1.92 |
-| Projection boost: REB | 18 | 72.2% | +1.19 | **+2.90** | 2.43 |
-| Projection boost: AST | 7 | 71.4% | +1.11 | **+2.57** | 2.31 |
-| Projection boost: 3PM | 1 | 100.0% | +0.56 | **+0.10** | 0.18 |
+| Projection boost: PTS | 166 | 71.7% | +2.59 | **+4.78** | 1.85 |
+| Projection boost: REB | 16 | 75.0% | +1.20 | **+3.16** | 2.64 |
+| Projection boost: AST | 7 | 71.4% | +1.12 | **+2.57** | 2.30 |
+| Projection boost: 3PM | 1 | 100.0% | +0.57 | **+0.10** | 0.18 |
 | *(no flag) everyone in this group, PTS* | 15,317 | 47.8% | – | +0.16 | – |
 | *(no flag) everyone in this group, REB* | 15,317 | 45.0% | – | -0.02 | – |
 | *(no flag) everyone in this group, AST* | 15,317 | 45.5% | – | +0.04 | – |
@@ -58,10 +58,10 @@ The sections below use the picked setting.
 | full model | REB | 15,317 | 2.066 | 2.076 | -0.3% | 0.56 ± 0.05 |
 | full model | AST | 15,317 | 1.585 | 1.583 | -1.5% | 0.78 ± 0.05 |
 | full model | 3PM | 15,317 | 1.062 | 1.066 | -0.4% | 0.69 ± 0.08 |
-| calibrated (what alerts use) | PTS | 15,317 | 5.377 | 5.333 | -2.2% | 1.52 ± 0.08 |
-| calibrated (what alerts use) | REB | 15,317 | 2.066 | 2.051 | -1.2% | 1.28 ± 0.09 |
-| calibrated (what alerts use) | AST | 15,317 | 1.585 | 1.574 | -2.1% | 1.43 ± 0.08 |
-| calibrated (what alerts use) | 3PM | 15,317 | 1.062 | 1.065 | -0.9% | 1.38 ± 0.11 |
+| calibrated (what alerts use) | PTS | 15,317 | 5.377 | 5.330 | -2.2% | 1.39 ± 0.07 |
+| calibrated (what alerts use) | REB | 15,317 | 2.066 | 2.051 | -1.2% | 1.25 ± 0.09 |
+| calibrated (what alerts use) | AST | 15,317 | 1.585 | 1.573 | -2.1% | 1.38 ± 0.07 |
+| calibrated (what alerts use) | 3PM | 15,317 | 1.062 | 1.065 | -0.9% | 1.32 ± 0.11 |
 | without shot zones | PTS | 15,317 | 5.377 | 5.358 | -1.8% | 1.09 ± 0.06 |
 | without shot zones | REB | 15,317 | 2.066 | 2.076 | -0.3% | 0.56 ± 0.05 |
 | without shot zones | AST | 15,317 | 1.585 | 1.583 | -1.5% | 0.78 ± 0.05 |
@@ -95,10 +95,10 @@ The sections below use the picked setting.
 
 | Flag | Picks | Beat their average | Model said (avg gain) | Actually got | Got ÷ said |
 |---|---:|---:|---:|---:|---:|
-| Projection boost: PTS | 200 | 63.0% | +2.65 | **+3.15** | 1.19 |
-| Projection boost: REB | 6 | 66.7% | +1.17 | **+2.54** | 2.17 |
-| Projection boost: AST | 11 | 45.5% | +1.24 | **+0.25** | 0.20 |
-| Projection boost: 3PM | 1 | 100.0% | +0.52 | **+1.10** | 2.12 |
+| Projection boost: PTS | 215 | 64.7% | +2.67 | **+3.23** | 1.21 |
+| Projection boost: REB | 5 | 60.0% | +1.15 | **+2.05** | 1.78 |
+| Projection boost: AST | 12 | 50.0% | +1.23 | **+0.65** | 0.53 |
+| Projection boost: 3PM | 1 | 100.0% | +0.52 | **+1.10** | 2.11 |
 | *(no flag) everyone in this group, PTS* | 15,530 | 46.3% | – | -0.15 | – |
 | *(no flag) everyone in this group, REB* | 15,530 | 44.4% | – | -0.10 | – |
 | *(no flag) everyone in this group, AST* | 15,530 | 44.5% | – | -0.00 | – |
@@ -112,10 +112,10 @@ The sections below use the picked setting.
 | full model | REB | 15,530 | 2.036 | 2.042 | -0.4% | 0.59 ± 0.05 |
 | full model | AST | 15,530 | 1.583 | 1.585 | -0.4% | 0.57 ± 0.05 |
 | full model | 3PM | 15,530 | 1.049 | 1.053 | -0.1% | 0.55 ± 0.07 |
-| calibrated (what alerts use) | PTS | 15,530 | 5.367 | 5.320 | -2.1% | 1.15 ± 0.06 |
-| calibrated (what alerts use) | REB | 15,530 | 2.036 | 2.020 | -1.7% | 1.44 ± 0.08 |
-| calibrated (what alerts use) | AST | 15,530 | 1.583 | 1.575 | -1.5% | 1.05 ± 0.07 |
-| calibrated (what alerts use) | 3PM | 15,530 | 1.049 | 1.052 | -0.9% | 1.22 ± 0.10 |
+| calibrated (what alerts use) | PTS | 15,530 | 5.367 | 5.316 | -2.2% | 1.09 ± 0.06 |
+| calibrated (what alerts use) | REB | 15,530 | 2.036 | 2.020 | -1.7% | 1.42 ± 0.08 |
+| calibrated (what alerts use) | AST | 15,530 | 1.583 | 1.574 | -1.5% | 1.02 ± 0.07 |
+| calibrated (what alerts use) | 3PM | 15,530 | 1.049 | 1.052 | -0.9% | 1.19 ± 0.10 |
 | without shot zones | PTS | 15,530 | 5.367 | 5.354 | -1.1% | 0.80 ± 0.06 |
 | without shot zones | REB | 15,530 | 2.036 | 2.042 | -0.4% | 0.59 ± 0.05 |
 | without shot zones | AST | 15,530 | 1.583 | 1.585 | -0.4% | 0.57 ± 0.05 |
@@ -199,16 +199,16 @@ Same replay with players averaging 10–20 minutes also projected. Starters keep
 | 1 | 1.0447 | 1.0591 | 0.50 | 0.9860 | 0.9852 | 0.61 |
 | 1.25 | 1.1540 | 1.1945 | 0.41 | 1.0527 | 1.0695 | 0.50 |
 
-### Bench, 2024-25: 7,715 player-games; 736 flagged, 5.6% of those didn't play (coach's decision)
+### Bench, 2024-25: 7,715 player-games; 726 flagged, 5.2% of those didn't play (coach's decision)
 
 All bench games:
 
 | Flag | Picks | Beat their average | Model said (avg gain) | Actually got | Got ÷ said |
 |---|---:|---:|---:|---:|---:|
-| Projection boost: PTS | 543 | 77.0% | +3.04 | **+4.84** | 1.59 |
-| Projection boost: REB | 427 | 71.0% | +1.50 | **+1.97** | 1.31 |
-| Projection boost: AST | 113 | 80.5% | +1.42 | **+1.95** | 1.38 |
-| Projection boost: 3PM | 125 | 67.2% | +0.69 | **+0.91** | 1.32 |
+| Projection boost: PTS | 545 | 76.9% | +3.02 | **+4.84** | 1.60 |
+| Projection boost: REB | 423 | 71.6% | +1.50 | **+2.01** | 1.34 |
+| Projection boost: AST | 110 | 80.0% | +1.42 | **+1.90** | 1.34 |
+| Projection boost: 3PM | 125 | 67.2% | +0.68 | **+0.91** | 1.33 |
 | *(no flag) everyone in this group, PTS* | 7,715 | 47.9% | – | +0.72 | – |
 | *(no flag) everyone in this group, REB* | 7,715 | 46.0% | – | +0.25 | – |
 | *(no flag) everyone in this group, AST* | 7,715 | 45.1% | – | +0.15 | – |
@@ -218,25 +218,25 @@ Only games where a teammate was out:
 
 | Flag | Picks | Beat their average | Model said (avg gain) | Actually got | Got ÷ said |
 |---|---:|---:|---:|---:|---:|
-| Projection boost: PTS | 533 | 77.1% | +3.05 | **+4.88** | 1.60 |
-| Projection boost: REB | 426 | 70.9% | +1.50 | **+1.96** | 1.30 |
-| Projection boost: AST | 112 | 80.4% | +1.42 | **+1.96** | 1.38 |
-| Projection boost: 3PM | 125 | 67.2% | +0.69 | **+0.91** | 1.32 |
+| Projection boost: PTS | 535 | 77.0% | +3.03 | **+4.88** | 1.61 |
+| Projection boost: REB | 422 | 71.6% | +1.50 | **+2.00** | 1.33 |
+| Projection boost: AST | 109 | 79.8% | +1.42 | **+1.92** | 1.35 |
+| Projection boost: 3PM | 125 | 67.2% | +0.68 | **+0.91** | 1.33 |
 | *(no flag) everyone in this group, PTS* | 5,756 | 51.4% | – | +1.20 | – |
 | *(no flag) everyone in this group, REB* | 5,756 | 49.6% | – | +0.45 | – |
 | *(no flag) everyone in this group, AST* | 5,756 | 48.1% | – | +0.27 | – |
 | *(no flag) everyone in this group, 3PM* | 5,756 | 38.7% | – | +0.16 | – |
 
-### Bench, 2025-26: 8,218 player-games; 537 flagged, 8.6% of those didn't play (coach's decision)
+### Bench, 2025-26: 8,218 player-games; 531 flagged, 8.7% of those didn't play (coach's decision)
 
 All bench games:
 
 | Flag | Picks | Beat their average | Model said (avg gain) | Actually got | Got ÷ said |
 |---|---:|---:|---:|---:|---:|
-| Projection boost: PTS | 363 | 76.3% | +3.05 | **+5.45** | 1.79 |
-| Projection boost: REB | 304 | 72.0% | +1.53 | **+2.32** | 1.52 |
-| Projection boost: AST | 75 | 72.0% | +1.33 | **+2.51** | 1.89 |
-| Projection boost: 3PM | 83 | 59.0% | +0.75 | **+0.68** | 0.90 |
+| Projection boost: PTS | 357 | 76.2% | +3.04 | **+5.48** | 1.80 |
+| Projection boost: REB | 303 | 72.6% | +1.53 | **+2.35** | 1.54 |
+| Projection boost: AST | 74 | 71.6% | +1.32 | **+2.53** | 1.92 |
+| Projection boost: 3PM | 83 | 59.0% | +0.74 | **+0.68** | 0.91 |
 | *(no flag) everyone in this group, PTS* | 8,218 | 48.5% | – | +0.80 | – |
 | *(no flag) everyone in this group, REB* | 8,218 | 46.9% | – | +0.26 | – |
 | *(no flag) everyone in this group, AST* | 8,218 | 45.3% | – | +0.19 | – |
@@ -246,9 +246,9 @@ Only games where a teammate was out:
 
 | Flag | Picks | Beat their average | Model said (avg gain) | Actually got | Got ÷ said |
 |---|---:|---:|---:|---:|---:|
-| Projection boost: PTS | 357 | 76.2% | +3.06 | **+5.44** | 1.78 |
-| Projection boost: REB | 302 | 72.5% | +1.53 | **+2.36** | 1.54 |
-| Projection boost: AST | 75 | 72.0% | +1.33 | **+2.51** | 1.89 |
+| Projection boost: PTS | 351 | 76.1% | +3.05 | **+5.46** | 1.79 |
+| Projection boost: REB | 301 | 73.1% | +1.53 | **+2.38** | 1.56 |
+| Projection boost: AST | 74 | 71.6% | +1.32 | **+2.53** | 1.92 |
 | Projection boost: 3PM | 82 | 58.5% | +0.75 | **+0.67** | 0.90 |
 | *(no flag) everyone in this group, PTS* | 5,974 | 52.7% | – | +1.35 | – |
 | *(no flag) everyone in this group, REB* | 5,974 | 50.5% | – | +0.49 | – |
