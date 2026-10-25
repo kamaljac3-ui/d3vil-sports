@@ -6,7 +6,8 @@
 const {env,envs,log,etParts,etToUtc,etClock,readState,writeState,ntfy,summary,getRaw,LIVE,DRY}=require("../nfl-props/lib");
 const data=require("../nfl-props/data"),W=require("../nfl-props/weather"),odds=require("../nfl-props/odds"),M=require("./model");
 const SH=require("../nfl-props/sharp");
-const {lateSeasonTag,loadStarters,absenceTags,windTag}=require("./tags");
+const {lateSeasonTag,loadStarters,absenceTags,windTag,windKey}=require("./tags");
+const {VERSIONS,gameContext}=require("../nfl-props/context");
 
 const MODE=envs("MODE","auto");
 const CFG={
@@ -94,11 +95,11 @@ function qbStatus(sched,S,week,g,team,sl,inj){
   const top=Object.entries(c).sort((a,b)=>b[1].n-a[1].n)[0];if(!top)return {status:"",note:""};
   const [id,{nm}]=top,s=sl[id],ri=inj.get(id)||"",si=s?s[1]:"";
   const listed=g.home_team===team?g.home_qb_id:g.away_qb_id,listedNm=g.home_team===team?g.home_qb_name:g.away_qb_name;
-  if((s&&s[0]&&s[0]!==team)||["Out","IR","PUP","Sus"].includes(si)||ri==="Out")return {status:"out",note:`${team} QB ${nm} out`};
-  if(si==="Doubtful"||ri==="Doubtful")return {status:"doubtful",note:`${team} QB ${nm} doubtful`};
-  if(si==="Questionable"||ri==="Questionable")return {status:"",note:`${team} QB ${nm} questionable`};
+  if((s&&s[0]&&s[0]!==team)||["Out","IR","PUP","Sus"].includes(si)||ri==="Out")return {status:"out",note:`${team} QB ${nm} out`,key:"qb_out"};
+  if(si==="Doubtful"||ri==="Doubtful")return {status:"doubtful",note:`${team} QB ${nm} doubtful`,key:"qb_doubtful"};
+  if(si==="Questionable"||ri==="Questionable")return {status:"",note:`${team} QB ${nm} questionable`,key:"qb_questionable"};
   // nflverse's listed starter is sometimes stale, so it's a heads-up only, not a rating penalty
-  if(listed&&listed!==id)return {status:"",note:`${team}: nflverse lists ${listedNm} as starter (usual: ${nm})`};
+  if(listed&&listed!==id)return {status:"",note:`${team}: nflverse lists ${listedNm} as starter (usual: ${nm})`,key:"qb_listed_differs"};
   return {status:"",note:""};
 }
 
@@ -152,14 +153,19 @@ async function tick(){
     const hq=qbStatus(sched,S,week,g,g.home_team,sl,inj),aq=qbStatus(sched,S,week,g,g.away_team,sl,inj);
     const wx=await W.kickoffWeather(g,new Date(g.kick));
     const P=M.predict(R,g,{homeQB:hq.status,awayQB:aq.status,wx});
-    const notes=[hq.note,aq.note,lateSeasonTag(sched,g),...absenceTags(CB,g,sl,inj)].filter(Boolean);
-    const wt=windTag(wx);if(wt)notes.push(wt);else if(wx&&!wx.indoor&&wx.precip>=M.C.PRECIP_IN)notes.push(W.wxText(wx));
+    const tagKeys=[];   // logged with every pick from this game (see nfl-props/context.js)
+    if(hq.key)tagKeys.push({tag:hq.key,team:g.home_team});if(aq.key)tagKeys.push({tag:aq.key,team:g.away_team});
+    const late=lateSeasonTag(sched,g);if(late)tagKeys.push({tag:"late_season_warm_visitor",team:g.away_team});
+    const notes=[hq.note,aq.note,late,...absenceTags(CB,g,sl,inj,tagKeys)].filter(Boolean);
+    const wt=windTag(wx);if(wt){notes.push(wt);tagKeys.push({tag:windKey(wx),team:null});}
+    else if(wx&&!wx.indoor&&wx.precip>=M.C.PRECIP_IN)notes.push(W.wxText(wx));
+    const ctx={...gameContext(g,wx),tags:tagKeys,model_version:VERSIONS["nfl-lines"]};
     const key=`${g.away_team}@${g.home_team}`,st=staleLines(g,OD&&OD[key]);
     blocks.push(gameBlock(g,P,L[key],notes,st));
-    for(const p of st.picks)picks.push({kind:"stale",game:g.game_id,...p});
+    for(const p of st.picks)picks.push({kind:"stale",game:g.game_id,...p,ctx});
     const b=blocks[blocks.length-1],mp=M.mlPick(P,(L[key]||{}).homeML,(L[key]||{}).awayML);
-    if(b.edges.includes("spread"))picks.push({kind:"model",market:"spread",game:g.game_id,line:L[key].spread,model:P.margin,src:L[key].src});
-    if(b.edges.includes("ml")&&mp)picks.push({kind:"model",market:"ml",game:g.game_id,team:mp.side==="home"?g.home_team:g.away_team,price:mp.price,model:mp.model,marketProb:mp.market,src:L[key].src});
+    if(b.edges.includes("spread"))picks.push({kind:"model",market:"spread",game:g.game_id,line:L[key].spread,model:P.margin,src:L[key].src,ctx});
+    if(b.edges.includes("ml")&&mp)picks.push({kind:"model",market:"ml",game:g.game_id,team:mp.side==="home"?g.home_team:g.away_team,price:mp.price,model:mp.model,marketProb:mp.market,src:L[key].src,ctx});
   }
   blocks.sort((a,b)=>(b.edges.length+b.stale)-(a.edges.length+a.stale));
   const nEdges=blocks.reduce((a,b)=>a+b.edges.length,0),nStale=blocks.reduce((a,b)=>a+b.stale,0),src=[...new Set(Object.values(L).map(x=>x.src))].join(", ");

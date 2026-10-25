@@ -146,6 +146,11 @@ scoreboard, i.e. DraftKings; optionally The Odds API) next to a port of `nfl-edg
   - windy games (12+ mph), with wind direction relative to the field
   The evidence is in `nfl-lines/research/*-results.md`.
 - **Sleeper's trimmed copy** (`nfl-props/data.js`) also keeps defensive backs, keyed `n:<name>|<team>`, because most have no gsis id.
+- **Learning loop (NFL):**
+  - **Read first:** `nfl-props/LEARNINGS.md` and `nfl-lines/LEARNINGS.md`, which list every angle tested and its status, before changing a model or adding a tag.
+  - **The rule:** an angle goes into a model only if it beats an out-of-sample backtest. Otherwise it's a ⚠️ tag at most.
+  - **Pick context:** every logged pick carries `ctx`: tags, injuries/teammates out, weather, rest, minutes to kickoff, and `model_version` (`nfl-props/context.js`). Bump `VERSIONS` whenever a model's numbers change.
+  - **Weekly review:** grades by tag and by version, closing-line value first.
 - **Grading the NFL bots:** run the manual **NFL Picks Export** workflow, `gh run download <id> -n nfl-state -D <dir>`,
   then `node nfl-lines/grade.js <dir>` (W-L, units, closing-line value, per week). `results/track.js` still doesn't grade NFL.
   As of Oct 24, 2026: props model 23-20, lines ✅ 21-22-2 (now off by default via `MODEL_EDGES=0`).

@@ -5,6 +5,7 @@
 //                  (GAME=<nflverse game_id>, else games in the window, else the next game).
 const {env,envs,log,etParts,etToUtc,etClock,readState,writeState,ntfy,summary,normName,LIVE,DRY}=require("./lib");
 const data=require("./data"),M=require("./model"),W=require("./weather"),odds=require("./odds"),SH=require("./sharp");
+const {VERSIONS,gameContext,windBucket}=require("./context");
 
 const MODE=envs("MODE","auto");
 const CFG={
@@ -131,12 +132,23 @@ async function attachLines(games,fresh){
 const staleLine=x=>{const side=x.side==="A"?"Over":"Under",ss=x.side==="A"?x.sharp.A:x.sharp.B;
   return `💰 ${x.name} (${x.game}) ${side} ${x.L} ${LABEL[x.stat]} at ${x.title} ${SH.fmt(x.price)}: fair ${(x.fair*100).toFixed(1)}%, +${(x.ev*100).toFixed(1)}% EV vs ${x.sharp.title} ${side} ${ss.L} ${SH.fmt(ss.price)}`;};
 // what a live alert contained, for grading / closing-line value later (results tracker format: sport + date)
-function logPicks(ctx,kind,evals,stale){
+// games = the projectGame results in the alert: every pick carries its game's context and, for model picks,
+// the player's situation (teammates out, usage bump, injury status, projected snap share...) - see context.js
+function logPicks(ctx,kind,evals,stale,games){
   const date=etParts().date,key=`picks-${date}.json`,at=new Date().toISOString();
+  const G=Object.fromEntries((games||[]).map(x=>[x.g.game_id,x]));
+  const gctx=gid=>{const x=G[gid];if(!x)return {model_version:VERSIONS["nfl-props"]};
+    const w=windBucket(x.wx);return {...gameContext(x.g,x.wx),model_version:VERSIONS["nfl-props"],tags:w?[{tag:w,team:null}]:[]};};
+  const pctx=e=>{const p=e.p,c=gctx(p.gid),side=G[p.gid]&&G[p.gid].sides.find(s=>s.team===p.team),tags=[...(c.tags||[])];
+    if(p.bump.t>=0.5||p.bump.c>=1)tags.push({tag:"teammate_out",team:p.team,players:p.bump.from});
+    if(p.status==="q")tags.push({tag:"questionable",team:p.team});
+    if(side&&side.qbChanged)tags.push({tag:"qb_changed",team:p.team});
+    return {...c,tags,player:{status:p.status||"",proj_snap:p.snap,t_share:p.tShare,c_share:p.cShare,tgt:p.tgt,car:p.car,
+      bump_tgt:p.bump.t,bump_car:p.bump.c,teammates_out:p.bump.from,matchup:p.ctx.matchup,man_zone:p.ctx.mz??null,qb_factor:p.ctx.qbFactor}};};
   const rows=[...evals.filter(e=>e.refKind==="line").map(e=>({kind:"model",market:e.stat,player:e.p.name,playerId:e.p.id,game:e.p.gid,
-      side:e.over?"Over":"Under",point:e.ref,price:e.price?e.price.price:null,book:e.price?e.price.book:null,proj:e.proj,prob:e.prob})),
+      side:e.over?"Over":"Under",point:e.ref,price:e.price?e.price.price:null,book:e.price?e.price.book:null,proj:e.proj,prob:e.prob,ctx:pctx(e)})),
     ...stale.map(x=>({kind:"stale",market:x.stat,player:x.name,game:x.gid,side:x.side==="A"?"Over":"Under",point:x.L,price:x.price,book:x.key,fair:x.fair,ev:x.ev,
-      sharp:`${x.sharp.key} ${(x.side==="A"?x.sharp.A:x.sharp.B).L} ${(x.side==="A"?x.sharp.A:x.sharp.B).price}`}))];
+      sharp:`${x.sharp.key} ${(x.side==="A"?x.sharp.A:x.sharp.B).L} ${(x.side==="A"?x.sharp.A:x.sharp.B).price}`,ctx:gctx(x.gid)}))];
   if(rows.length)writeState(key,(readState(key)||[]).concat(rows.map(r=>({sport:"nfl",bot:"nfl-props",date,at,alert:kind,week:ctx.week,...r}))));
 }
 
@@ -162,7 +174,7 @@ async function weekly(ctx,kind,games){
   const ok=await ntfy(`NFL props W${ctx.week}: ${label} (${top.length}${stale.length?`, ${stale.length} stale`:""})`,msg+(RUN_URL?"\n\nTap for every projection.":""),top.length?4:2,["football","chart_with_upwards_trend"],RUN_URL);
   summary(tableMd(`NFL week ${ctx.week} projections (${label})`,G));
   if(LIVE&&ok){
-    logPicks(ctx,kind,top,stale.slice(0,CFG.STALE_N));
+    logPicks(ctx,kind,top,stale.slice(0,CFG.STALE_N),G);
     const snap={kind,games:{}};
     for(const x of G)snap.games[x.g.game_id]={wx:x.wx,qb:x.sides.map(s=>s.qb),
       out:x.sides.flatMap(s=>s.out.map(o=>o.id)),players:Object.fromEntries(x.players.map(p=>[p.id,{name:p.name,stats:p.stats,status:p.status}]))};
@@ -211,7 +223,7 @@ async function gameday(ctx,g){
   if(!snap)msg+="\n\n(no Wed/Fri snapshot for this game - showing current projections only)";
   summary(tableMd(`${matchup} game-day projections`,[x]));
   const ok=await ntfy(`${matchup} ${t} ET: inactives check`,msg||"No changes.",notes.length||stale.length?4:3,["football"],RUN_URL);
-  if(LIVE&&ok)logPicks({...ctx,week:g.week},"gameday",evals,stale.slice(0,CFG.STALE_N));
+  if(LIVE&&ok)logPicks({...ctx,week:g.week},"gameday",evals,stale.slice(0,CFG.STALE_N),[x]);
   return ok;
 }
 

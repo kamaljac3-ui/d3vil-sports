@@ -24,11 +24,15 @@ const picksOf=bot=>{const d=path.join(DIR,bot,".cache");return fs.existsSync(d)?
     ["game_id","player_id","player_display_name","receptions","receiving_yards","rushing_yards","passing_yards"])){
     ST[r.game_id+"|"+r.player_id]=r;ST[r.game_id+"|"+normName(r.player_display_name)]=r;}
   const STAT={rec:"receptions",recYds:"receiving_yards",rushYds:"rushing_yards",passYds:"passing_yards"};
+  // actual offensive snap share per game|gsis, to compare with the projected snap share logged in ctx.player
+  const snapOf={};{const pfr2g={};
+    for(const r of parseCSV(await getText(`${NV}/rosters/roster_${S}.csv`)||"",["gsis_id","pfr_id"]))if(r.pfr_id)pfr2g[r.pfr_id]=r.gsis_id;
+    for(const r of parseCSV(await getText(`${NV}/snap_counts/snap_counts_${S}.csv`)||"",["game_id","pfr_player_id","offense_pct"])){const g=pfr2g[r.pfr_player_id];if(g)snapOf[r.game_id+"|"+g]=+r.offense_pct;}}
   const out=[];
 
   // ---------- game lines (nfl-lines) ----------
   for(const p of picksOf("nfl-lines")){
-    const g=G[p.game];const r={bot:"nfl-lines",kind:p.kind,market:p.market,game:p.game,week:g?+g.week:null,at:p.at,book:p.book||"consensus"};
+    const g=G[p.game];const r={bot:"nfl-lines",kind:p.kind,market:p.market,game:p.game,week:g?+g.week:null,at:p.at,book:p.book||"consensus",ctx:p.ctx||null};
     if(!g||g.result===""){out.push({...r,res:"pending"});continue;}
     const margin=g.home_score-g.away_score,close=+g.spread_line,tot=+g.home_score+ +g.away_score;
     const teamMargin=t=>t===g.home_team?margin:-margin;
@@ -54,13 +58,14 @@ const picksOf=bot=>{const d=path.join(DIR,bot,".cache");return fs.existsSync(d)?
 
   // ---------- player props (nfl-props) ----------
   for(const p of picksOf("nfl-props")){
-    const g=G[p.game];const r={bot:"nfl-props",kind:p.kind,market:p.market,game:p.game,week:g?+g.week:p.week,at:p.at,alert:p.alert,
+    const g=G[p.game];const r={bot:"nfl-props",kind:p.kind,market:p.market,game:p.game,week:g?+g.week:p.week,at:p.at,alert:p.alert,ctx:p.ctx||null,
       label:`${p.player} ${p.side} ${p.point} ${p.market}`,price:p.price??null,book:p.book||null};
     if(!g||g.result===""){out.push({...r,res:"pending"});continue;}
     const row=(p.playerId&&ST[p.game+"|"+p.playerId])||ST[p.game+"|"+normName(p.player)];
     if(!row){out.push({...r,res:"void"});continue;}   // didn't play (or no stat line)
     const v=+row[STAT[p.market]]||0,d=p.side==="Over"?v-p.point:p.point-v,res=d>0?"W":d<0?"L":"P";
-    out.push({...r,actual:v,res,units:profit(res,r.price),proj:p.proj,prob:p.prob,fair:p.fair,ev:p.ev});
+    const snap=p.playerId?snapOf[p.game+"|"+p.playerId]:undefined;
+    out.push({...r,actual:v,res,units:profit(res,r.price),proj:p.proj,prob:p.prob,fair:p.fair,ev:p.ev,actual_snap:snap??null});
   }
 
   fs.writeFileSync(path.join(DIR,"graded.json"),JSON.stringify(out,null,1));

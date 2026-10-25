@@ -73,18 +73,22 @@ function missing(ST,team,week,group,sl,inj){
     return (s&&s[0]&&s[0]!==team)||(s&&["Out","IR","PUP","Sus","NA","Doubtful"].includes(s[1]))||ri==="Out"||ri==="Doubtful";});
 }
 const RUN_HEAVY=122;   // rushing yds/g, top third of offenses 2013-2025
-function absenceTags(ST,g,sl,inj){
+// keys (optional array) collects {tag, team, players} for the pick log, one per tag shown
+function absenceTags(ST,g,sl,inj,keys){
   const out=[],names=l=>l.map(p=>p.name).join(" & ");
   for(const def of [g.home_team,g.away_team]){
     const off=def===g.home_team?g.away_team:g.home_team;
     const cb=missing(ST,def,g.week,"CB",sl,inj);
+    if(cb.length&&keys)keys.push({tag:"cb_missing",team:def,players:cb.map(p=>p.name)});
     if(cb.length)out.push(`⚠️ ${def} missing starting CB${cb.length>1?"s":""} ${names(cb)}: offenses in this spot covered 54.2% since 2020 (650 games), 48% in 2013-19${cb.length>1?"; 61.8% with 2+ out (103 games)":""}. Edge for ${off}? Unproven.`);
     const front=[...missing(ST,def,g.week,"DL",sl,inj),...missing(ST,def,g.week,"LB",sl,inj)];
     const r=Object.values(ST.rush[off]||{}).filter(x=>x.week<g.week),ypg=r.length>=2?r.reduce((a,x)=>a+x.y,0)/r.length:null;
+    if(front.length&&ypg!=null&&ypg>=RUN_HEAVY&&keys)keys.push({tag:"front7_missing_vs_run",team:def,players:front.map(p=>p.name)});
     if(front.length&&ypg!=null&&ypg>=RUN_HEAVY)out.push(`⚠️ ${def} missing front-seven starter${front.length>1?"s":""} ${names(front)} vs run-heavy ${off} (${Math.round(ypg)} rush yds/g): such offenses ran +8 yds and scored +1.4 pts over their implied team total (507 games), but covered only 49%. Lean: ${off} team total over, not the spread.`);
   }
   for(const off of [g.home_team,g.away_team]){
     const ol=missing(ST,off,g.week,"OL",sl,inj);
+    if(ol.length>=2&&keys)keys.push({tag:"ol_missing_2plus",team:off,players:ol.map(p=>p.name)});
     if(ol.length>=2)out.push(`⚠️ ${off} missing ${ol.length} starting O-linemen (${names(ol)}): offenses in this spot covered 43.9% (364 games; 45% in 2013-19, 43% since 2020), -9 pass yds, more sacks. Lean against ${off}? Unproven.`);
   }
   return out;
@@ -103,4 +107,7 @@ function windTag(wx){
   return `⚠️ ${W.wxText(wx)}: games with ${what} went under the closing total ${pct} since 1999 (${n} games; partly hindsight)`;
 }
 
-module.exports={lateSeasonTag,domeTeam,WARM_OUTDOOR,loadStarters,starters,missing,absenceTags,windTag};
+// the windTag bucket as a key (null when no wind tag)
+const windKey=wx=>require("../nfl-props/context").windBucket(wx);
+
+module.exports={lateSeasonTag,domeTeam,WARM_OUTDOOR,loadStarters,starters,missing,absenceTags,windTag,windKey};

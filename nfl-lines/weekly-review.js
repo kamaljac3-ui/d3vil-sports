@@ -59,6 +59,27 @@ const state=(bot,f)=>{const v=readJSON(path.join(bot,".cache",f),null);return v&
     [...new Set(picks.map(p=>p.week).filter(Boolean))].sort((a,b)=>a-b).map(w=>{const d=del.find(x=>x.week===w);
       return `| ${w} | `+fams.map(f=>{const t=tally(picks.filter(p=>p.week===w&&fam(p)===f));return t.w+t.l+t.p?`${t.rec} (${(t.u>=0?"+":"")+t.u.toFixed(1)}u)`:"";}).join(" | ")+` | ${d?`${d.lines_sent}/${d.lines_slots}`:""} |`;}).join("\n")+
     `\n\n## Week ${W} picks\n\n`+wk.filter(p=>p.res!=="pending").map(p=>`- ${p.res} ${fam(p)}: ${p.label}${p.book?` (${p.book}${p.price!=null?" "+(p.price>0?"+":"")+p.price:""})`:""}${p.units!=null?` ${(p.units>=0?"+":"")+p.units.toFixed(2)}u`:""}`).join("\n")+"\n";
+  // ---------- by tag and by model version (closing-line value first: it shows an edge in ~50 picks, W-L needs hundreds) ----------
+  const graded=picks.filter(p=>["W","L","P"].includes(p.res)&&fam(p)!=="Lines model ✅");
+  const groupRow=(label,R)=>{const t=tally(R),c=R.filter(p=>p.clv!=null),pts=c.filter(p=>p.clvUnit==="pts"),pr=c.filter(p=>p.clvUnit==="prob");
+    const avg=(a,d)=>a.length?(a.reduce((s,p)=>s+p.clv,0)/a.length).toFixed(d):"";
+    return `| ${label} | ${t.w+t.l+t.p} | ${t.rec} | ${(t.u>=0?"+":"")+t.u.toFixed(2)}u | ${c.length?Math.round(100*c.filter(p=>p.clv>1e-9).length/c.length)+"% of "+c.length:""} | ${avg(pts,2)} | ${avg(pr,3)} |`;};
+  const tagsOf=p=>p.ctx&&Array.isArray(p.ctx.tags)?p.ctx.tags.map(t=>t.tag):null;
+  const tagNames=[...new Set(graded.flatMap(p=>tagsOf(p)||[]))].sort();
+  md+=`\n## By tag (season, excluding the retired lines ✅ picks)\n\n`+
+    `Every pick logs its situation since Oct 25, 2026 (nfl-props/context.js), tagged or not, so each angle has a "without" group. `+
+    `Closing-line value only exists for game lines (props have no free closing data).\n\n`+
+    `| tag | picks | record | units | beat close | avg CLV (pts) | avg CLV (win prob) |\n|---|---|---|---|---|---|---|\n`+
+    [...tagNames.map(t=>groupRow(t,graded.filter(p=>(tagsOf(p)||[]).includes(t)))),
+     groupRow("no tags (baseline)",graded.filter(p=>tagsOf(p)&&!tagsOf(p).length)),
+     groupRow("logged before context (pre Oct 25)",graded.filter(p=>!tagsOf(p)))].join("\n")+"\n";
+  const ver=p=>(p.ctx&&p.ctx.model_version)||"before versioning";
+  md+=`\n## By model version\n\n| version | picks | record | units | beat close | avg CLV (pts) | avg CLV (win prob) |\n|---|---|---|---|---|---|---|\n`+
+    [...new Set(graded.map(ver))].sort().map(v=>groupRow(v,graded.filter(p=>ver(p)===v))).join("\n")+"\n";
+  // props: projected vs actual snap share (did we read the role right?)
+  const sn=graded.filter(p=>p.bot==="nfl-props"&&p.actual_snap!=null&&p.ctx&&p.ctx.player&&p.ctx.player.proj_snap!=null);
+  if(sn.length)md+=`\nProps snap share: projected ${(100*sn.reduce((a,p)=>a+p.ctx.player.proj_snap,0)/sn.length).toFixed(0)}% vs actual ${(100*sn.reduce((a,p)=>a+p.actual_snap,0)/sn.length).toFixed(0)}% on ${sn.length} picks; `+
+    `role misreads (off by 15+ points): ${sn.filter(p=>Math.abs(p.actual_snap-p.ctx.player.proj_snap)>=0.15).length}.\n`;
   fs.writeFileSync(path.join(LEDGER,"SUMMARY.md"),md);
   log(`ledger: ${picks.length} picks, week ${W} reviewed`);
 
