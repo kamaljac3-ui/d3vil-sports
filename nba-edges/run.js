@@ -263,7 +263,15 @@ const linesMessage=rows=>rows.length?`Game lines (model vs line; no proven edge 
 // ---------- scoring ----------
 async function sideRows(g,side,D,outKeys,lines){
   const team=(await roster(g[side].espnId)).map(n=>D.players[nk(n)]).filter(Boolean);
-  return flagRows(projectSide(team,g,side,D,outKeys),lines);
+  const rows=flagRows(projectSide(team,g,side,D,outKeys),lines);
+  return await b2bNight(g,side)?rows.map(r=>({...r,tags:[...r.tags,"b2b 2nd night"]})):rows;
+}
+// Informational tag only, never in the projection: in the 2024-26 box scores regulars who played the 2nd night of a
+// back-to-back scored right at their projection (and a player's own b2b split barely repeated year to year), but sat
+// 21% of the time vs 16% otherwise. So the risk is a late rest day, not a cold night.
+async function b2bNight(g,side){
+  try{const {games}=await ratings();return LN.restDays(games.filter(x=>x.date<g.date),g[side].espnAbbr,g.date)===1;}
+  catch(e){return false;}
 }
 // Pure scoring (also used by backtest.js): project every rotation player on one side of a game.
 // team: stat objects for that side's roster; g: {home,away:{abbr},total,homeSpread}; outKeys: Set of ruled-out name keys.

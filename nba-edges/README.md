@@ -13,6 +13,7 @@ NBA matchup alerts sent to ntfy: per-game stat projections (projection boosts, a
   - blowout trim for starters when the spread is 12 or more
   - teammates ruled out: their minutes go to the rest of the rotation, weighted toward players with room to play more (MIN × (36 − MIN)), at a quarter strength (`NBA_OUT_MIN_SCALE` 0.25). Per-minute production gets a small usage bump: 0.15 × the share of that stat the team lost (`NBA_OUT_USAGE` 0.15). This only counts players who have been playing, since a long absence is already in everyone's averages.
 - **Season blend:** until a player has about 15 games, last season is mixed in.
+- **`b2b 2nd night` tag** (informational only, never in the projection): the player's team played yesterday. In the 2024–26 box scores, regulars who played the second night scored right at their projection (+0.15 vs +0.17 pts on other nights). A player's own back-to-back split barely repeated from one season to the next (0.11× ± 0.08), so the tag doesn't say better or worse. What did change is that they sat 21% of second nights vs 16% of other games, so the risk is a late rest day.
 - **Calibration** (`calibrate`, `sdOf`; the `CAL` constants, fit by the backtest on 2024–26). Every alert uses it:
   - starters (20+ MPG) keep only k (0.6–0.8) of the projection's gap from their average; bench players keep all of it
   - then every projection is pulled toward the middle (beta ≈ 0.94): a 28+ ppg scorer comes in about 2 under his average
