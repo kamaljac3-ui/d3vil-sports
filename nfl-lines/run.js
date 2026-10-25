@@ -10,13 +10,19 @@ const {lateSeasonTag,loadStarters,absenceTags,windTag}=require("./tags");
 
 const MODE=envs("MODE","auto");
 const CFG={
-  GD_MIN:env("GD_MIN",75),GD_MAX:env("GD_MAX",110),
+  // Game-day window, minutes before kickoff. Opens at 80 so the alert follows the inactives list (~90 min out)
+  // and Sleeper's updates; stays open to 10 so a run GitHub starts late still sends instead of skipping (week 5:
+  // a run began 74.6 min before Monday night's kickoff and missed the old 75-110 window by 36 seconds).
+  GD_MIN:env("GD_MIN",10),GD_MAX:env("GD_MAX",80),
   MIN_SPREAD:env("MIN_SPREAD",3),         // model vs line, points
   MIN_ML:env("MIN_ML",0.06),              // model win % minus the market's no-vig %
   MIN_TOTAL:env("MIN_TOTAL",4),
   TOTAL_EDGES:env("TOTAL_EDGES",0),       // off: totals lost badly in the 2023-25 backtests (see README)
   LINES:envs("LINES","auto"),             // auto = Odds API consensus when ODDS_API_KEY is set, else ESPN | espn | odds
   MIN_WEEK:env("MIN_WEEK",4),             // no ✅ before this week: ratings from 1-3 games swing wildly
+  // ✅ model spread/moneyline edges: OFF by default. The rating model went 9-11-1 on flagged spreads in 2026
+  // (closing-line value ~0) and ~51% ATS over 2023-25 backtests. Numbers, 💰 stale prices and ⚠️ tags still show.
+  MODEL_EDGES:env("MODEL_EDGES",0),
   // stale lines (needs ODDS_API_KEY): your books vs the sharp book's no-vig price
   MIN_EV:env("MIN_EV_LINES",0.02),        // flag offers worth at least +2% expected value
   STALE_GAP:env("STALE_GAP",2.5),         // max points between your book's number and the sharp number
@@ -98,7 +104,7 @@ function qbStatus(sched,S,week,g,team,sl,inj){
 
 // ---------- one game ----------
 function gameBlock(g,P,L,notes,stale){
-  const k=`${g.away_team} @ ${g.home_team}`,lines=[],edges=[],flag=g.week>=CFG.MIN_WEEK;
+  const k=`${g.away_team} @ ${g.home_team}`,lines=[],edges=[],flag=CFG.MODEL_EDGES&&g.week>=CFG.MIN_WEEK;
   if(!L||L.spread==null){lines.push(`${k}: no line yet. Model ${fav(g,r1(P.margin))}, total ${r1(P.total)}`);return {text:lines.join("\n"),edges,k,stale:0};}
   const sp=M.spreadPick(P,L.spread);
   const spSide=sp.side==="home"?`${g.home_team} ${sgn(-L.spread)}`:`${g.away_team} ${sgn(L.spread)}`;
@@ -158,8 +164,8 @@ async function tick(){
   blocks.sort((a,b)=>(b.edges.length+b.stale)-(a.edges.length+a.stale));
   const nEdges=blocks.reduce((a,b)=>a+b.edges.length,0),nStale=blocks.reduce((a,b)=>a+b.stale,0),src=[...new Set(Object.values(L).map(x=>x.src))].join(", ");
   const title=`${etParts(new Date(kick)).wd} ${etClock(new Date(kick))} ET lines: ${nEdges} edge${nEdges===1?"":"s"}${OD?`, ${nStale} stale`:""} (${games.length} game${games.length>1?"s":""})`;
-  const early=week<CFG.MIN_WEEK?`Week ${week}: numbers only, no edges flagged until week ${CFG.MIN_WEEK}.\n\n`:"";
-  const msg=early+blocks.map(b=>b.text).join("\n\n")+`\n\nLines: ${src||"none"}. Model = nfl-edge-finder port; not proven to beat closing lines (see README).`;
+  const early=CFG.MODEL_EDGES&&week<CFG.MIN_WEEK?`Week ${week}: numbers only, no edges flagged until week ${CFG.MIN_WEEK}.\n\n`:"";
+  const msg=early+blocks.map(b=>b.text).join("\n\n")+`\n\nLines: ${src||"none"}. Model numbers are info only (no proven edge vs closing lines; ✅ off). 💰 = your book vs Pinnacle's fair price.`;
   summary(`## ${title}\n\n\`\`\`\n${msg}\n\`\`\`\n`);
   const ok=await ntfy(title,msg,nEdges||nStale?4:3,["football","moneybag"],RUN_URL);
   if(LIVE&&ok&&MODE==="auto"){sent[kick]=true;writeState(`sent-${S}.json`,sent);}

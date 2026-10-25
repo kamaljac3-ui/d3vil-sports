@@ -9,7 +9,10 @@ const data=require("./data"),M=require("./model"),W=require("./weather"),odds=re
 const MODE=envs("MODE","auto");
 const CFG={
   WED_HOUR:env("WED_HOUR",11),FRI_HOUR:env("FRI_HOUR",17),       // Eastern hour the weekly alerts become due
-  GD_MIN:env("GD_MIN",75),GD_MAX:env("GD_MAX",110),              // game-day window, minutes before kickoff
+  // Game-day window, minutes before kickoff. Opens at 80 so the alert follows the inactives list (~90 min out)
+  // and Sleeper's updates; stays open to 10 so a run GitHub starts late still sends instead of skipping (week 5:
+  // a run began 74.6 min before Monday night's kickoff and missed the old 75-110 window by 36 seconds).
+  GD_MIN:env("GD_MIN",10),GD_MAX:env("GD_MAX",80),
   TOP_N:env("TOP_N",12),
   MIN_PROB:env("MIN_PROB",0.56),                                  // calibrated chance the pick side hits
   MIN_EDGE_PCT:env("MIN_EDGE_PCT",0.2),                           // no line: projection vs recent average

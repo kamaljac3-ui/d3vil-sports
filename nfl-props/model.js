@@ -8,7 +8,10 @@ const C={
   HL_SHARE:env("HL_SHARE",4),   // half-life for target / carry share per snap
   HL_SNAP:env("HL_SNAP",2),     // half-life for snap share (reacts fastest to role changes)
   HL_EFF:env("HL_EFF",10),      // half-life for efficiency (yards per target / carry / dropback)
-  PRIOR_W:env("PRIOR_W",0.35),  // weight on last season's games vs this season's
+  PRIOR_W:env("PRIOR_W",0.35),  // weight on last season's games vs this season's (players and teams)
+  // league baselines: last season counts as at most this many team-games, so the current season's environment
+  // takes over within ~2 weeks (2026 ran +10 pass yds/team-game over 2025; a 50/50 blend under-projected QBs by 12 yds)
+  LG_PRIOR_GAMES:env("LG_PRIOR_GAMES",64),
   K_YPT:env("K_YPT",40),K_CATCH:env("K_CATCH",40),K_YPC:env("K_YPC",60),K_QB:env("K_QB",150),
   K_DEF_REC:env("K_DEF_REC",150),K_DEF_RUN:env("K_DEF_RUN",200),K_DEF_PASS:env("K_DEF_PASS",300),
   K_SPLIT:env("K_SPLIT",40),K_DEF_FREQ:env("K_DEF_FREQ",200),K_TEAM:env("K_TEAM",3),
@@ -66,13 +69,14 @@ function index(DB){
 // ---------- league baselines ----------
 function league(DB,asOf){
   const ix=index(DB);if(ix.lg.has(asOf))return ix.lg.get(asOf);
-  const S=DB.S,T={plays:0,pp:0,att:0,sacks:0,tgts:0,press:0,cleanPP:0,cleanYds:0,pressPP:0,pressYds:0,passYds:0,ftnPP:0,blz:0,ftnRuns:0,stack:0,rbCar:0,rbYds:0,n:0};
+  const S=DB.S,prevN=DB.tg.filter(r=>r.season<S&&r.o<asOf).length,lgW=prevN?Math.min(C.PRIOR_W,C.LG_PRIOR_GAMES/prevN):0;
+  const T={plays:0,pp:0,att:0,sacks:0,tgts:0,press:0,cleanPP:0,cleanYds:0,pressPP:0,pressYds:0,passYds:0,ftnPP:0,blz:0,ftnRuns:0,stack:0,rbCar:0,rbYds:0,n:0};
   const P={WR:{t:0,r:0,y:0,air:0},TE:{t:0,r:0,y:0,air:0},RB:{t:0,r:0,y:0,air:0}};
-  for(const r of DB.tg){if(r.o>=asOf)continue;const w=r.season<S?C.PRIOR_W:1;T.n+=w;
+  for(const r of DB.tg){if(r.o>=asOf)continue;const w=r.season<S?lgW:1;T.n+=w;
     for(const k in T)if(k!=="n")T[k]+=w*r[k];for(const p in P){P[p].t+=w*r.pos[p].t;P[p].r+=w*r.pos[p].r;P[p].y+=w*r.pos[p].y;}}
   const R={QB:{c:0,y:0},RB:{c:0,y:0},WR:{c:0,y:0},TE:{c:0,y:0}};
   for(const [id,recs] of DB.pg){const pos=(DB.players.get(id)||{}).pos;
-    for(const g of recs){if(g.o>=asOf)continue;const w=g.season<S?C.PRIOR_W:1;
+    for(const g of recs){if(g.o>=asOf)continue;const w=g.season<S?lgW:1;
       if(R[pos]&&g.car){R[pos].c+=w*g.car;R[pos].y+=w*g.ruyds;}if(P[pos]&&g.tgt)P[pos].air+=w*g.air;}}
   const tot=DB.games.filter(g=>ord(g.season,g.week)<asOf&&g.total_line!=="");
   const L={
