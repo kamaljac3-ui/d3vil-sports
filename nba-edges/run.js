@@ -25,7 +25,7 @@ const P_MIN=+(process.env.P_MIN||0.58);           // model over/under probabilit
 const PREGAME_MIN=+(process.env.PREGAME_MIN||90);
 const CLOSE_LINES=process.env.CLOSE_LINES!=="0",CLOSE_WINDOW=+(process.env.CLOSE_WINDOW||45);  // closing-line capture, see captureCloses
 // tagged on every logged pick so results/track.js can grade each model version separately; bump it on any model change
-const MODEL_VERSION=process.env.MODEL_VERSION||"2026-10-24-cal";
+const MODEL_VERSION=process.env.MODEL_VERSION||"2026-10-24-rosters";
 const ABS_MIN={pts:2,reb:1,ast:1,fg3m:0.5};
 const STATS=["pts","reb","ast","fg3m"],AVG={pts:"PTS",reb:"REB",ast:"AST",fg3m:"FG3M"},LABEL={pts:"PTS",reb:"REB",ast:"AST",fg3m:"3PM"};
 const CACHE=path.join(__dirname,".cache");fs.mkdirSync(CACHE,{recursive:true});

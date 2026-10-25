@@ -82,7 +82,10 @@ async function replay(season){
   const games=[];await pool(dates,async d=>{const g=await gamesOn(d);if(g)games.push(...g);});
   log(`${games.length} games; downloading box scores…`);
   await pool(games,async g=>{g.b=await boxOf(g.id);});
-  const sides=[];const snaps={};
+  // rosters come from the box scores walked in date order: a player belongs to the team he last appeared for, and his
+  // games for that team are his gpCur. stats.nba.com snapshots list each player's *current* team (a Jan 2025 snapshot
+  // already has Davis on DAL), which put traded players on teams they hadn't joined yet.
+  const sides=[];const snaps={},teams={},lastTeam={};
   for(const g of games.sort((a,b)=>a.date<b.date?-1:1)){
     if(!g.b)continue;
     const bucket=addDays(start,7*Math.floor(days(start,g.date)/7));
@@ -93,12 +96,15 @@ async function replay(season){
     const G={home:{abbr:abbr(g.home)},away:{abbr:abbr(g.away)},total:g.b.total,homeSpread};
     for(const side of ["home","away"]){
       const espnAbbr=g[side],box=g.b.box[espnAbbr]||[],played=new Map(box.filter(x=>!x.dnp&&x.min>0).map(x=>[R.nk(x.name),x]));
-      // roster: everyone in the box + this season's regulars on this team; a regular who didn't play is "out"
-      const keys=new Set([...box.map(x=>R.nk(x.name)),...Object.values(D.players).filter(p=>p.gpCur>0&&p.team===G[side].abbr).map(p=>p.key)]);
-      const team=[...keys].map(k=>D.players[k]).filter(Boolean);
+      // roster: everyone in the box + everyone who has appeared for this team; one of them who didn't play is "out"
+      // (model.outBoost then counts only regulars). Stat averages stay the snapshot's.
+      const T=teams[espnAbbr]||(teams[espnAbbr]={apps:{}});
+      const keys=new Set([...box.map(x=>R.nk(x.name)),...Object.keys(T.apps)]);
+      const team=[...keys].filter(k=>D.players[k]).map(k=>({...D.players[k],team:G[side].abbr,gpCur:T.apps[k]||0}));
       const cd=new Set(box.filter(x=>x.dnp&&/coach/i.test(x.reason)).map(x=>R.nk(x.name)));
       const out=new Set(team.filter(p=>!played.has(p.key)&&!cd.has(p.key)).map(p=>p.key));
       sides.push({season,date:g.date,G,side,D,team,out,played,hasLine:!!g.b.total});
+      for(const k of played.keys()){if(lastTeam[k]&&lastTeam[k]!==espnAbbr)delete teams[lastTeam[k]].apps[k];lastTeam[k]=espnAbbr;T.apps[k]=(T.apps[k]||0)+1;}
     }
   }
   log(`${season}: ${sides.length} team-games collected`);

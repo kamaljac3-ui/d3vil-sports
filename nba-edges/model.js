@@ -57,8 +57,8 @@ function project(pl,ctx){
 //  a,b   - real spread of the stat around that projection: sd = a + b*sqrt(proj). The old fixed spreads were ~2/3 of
 //          the real one in the 8-20 pt range, which made 60% spots look like 85-90%.
 const CAL=process.env.NBA_CAL?JSON.parse(process.env.NBA_CAL):{
-  pts:{k:0.798,m:9.74,beta:0.941,a:1.559,b:1.394},reb:{k:0.58,m:2.51,beta:0.941,a:-0.03,b:1.237},
-  ast:{k:0.651,m:2.43,beta:0.942,a:-0.033,b:1.17},fg3m:{k:0.604,m:1.21,beta:0.91,a:-0.082,b:1.166}};
+  pts:{k:0.842,m:9.37,beta:0.931,a:1.524,b:1.398},reb:{k:0.575,m:2.59,beta:0.938,a:-0.027,b:1.233},
+  ast:{k:0.666,m:2.366,beta:0.937,a:-0.036,b:1.17},fg3m:{k:0.612,m:1.198,beta:0.906,a:-0.081,b:1.164}};
 function calibrate(stat,proj,avg,mpg,cal=CAL){
   const c=cal[stat];if(!c||!(avg>=0))return proj;
   const p=mpg>=20?avg+c.k*(proj-avg):proj;
@@ -75,12 +75,12 @@ const pOver=(proj,line,stat,cal=CAL)=>1-Phi((line-proj)/sdOf(stat,proj,cal));
 //  mode "minutes" (default): the out players' minutes go to the rest of the rotation weighted by MIN x (MAX_MIN - MIN),
 //    so bench/rotation players with room absorb most of it and 36-minute starters little; each player's minutes
 //    factor is scaled by minScale. On top of that, per-minute production rises by usage x (share of that stat the
-//    team lost). Both fit by backtest.js: best on 2024-25 and held on 2025-26 was minScale 0.25, usage 0. For 20+ MPG
-//    players a teammate sitting barely moves their numbers; any usage bump made projections worse.
+//    team lost). Both fit by backtest.js on 2024-25: minScale 0.25, usage 0.15 (with box-score rosters; usage 0 was a
+//    hair better on 2025-26, 0.9930 vs 0.9937, so the usage bump is marginal). 0.5+ minutes or 0.3+ usage overshoot.
 //  mode "uniform": the original rule (everyone +70% x lost/remaining, capped at +25%); the 2024-26 backtest showed
 //    it overshoots ~5x, kept only so the backtest can compare.
-const OUT_OPTS={mode:process.env.NBA_OUT_MODE||"minutes",minScale:+(process.env.NBA_OUT_MIN_SCALE||0.25),usage:+(process.env.NBA_OUT_USAGE||0),maxMin:36,
-  // bench (under 20 MPG) share of a missing teammate's minutes: 0.25 picked on 2024-25, held on 2025-26 (0.5 was close)
+const OUT_OPTS={mode:process.env.NBA_OUT_MODE||"minutes",minScale:+(process.env.NBA_OUT_MIN_SCALE||0.25),usage:+(process.env.NBA_OUT_USAGE||0.15),maxMin:36,
+  // bench (under 20 MPG) share of a missing teammate's minutes: 0.25 picked on 2024-25 (0.5 tied there and was better on 2025-26)
   benchScale:+(process.env.NBA_OUT_BENCH_SCALE||0.25)};
 function outBoost(team,outKeys,teamGP,opts={}){
   const o={...OUT_OPTS,...opts};
