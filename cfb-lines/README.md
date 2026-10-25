@@ -33,6 +33,20 @@ The full slate goes to the run's step summary. Edges bigger than `MAX_EDGE` (14)
 
 Manual modes (workflow_dispatch): `probe` (checks every data source from the runner), `backtest`, `first`, `update`, `final` and `gameday`. The last four build that card now; use them with `dry_run=1`.
 
+## Weekly review (the learning loop)
+
+**`LEARNINGS.md` lists every factor tested so far and the rule for adding one. Read it first.**
+
+- Every priced game in every card that is really sent (never on a dry run) is logged with its context to
+  `.cache/picks-<season>-w<week>.json`: model version (`MODEL_VERSION` in `model.js`), card, minutes to kickoff,
+  line at alert time, our number, conference game, rest days, the model's situational features, kickoff weather,
+  availability outs by position group, and the alert's reasons.
+- `review.js` runs in the same workflow on Monday from 8 AM ET (Tuesday as a backup; `mode=review` runs it now). It merges
+  the log into the ledger on the `bot-results` branch (`cfb/picks.json`), grades each pick (W-L-push, units at -110,
+  closing line value), writes `cfb/SUMMARY.md` and `cfb/reports/week-N.md`, and sends one scorecard per week to the CFB
+  ntfy topic (`cfb/scorecards.json` stops a second send).
+- Costs one CFBD `/lines` call per finished week (the closing line), plus the schedule the bot already caches.
+
 ## Data (all free)
 
 | Source | Used for | Notes |

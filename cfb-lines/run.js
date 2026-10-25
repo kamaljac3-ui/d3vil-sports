@@ -75,8 +75,9 @@ async function currentLines(games,wk,{espn=false,h=1}={}){
   const cf=await D.lines(S,S,wk,h),es=espn?await espnLines([...new Set(games.map(g=>etParts(new Date(g.start)).date))]):{};
   const out={};
   for(const g of games){const c=D.consensus(cf[g.id]),e=es[normName(g.away)+"@"+normName(g.home)];
-    if(e&&e.m!=null)out[g.id]={m:e.m,t:e.t??(c&&c.t),src:e.book};
-    else if(c&&c.m!=null)out[g.id]={m:c.m,t:c.t,src:`${c.books.length} books`};}
+    const open=c?{mOpen:c.mOpen,tOpen:c.tOpen}:{};
+    if(e&&e.m!=null)out[g.id]={m:e.m,t:e.t??(c&&c.t),src:e.book,...open};
+    else if(c&&c.m!=null)out[g.id]={m:c.m,t:c.t,src:`${c.books.length} books`,...open};}
   return out;
 }
 
@@ -93,10 +94,11 @@ async function evaluate(ctx,games,{espn=false,avail=true,lineH=1}={}){
   for(const g of games){
     if(!g.homeFBS||!g.awayFBS)continue;
     const wx=await A.kickoffWeather(ctx.venues[g.venueId],g.start);
-    const inj={},notes=[],qbFlags={};
+    const inj={},notes=[],qbFlags={},outs={};
     for(const [side,t] of [["home",g.home],["away",g.away]]){
       const rep=reps[t],qb=qbs[t];
       if(!rep)continue;
+      outs[side]=outsOf(rep,qb);
       const a=M.availability(rep.rows,qb,U[t]||{},T[t]||{},normName);
       inj[side]={pts:a.pts,total:a.total};notes.push(...a.notes.map(n=>`${ctx.teams[t]?.abbr||t} ${n}`));
       qbFlags[t]=a.notes.filter(n=>n.startsWith("QB")).join(",");
@@ -107,9 +109,18 @@ async function evaluate(ctx,games,{espn=false,avail=true,lineH=1}={}){
     if(wx&&!wx.indoor&&(wx.dew>=M.C.HUMID_DEW||wx.temp>=M.C.HEAT_F))
       for(const t of [g.home,g.away]){const T=ctx.teams[t];norm[t]=await A.homeClimate(t,T&&T.venueId!=null&&ctx.venues[T.venueId]||T,S);}
     const P=M.predict(R,MC,g,{wx,inj,norm}),line=L[g.id];
-    out.push({g,P,line,wx,notes,qbFlags,avail:{home:!!reps[g.home],away:!!reps[g.away]},...edges(g,P,line)});
+    out.push({g,P,line,wx,notes,qbFlags,outs,avail:{home:!!reps[g.home],away:!!reps[g.away]},...edges(g,P,line)});
   }
   return out;
+}
+// Availability report -> players out or doubtful, by position group (logged for the weekly review's tags).
+const GROUPS=[["QB",/^QB$/],["OL",/^(OL|OT|OG|T|G|C|IOL)$/],["skill",/^(RB|WR|TE|FB)$/],["DL",/^(DL|DE|DT|NT|EDGE)$/],["LB",/^(LB|ILB|OLB|MLB)$/],["DB",/^(CB|S|DB|FS|SS|NB|STAR)$/]];
+function outsOf(rep,qb){
+  const o={type:rep.type||"",n:0,groups:{},qb:false};
+  for(const p of rep.rows){if(!/^(out|doubtful)/i.test(p.status||""))continue;
+    o.n++;const gr=(GROUPS.find(([,re])=>re.test(p.pos))||["other"])[0];o.groups[gr]=(o.groups[gr]||0)+1;
+    if(qb&&normName(p.name)===normName(qb.name))o.qb=true;}
+  return o;
 }
 function edges(g,P,line){
   const e={spread:null,total:null};if(!line)return e;
@@ -162,16 +173,33 @@ async function sendCard(ctx,kind,games,title){
   const quiet=ET.h<CFG.QUIET_UNTIL;   // ntfy priority 2 = no sound or vibration
   const ok=await ntfy(title,msg,quiet?2:hits.length?4:3,["football","moneybag"],RUN_URL);
   if(LIVE&&ok)saveSnaps(ev);
-  if(LIVE&&ok&&kind==="first")recordCard(ctx,ev);
+  if(LIVE&&ok)logPicks(ctx,kind,ev);
   return ok;
 }
-// The first look is the card to bet, so its whole slate goes to review.js's ledger (home perspective).
-function recordCard(ctx,ev){
-  const all=readState(`picks-${S}.json`)||{},wk=ev[0]&&ev[0].g.wk;if(wk==null||all[wk])return;
-  all[wk]={sentAt:new Date(now).toISOString(),games:ev.filter(x=>x.line).map(x=>({gid:x.g.id,wk:x.g.wk,away:ab(ctx,x.g.away),home:ab(ctx,x.g.home),
-    lm:x.line.m,lt:x.line.t??null,om:+x.P.margin.toFixed(1),ot:+x.P.total.toFixed(1),se:x.spread?+x.spread.size.toFixed(1):0,
-    spick:!!(x.spread&&x.spread.ok&&!x.spread.wild),why:reasons(ctx,x).join("; ")}))};
-  writeState(`picks-${S}.json`,all);
+// Every priced game in a card that was really sent goes to the pick log (state picks-<S>-w<week>.json), which
+// review.js merges into the ledger on the bot-results branch and grades weekly. Home perspective: lm/om = the
+// line's / our home margin. pick = the ✅ that was shown; the rest are graded as leans. Never on dry runs.
+function logPicks(ctx,kind,ev){
+  const byWk={};for(const x of ev)if(x.line)(byWk[x.g.wk]||(byWk[x.g.wk]=[])).push(x);
+  const n1=v=>v==null?null:+(+v).toFixed(1),pick=e=>!!(e&&e.ok&&!e.wild);
+  for(const [wk,xs] of Object.entries(byWk)){
+    const f=`picks-${S}-w${wk}.json`,all=readState(f)||{};
+    for(const x of xs){const g=x.g,key=`${kind}|${g.id}`;if(all[key])continue;
+      const P=x.P.f;
+      all[key]={key,S,wk:g.wk,gid:g.id,card:kind,ver:M.MODEL_VERSION,params:M.PARAMS_AT,
+        sentAt:new Date(now).toISOString(),mins:Math.round((g.start-now)/6e4),kick:new Date(g.start).toISOString(),
+        away:ab(ctx,g.away),home:ab(ctx,g.home),conf:!!g.conf,neutral:!!g.neutral,
+        lm:x.line.m,lt:x.line.t??null,lmOpen:x.line.mOpen??null,ltOpen:x.line.tOpen??null,src:x.line.src,
+        om:n1(x.P.margin),ot:n1(x.P.total),se:x.spread?n1(x.spread.size):0,te:x.total?n1(x.total.size):0,
+        spick:pick(x.spread),tpick:pick(x.total),swild:!!(x.spread&&x.spread.ok&&x.spread.wild),
+        min:{spread:CFG.MIN_SPREAD,total:CFG.MIN_TOTAL,week:CFG.MIN_WEEK},
+        f:{home:n1(P.home),capZ:n1(P.capZ),travel:n1(P.travel),tz:P.tz,rest:n1(P.rest),climb:+P.climb.toFixed(2),descend:+P.descend.toFixed(2),
+          humid:+P.humid.toFixed(2),heat:+P.heat.toFixed(2),dome:P.dome},
+        rest:{home:n1(M.restDays(ctx.games,g.home,g)),away:n1(M.restDays(ctx.games,g.away,g))},
+        wx:x.wx?(x.wx.indoor?{indoor:true}:{wind:x.wx.wind,gust:x.wx.gust,precip:x.wx.precip,temp:x.wx.temp,dew:x.wx.dew}):null,
+        outs:x.outs,why:reasons(ctx,x).join("; ")};}
+    writeState(f,all);
+  }
 }
 
 // ---------- game-day: only material changes ----------
@@ -203,7 +231,7 @@ async function gameday(ctx,games,sent){
       const msg=`Changed: ${c.join("; ")}\n\n${block(ctx,x)}${x.line?`\n\nLine: ${x.line.src}`:""}`;
       summary(`## ${title}\n\n\`\`\`\n${msg}\n\`\`\`\n`);
       const ok=await ntfy(title,msg,hasEdge(x)?4:3,["football","rotating_light"],RUN_URL);n++;
-      if(LIVE&&ok)saveSnaps([x]);
+      if(LIVE&&ok){saveSnaps([x]);logPicks(ctx,"gameday",[x]);}
     }
     if(LIVE&&MODE==="auto")sent.gd[x.g.id]=true;
   }

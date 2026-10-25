@@ -162,6 +162,8 @@ College football spreads and totals. **`cfb-lines/README.md` is the full referen
   Rerun it after any model change.
 - **Modes:** first look (Sunday/Monday), update (Thursday noon), final (9 AM ET on game day) and a game-day
   alert 75–110 min out only on material change. `MODE=probe` checks every source from the runner.
+- **Weekly review:** every sent pick is logged with its context and graded on Mondays (CLV first) into `cfb/` on
+  `bot-results`. **Read `cfb-lines/LEARNINGS.md` before changing the model,** and bump `MODEL_VERSION` when you do.
 
 ## Conventions and lessons (apply to every bot here)
 

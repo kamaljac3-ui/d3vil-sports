@@ -67,28 +67,40 @@ jobs:
           else
             node cfb-lines/run.js
           fi
-      # Mondays (or mode=review): grade last week's first-look card, update the ledger, send the scorecard
+      # The weekly learning loop (cfb-lines/review.js): Monday from 8 AM ET, Tuesday as a backup, or mode=review.
+      # Grades every logged pick, keeps the ledger on the bot-results branch (cfb/) and sends one scorecard per week
+      # (cfb/scorecards.json dedupes it). It runs inside this job, not its own workflow, so its few CFBD calls are
+      # counted in the saved state and it never races the bot's cache.
       - name: Check out ledger (bot-results branch)
         id: ledger
-        if: github.event.inputs.mode == 'review' || (github.event.inputs.mode || 'auto') == 'auto'
+        if: ${{ !cancelled() && (github.event.inputs.mode == 'review' || (github.event.inputs.mode || 'auto') == 'auto') }}
         run: |
-          if [ "$(TZ=America/New_York date +%a)" != "Mon" ] && [ "${{ github.event.inputs.mode }}" != "review" ]; then exit 0; fi
-          git fetch -q origin bot-results:bot-results && git worktree add -q ledger bot-results
+          d=$(TZ=America/New_York date +%a)
+          if [ "${{ github.event.inputs.mode }}" != "review" ] && [ "$d" != "Mon" ] && [ "$d" != "Tue" ]; then exit 0; fi
+          if git ls-remote --exit-code --heads origin bot-results >/dev/null; then
+            git fetch -q origin bot-results:bot-results
+            git worktree add -q ledger bot-results
+          else
+            git worktree add -q --orphan -b bot-results ledger
+          fi
           echo "ready=true" >> "$GITHUB_OUTPUT"
       - name: Weekly review
-        if: steps.ledger.outputs.ready == 'true'
+        id: review
+        if: ${{ !cancelled() && steps.ledger.outputs.ready == 'true' }}
         env:
           NP_CACHE: cfb-lines/.cache
           LEDGER_DIR: ledger
           MODE: ${{ github.event.inputs.mode || 'auto' }}
           DRY_RUN: ${{ github.event.inputs.dry_run || '0' }}
+          FORCE_SEND: ${{ github.event.inputs.mode == 'review' && '1' || '0' }}   # a manual review always sends
           CFBD_API_KEY: ${{ secrets.CFBD_API_KEY }}
-          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC_CFB }}
+          CFBD_MONTHLY_BUDGET: ${{ vars.CFB_CFBD_BUDGET || '700' }}
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC_CFB }}   # CFB's own topic, no fallback
           NTFY_SERVER: ${{ secrets.NTFY_SERVER }}
           NTFY_TOKEN: ${{ secrets.NTFY_TOKEN }}
         run: node cfb-lines/review.js
       - name: Save ledger
-        if: steps.ledger.outputs.ready == 'true' && (github.event.inputs.dry_run || '0') != '1'
+        if: ${{ !cancelled() && steps.review.outcome == 'success' && (github.event.inputs.dry_run || '0') != '1' }}
         working-directory: ledger
         run: |
           git config user.name "github-actions[bot]"
@@ -96,7 +108,9 @@ jobs:
           git add cfb
           git diff --cached --quiet && { echo "no changes"; exit 0; }
           git commit -q -m "cfb review: $(TZ=America/New_York date +%F)"
-          git pull -q --rebase origin bot-results && git push -q origin bot-results
+          # the results tracker and the NFL review push to this branch too: rebase onto it and retry if it moved
+          for i in 1 2 3; do git push -q origin bot-results && exit 0; git pull -q --rebase origin bot-results; done
+          exit 1
       - name: Upload backtest results
         if: github.event.inputs.mode == 'backtest'
         uses: actions/upload-artifact@v4
@@ -106,7 +120,7 @@ jobs:
             cfb-lines/params.json
             cfb-lines/.cache/backtest.md
       - name: Save state
-        if: always() && steps.run.outputs.state_changed == 'true'
+        if: always() && (steps.run.outputs.state_changed == 'true' || steps.review.outputs.state_changed == 'true')
         uses: actions/cache/save@v4
         with:
           path: cfb-lines/.cache

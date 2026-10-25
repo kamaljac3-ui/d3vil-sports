@@ -11,6 +11,12 @@
 const fs=require("fs"),path=require("path");
 const {env}=require("../nfl-props/lib");
 
+// Logged with every pick so the weekly review can grade each model separately. Bump it on ANY change that
+// moves our numbers or which games get a ✅ (model.js math or defaults, a new params.json, edge rules in run.js),
+// and add a line to the version log in LEARNINGS.md.
+//   v1  2026-09-27  live model: params fitted on 2021-22, altitude climb pinned at 1.5/km, descent/humidity/heat 0
+const MODEL_VERSION="v1";
+
 // ---------- tunables (env overrides > params.json > defaults) ----------
 const PFILE=path.join(__dirname,"params.json");
 const FIT=fs.existsSync(PFILE)?JSON.parse(fs.readFileSync(PFILE,"utf8")):{};
@@ -239,4 +245,4 @@ function availability(roster,qb,use,tk,norm){
   return {pts:Math.min(pts,C.INJ_CAP+C.QB_OUT),total,notes,qbListed};
 }
 
-module.exports={C,DEF,METRICS,adjust,metricRows,seasonFinal,priors,ratings,sidePts,features,predict,availability,miles,tzOffset,ptsFrom,MARGIN_KEYS,PFILE};
+module.exports={MODEL_VERSION,PARAMS_AT:(FIT._fit&&FIT._fit.at)||null,C,DEF,METRICS,adjust,metricRows,seasonFinal,priors,ratings,sidePts,features,predict,availability,restDays,miles,tzOffset,ptsFrom,MARGIN_KEYS,PFILE};
