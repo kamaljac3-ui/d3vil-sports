@@ -11,34 +11,59 @@ NBA matchup alerts sent to ntfy: per-game stat projections (projection boosts, a
   - scoring environment: implied team total from the ESPN total/spread ÷ team PPG, or opponent pace
   - opponent rebounds and assists allowed ÷ league
   - blowout trim for starters when the spread is 12 or more
-  - teammates ruled out: their minutes go to the rest of the rotation, weighted toward players with room to play more (MIN × (36 − MIN)), at a quarter strength (`NBA_OUT_MIN_SCALE` 0.25). There's no usage bump (`NBA_OUT_USAGE` 0). This only counts players who have been playing, since a long absence is already in everyone's averages.
+  - teammates ruled out: their minutes go to the rest of the rotation, weighted toward players with room to play more (MIN × (36 − MIN)), at a quarter strength (`NBA_OUT_MIN_SCALE` 0.25). Per-minute production gets a small usage bump: 0.15 × the share of that stat the team lost (`NBA_OUT_USAGE` 0.15). This only counts players who have been playing, since a long absence is already in everyone's averages.
 - **Season blend:** until a player has about 15 games, last season is mixed in.
+- **`b2b 2nd night` tag** (informational only, never in the projection): the player's team played yesterday. In the 2024–26 box scores, regulars who played the second night scored right at their projection (+0.15 vs +0.17 pts on other nights). A player's own back-to-back split barely repeated from one season to the next (0.11× ± 0.08), so the tag doesn't say better or worse. What did change is that they sat 21% of second nights vs 16% of other games, so the risk is a late rest day.
+- **Defense context** (informational only, never in a projection or a pick):
+  - Player rows get a tag like `SAC 29th of 30 vs forwards (+11% pts)` when the opponent ranks in the top or bottom `DVP_RANK` (3) defenses against his position (ESPN's G/F/C). The ranking is points allowed to that position vs those players' own per-minute averages, from this season's ESPN box scores (cached for good as `box-<id>.json`), and starts once teams have `DVP_MIN_GP` (10) games. 1st = allows the least.
+  - Each game line gets a second line, e.g. `pts allowed/g (1st = fewest): MEM 5th (105.5, L10 104.0), SAC 26th (124.5, L10 126.1)`, after `DEF_MIN_GP` (5) games. These are raw points, so fast teams look worse than they are.
+  - Why it's only a note: in the 2024–26 backtest, players facing a bottom-3 defense vs their position beat their own average by about 0.7 pts more than players facing a top-3 one. But they didn't beat the projection by more, because the game total and pace already carry it. Adding a DvP factor didn't improve projections out of sample. The game-line ratings are already opponent-adjusted and recency-weighted (half-life fit in `BACKTEST-LINES.md`).
+- **Calibration** (`calibrate`, `sdOf`; the `CAL` constants, fit by the backtest on 2024–26). Every alert uses it:
+  - starters (20+ MPG) keep only k (0.6–0.8) of the projection's gap from their average; bench players keep all of it
+  - then every projection is pulled toward the middle (beta ≈ 0.94): a 28+ ppg scorer comes in about 2 under his average
+  - the prop probability uses the real spread, sd = a + b·√projection. The old fixed spreads were about 2/3 of it in the 8–20 pt range, so "90%" picks were really ~75%.
+  - Alerts show the calibrated projection; picks log it as `proj` and the raw one as `projRaw`.
+
+**Before testing an idea or changing the model, read [`LEARNINGS.md`](LEARNINGS.md).** It lists every angle tried, its evidence and its status, plus what the weekly review checks on live picks.
 
 ## Backtest (`backtest.js`, results in `BACKTEST.md`)
 
-`node nba-edges/backtest.js` replays 2024–25 (the fit season) and 2025–26 (out of sample) with the bot's own `projectSide`/`flagRows`. There's no look-ahead: stats are season-to-date as of the day before each weekly bucket, blended with the prior season. The first run downloads about 400 nba.com snapshots and 2,500 ESPN box scores into `.cache/bt`. Reruns take about 20 seconds.
+`node nba-edges/backtest.js` replays 2024–25 (the fit season) and 2025–26 (out of sample) with the bot's own `projectSide`/`flagRows`. There's no look-ahead: stats are season-to-date as of the day before each weekly bucket, blended with the prior season. Rosters and games played come from the box scores in date order (a player belongs to the team he last appeared for), because nba.com's historical snapshots list each player's *current* team. The first run downloads about 400 nba.com snapshots and 2,500 ESPN box scores into `.cache/bt`. Reruns take about 20 seconds.
 
-- **The original teammate-out rule overshot about 5x.** It gave everyone +70% × lost/remaining, capped at +25%, and made projections 5–7% worse than the plain season average. Grid search picked a quarter-strength minutes shift with no usage bump. For 20+ MPG players a teammate sitting barely changes their numbers.
-- **Points boosts are the real signal.** With that setting, flagged points boosts beat the player's average 60% / 56% of the time, against a 48% / 46% baseline. They delivered 98% / 66% of the promised gain (+2.5 promised → +2.5, and +2.7 → +1.8 out of sample).
-- **Other boosts show up at about half size.** Rebounds, assists and threes delivered roughly 40–80% of the promised gain.
+- **The original teammate-out rule overshot about 5x.** It gave everyone +70% × lost/remaining, capped at +25%, and made projections 5–7% worse than the plain season average. Grid search picked a quarter-strength minutes shift with a small usage bump (0.15). The bump is marginal: usage 0 did a hair better out of sample. Anything stronger overshoots.
+- **Points boosts are the real signal.** With that setting, flagged points boosts beat the player's average 72% / 65% of the time, against a 48% / 46% baseline. They delivered more than promised (+2.6 promised → +4.8, and +2.7 → +3.2 out of sample).
+- **Other starter boosts are too few to judge.** Only 1–18 rebound, assist and three flags a season.
 - **Shot-zone edges are noise.** They promised about +2 pts and delivered +0.2–0.3, so shot-zone alerts are off by default (`ZONE_MIN` 99). The zone factor stays in the projections.
 - **Bench players (10–20 MPG) are where teammate-out news pays.** They're projected by default (`MIN_PROJ` 10), with their own share of a missing teammate's minutes (`NBA_OUT_BENCH_SCALE` 0.25, picked on 2024–25).
-  - Flagged bench boosts, almost all in games with a teammate out, beat the player's average 77% / 70% of the time, against a ~48% baseline.
-  - Points came in at +5.0 / +4.5 against +3.0 promised. The model is conservative here.
-  - 6–10% of flagged bench players got a coach's-decision DNP. The backtest counts those as "didn't play", not as known in advance. A prop on a player who doesn't play is usually voided.
+  - Flagged bench boosts, almost all in games with a teammate out, beat the player's average 77% / 76% of the time on points, against a ~48% baseline.
+  - Points came in at +4.8 / +5.5 against +3.0 promised. The model is conservative here.
+  - 5–9% of flagged bench players got a coach's-decision DNP. The backtest counts those as "didn't play", not as known in advance. A prop on a player who doesn't play is usually voided.
   - **The big caveat:** these spots depend on knowing who's out. The backtest knows every absence, and the live bot only knows what the injury report says 90 minutes before tip. Late scratches will cost some of this.
   - Bench boosts are large in % terms, so they tend to fill the morning list. Alerts label them `bench N mpg`.
+- **Calibration (added 2026-10-24) makes the probabilities honest and the picks fewer and better.** With stand-in lines (each player's average rounded to x.5; there are no historical prop lines), out of sample on 2025-26: picks went from 5,351 at 63.1% to 4,116 at 66.6%, and "said 65–75%" now hits 64% instead of 62% from a claimed 68%. Starter points boosts went from 655 flags beating their average 57.9% of the time to 133 at 64.7%. Real books are sharper than the stand-in line, so live hit rates will be lower. After a model change, rerun the backtest and paste its `CAL` line into `model.js`.
 - **Whole-model accuracy barely moves.** Projections beat the plain average by only 0.1–1% in squared error. The value is in the flagged tail, not in every projection.
 - **Caveats:**
   - "Ruled out" means a regular who didn't play, because ESPN keeps no historical injury lists. That's slightly optimistic.
   - Spreads and totals are only available from December 2025.
   - There are no historical prop lines, so none of this shows the bot beating sportsbooks.
 
+## Game lines (`lines.js`, backtest in `BACKTEST-LINES.md`)
+
+Every morning push ends with a **Game lines** block: each game's spread and total (ESPN's current line) next to the model's, and how far apart they are. A pregame push includes its game's row when it goes out anyway.
+
+- **Model:** opponent-adjusted team ratings from this season's results (30 ESPN team schedules), weighted toward recent games (half-life 30 days) and seeded by last season's final ratings (×0.6, worth 4 games). Home court 1.6, back-to-back −1.8, and regulars ruled out (box-score value × share of games played) cost margin. Every setting is an `NBA_LINES_*` env var.
+- **Backtest (`node nba-edges/backtest-lines.js`, needs `backtest.js` run first for its cache):** 2024-25 fit, 2025-26 out of sample, against ESPN's opening and closing lines.
+  - **No edge against the closing line**, at any size of disagreement: spreads 50–53%, totals lose. The model's disagreement with the close shows up in results at 0.05 ± 0.13 of its size (0 = the line already knew).
+  - Against the **opening** line spreads did better (2025-26: 56% at 3+ pts, 60% at 5+ pts), and the line moved toward the model about 2.5x as often as away. But part of that is the backtest knowing who sat, and the bot sees the 11 AM line, not the open.
+  - Big totals disagreements lost in both seasons.
+- **So there's no ✅ by default.** `SPREAD_EDGES=1` / `TOTAL_EDGES=1` turn them on. Spreads off by `MIN_SPREAD` (4) or more are still logged as tracked picks, and `results/` grades them against the result **and the closing line**. If the morning disagreements keep beating the close, that's the evidence to turn ✅ on.
+- **Known limit: offseason moves.** Ratings start from last season's *teams*, so a team that lost its stars over the summer looks too good for the first few weeks (Oct 2026: LAC without Leonard, Harden and Zubac, model OKC −7 vs the market's −14.5). The market prices that; the model doesn't until the games come in.
+
 ## Modes (`run.js`)
 
 | `MODE` | What it does |
 |---|---|
-| `morning` | Whole slate, one push listing the top `TOP_N` shot-zone edges, prop lines and projection boosts. |
+| `morning` | Whole slate, one push listing the top `TOP_N` shot-zone edges, prop lines and projection boosts, then the game lines. |
 | `pregame` | Games tipping within `PREGAME_MIN` (90) minutes. Fresh injuries, plus prop lines if `ODDS_API_KEY` is set. One push per game, sent once. |
 | `snapshot` | Saves stats.nba.com data to `data/nba-stats.json`. Run it on a PC with `snapshot.cmd` (pull, snapshot, commit, push that one file). |
 | `probe` | Reports which data sources the current machine can reach. |
@@ -53,13 +78,14 @@ Workflow: `.github/workflows/nba-edges-alerts.yml`. Morning runs at 15:00 UTC, a
 
 ## Settings (env)
 
-`TOP_N` (6), `ZONE_MIN` (99 = shot-zone alerts off; 1.0 to turn them on), `NBA_OUT_MIN_SCALE` (0.25), `NBA_OUT_USAGE` (0), `NBA_OUT_MODE` (`minutes`; `uniform` = the old rule), `NBA_OUT_BENCH_SCALE` (0.25), `MIN_PROJ` (10; 20 = starters only), `BOOST_MIN` (0.10), `P_MIN` (0.58), `PREGAME_MIN` (90), `ODDS_IN_MORNING` (0), `DATE` (test a past slate; keeps finished games), `FORCE_ESPN` (1 = skip nba.com), `DRY_RUN`.
+`TOP_N` (6), `ZONE_MIN` (99 = shot-zone alerts off; 1.0 to turn them on), `NBA_OUT_MIN_SCALE` (0.25), `NBA_OUT_USAGE` (0.15), `NBA_OUT_MODE` (`minutes`; `uniform` = the old rule), `NBA_OUT_BENCH_SCALE` (0.25), `MIN_PROJ` (10; 20 = starters only), `BOOST_MIN` (0.10), `P_MIN` (0.58), `NBA_CAL` (JSON override of the calibration constants), `PREGAME_MIN` (90), `ODDS_IN_MORNING` (0), `SPREAD_EDGES` (0), `TOTAL_EDGES` (0), `MIN_SPREAD` (4), `MIN_TOTAL` (6), `NBA_LINES_HALF_LIFE` / `_PRIOR_GAMES` / `_REGRESS` / `_HCA` / `_B2B` / `_INJ` / `_INJ_TOTAL` (game-line model, see `lines.js`), `CLOSE_LINES` (1 = pull prop lines again in the last `CLOSE_WINDOW` (45) minutes before tip as the closing line; one Odds API call per game with props), `MODEL_VERSION` (tag on logged picks; bump it on any model change), `DATE` (test a past slate; keeps finished games), `FORCE_ESPN` (1 = skip nba.com), `DVP_RANK` (3), `DVP_MIN_GP` (10), `DEF_MIN_GP` (5), `DRY_RUN`.
 
 ## Cache (`.cache/`)
 
 - `data-<season>.json`: 12h
 - `r-<team>-<date>.json`: 12h
 - `odds-events-<date>.json`: 3h
+- `results-<season>.json`: finished games for the game-line ratings (this season 4h, last season 30 days)
 - `morning-<date>.json` / `pregame-<date>.json`: sent markers
 - `picks-<date>.json`: sent picks, graded by `results/`
 

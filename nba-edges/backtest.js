@@ -13,7 +13,7 @@ const SEASONS=(process.env.SEASONS||"2024-25,2025-26").split(",");
 const OUT=process.env.OUT||path.join(__dirname,"BACKTEST.md");
 const CACHE=path.join(__dirname,".cache","bt");fs.mkdirSync(CACHE,{recursive:true});
 const CONC=+(process.env.CONCURRENCY||4);
-const {STATS,AVG,ZONE_MIN,BOOST_MIN,ABS_MIN}=R.SETTINGS;
+const {STATS,AVG,ZONE_MIN,BOOST_MIN,ABS_MIN,P_MIN}=R.SETTINGS;
 const LABEL={pts:"PTS",reb:"REB",ast:"AST",fg3m:"3PM"};
 const log=(...a)=>console.log("[bt]",...a);
 const sleep=ms=>new Promise(s=>setTimeout(s,ms));
@@ -82,7 +82,10 @@ async function replay(season){
   const games=[];await pool(dates,async d=>{const g=await gamesOn(d);if(g)games.push(...g);});
   log(`${games.length} games; downloading box scores…`);
   await pool(games,async g=>{g.b=await boxOf(g.id);});
-  const sides=[];const snaps={};
+  // rosters come from the box scores walked in date order: a player belongs to the team he last appeared for, and his
+  // games for that team are his gpCur. stats.nba.com snapshots list each player's *current* team (a Jan 2025 snapshot
+  // already has Davis on DAL), which put traded players on teams they hadn't joined yet.
+  const sides=[];const snaps={},teams={},lastTeam={};
   for(const g of games.sort((a,b)=>a.date<b.date?-1:1)){
     if(!g.b)continue;
     const bucket=addDays(start,7*Math.floor(days(start,g.date)/7));
@@ -93,12 +96,15 @@ async function replay(season){
     const G={home:{abbr:abbr(g.home)},away:{abbr:abbr(g.away)},total:g.b.total,homeSpread};
     for(const side of ["home","away"]){
       const espnAbbr=g[side],box=g.b.box[espnAbbr]||[],played=new Map(box.filter(x=>!x.dnp&&x.min>0).map(x=>[R.nk(x.name),x]));
-      // roster: everyone in the box + this season's regulars on this team; a regular who didn't play is "out"
-      const keys=new Set([...box.map(x=>R.nk(x.name)),...Object.values(D.players).filter(p=>p.gpCur>0&&p.team===G[side].abbr).map(p=>p.key)]);
-      const team=[...keys].map(k=>D.players[k]).filter(Boolean);
+      // roster: everyone in the box + everyone who has appeared for this team; one of them who didn't play is "out"
+      // (model.outBoost then counts only regulars). Stat averages stay the snapshot's.
+      const T=teams[espnAbbr]||(teams[espnAbbr]={apps:{}});
+      const keys=new Set([...box.map(x=>R.nk(x.name)),...Object.keys(T.apps)]);
+      const team=[...keys].filter(k=>D.players[k]).map(k=>({...D.players[k],team:G[side].abbr,gpCur:T.apps[k]||0}));
       const cd=new Set(box.filter(x=>x.dnp&&/coach/i.test(x.reason)).map(x=>R.nk(x.name)));
       const out=new Set(team.filter(p=>!played.has(p.key)&&!cd.has(p.key)).map(p=>p.key));
       sides.push({season,date:g.date,G,side,D,team,out,played,hasLine:!!g.b.total});
+      for(const k of played.keys()){if(lastTeam[k]&&lastTeam[k]!==espnAbbr)delete teams[lastTeam[k]].apps[k];lastTeam[k]=espnAbbr;T.apps[k]=(T.apps[k]||0)+1;}
     }
   }
   log(`${season}: ${sides.length} team-games collected`);
@@ -114,7 +120,7 @@ function score(sides,outOpts,minProj=20){
       const f=flags.filter(r=>r.key===p.key);
       recs.push({season:x.season,date:x.date,name:p.name,team:S.me,opp:S.opp,hasLine:x.hasLine,outCount:S.tags.some(t=>t.startsWith("w/o")),
         p:{MIN:p.MIN,MIN10:p.MIN10,PTS:p.PTS,REB:p.REB,AST:p.AST,FG3M:p.FG3M,FTM:p.FTM,gpCur:p.gpCur},
-        zone:zone&&{ptsFactor:zone.ptsFactor,threesFactor:zone.threesFactor,delta:zone.delta},ctx:S.ctx,boost,pr,
+        zone:zone&&{ptsFactor:zone.ptsFactor,threesFactor:zone.threesFactor,delta:zone.delta},ctx:S.ctx,boost,pr,prc:Object.fromEntries(STATS.map(s=>[s,M.calibrate(s,pr[s],p[AVG[s]],p.MIN)])),
         act:a&&{min:a.min,pts:a.pts,reb:a.reb,ast:a.ast,fg3m:a.fg3m},
         zoneFlag:f.some(r=>r.kind==="zone"),boostFlags:f.filter(r=>r.kind==="boost").map(r=>r.stat)});
     }
@@ -122,10 +128,45 @@ function score(sides,outOpts,minProj=20){
   return recs;
 }
 
+// ---------- calibration ----------
+const OUT_BENCH=+(process.env.NBA_OUT_BENCH_SCALE||0.25);
+const r3=v=>Math.round(v*1000)/1000;
+function fitCal(recs){
+  const cal={};
+  for(const s of STATS){
+    let sxy=0,sxx=0;for(const r of recs)if(r.p.MIN>=20){const a=r.p[AVG[s]],d=r.pr[s]-a;sxy+=d*(r.act[s]-a);sxx+=d*d;}
+    const k=M.clamp(sxx?sxy/sxx:1,0,1),s1=r=>r.p.MIN>=20?r.p[AVG[s]]+k*(r.pr[s]-r.p[AVG[s]]):r.pr[s];
+    const xs=recs.map(s1),ys=recs.map(r=>r.act[s]),mx=mean(xs),my=mean(ys);let c=0,v=0;xs.forEach((x,i)=>{c+=(x-mx)*(ys[i]-my);v+=(x-mx)**2;});
+    const beta=c/v,m=(my-beta*mx)/(1-beta);
+    // spread: regress |residual|·√(π/2) (the normal sd) on √projection
+    let n=0,sx=0,sy=0,sq=0,sp=0;for(let i=0;i<recs.length;i++){const p=Math.max(0,m+beta*(xs[i]-m)),x=Math.sqrt(p),y=Math.abs(ys[i]-p)*1.2533;n++;sx+=x;sy+=y;sq+=x*x;sp+=x*y;}
+    const b=(n*sp-sx*sy)/(n*sq-sx*sx),a=(sy-b*sx)/n;
+    cal[s]={k:r3(k),m:r3(m),beta:r3(beta),a:r3(a),b:r3(b)};
+  }
+  return cal;
+}
+// the bot's probabilities before calibration (fixed spreads, raw projection), for comparison
+const OLD_SD={pts:p=>Math.max(4,0.28*p),reb:p=>Math.max(1.8,0.35*p),ast:p=>Math.max(1.5,0.38*p),fg3m:p=>Math.max(0.9,0.55*p)};
+const oldPOver=(proj,line,s)=>M.pOver(proj,line,s,{[s]:{a:OLD_SD[s](proj),b:0}});
+// every player-game against a stand-in line (his average rounded to x.5); cal null = old probabilities
+function propSim(recs,cal){
+  const bins={};let picks=0,wins=0,ll=0,n=0;
+  for(const r of recs)for(const s of STATS){
+    const avg=r.p[AVG[s]];if(!(avg>=0.6))continue;
+    const L=Math.floor(avg)+0.5,proj=cal?M.calibrate(s,r.pr[s],avg,r.p.MIN,cal):r.pr[s],po=cal?M.pOver(proj,L,s,cal):oldPOver(proj,L,s);
+    const over=r.act[s]>L,c=Math.max(po,1-po),win=(po>=0.5)===over;
+    ll-=Math.log(M.clamp(over?po:1-po,1e-4,1));n++;
+    const k=c<0.55?"50-55":c<0.6?"55-60":c<0.65?"60-65":c<0.75?"65-75":"75+";(bins[k]=bins[k]||{n:0,hit:0,said:0});bins[k].n++;bins[k].hit+=win;bins[k].said+=c;
+    if(c>=P_MIN&&Math.abs(proj-L)>=ABS_MIN[s]){picks++;wins+=win;}
+  }
+  return {bins,picks,wins,ll:ll/n};
+}
+
 // ---------- analysis ----------
 const NOBOOST={pts:1,reb:1,ast:1};
 const VARIANTS={
   "full model":r=>r.pr,
+  "calibrated (what alerts use)":r=>r.prc,
   "without shot zones":r=>M.project(r.p,{...r.ctx,boost:r.boost,zone:null}),
   "without last-10 minutes":r=>M.project({...r.p,MIN10:undefined},{...r.ctx,boost:r.boost,zone:r.zone}),
   "without game total / pace":r=>M.project(r.p,{...r.ctx,boost:r.boost,zone:r.zone,env:1}),
@@ -151,7 +192,7 @@ const f2=v=>isFinite(v)?v.toFixed(2):"–",f3=v=>isFinite(v)?v.toFixed(3):"–",
 function flagTable(recs){
   recs=recs.filter(r=>r.act);
   const out=["| Flag | Picks | Beat their average | Model said (avg gain) | Actually got | Got ÷ said |","|---|---:|---:|---:|---:|---:|"];
-  const row=(label,list,stat)=>{if(!list.length)return;const said=mean(list.map(r=>r.pr[stat]-r.p[AVG[stat]])),got=mean(list.map(r=>r.act[stat]-r.p[AVG[stat]]));
+  const row=(label,list,stat)=>{if(!list.length)return;const said=mean(list.map(r=>r.prc[stat]-r.p[AVG[stat]])),got=mean(list.map(r=>r.act[stat]-r.p[AVG[stat]]));
     out.push(`| ${label} | ${list.length.toLocaleString()} | ${pc(list.filter(r=>r.act[stat]>r.p[AVG[stat]]).length/list.length)} | ${sg(said)} | **${sg(got)}** | ${f2(got/said)} |`);};
   row("Shot-zone edge (PTS)",recs.filter(r=>r.zoneFlag),"pts");
   for(const s of STATS)row(`Projection boost: ${LABEL[s]}`,recs.filter(r=>r.boostFlags.includes(s)),s);
@@ -200,6 +241,17 @@ function fitTable(recs,label){
     const raw=fit(r,s,VARIANTS["full model"]),sh=fit(r,s,shr);
     md.push(`| ${season} | ${LABEL[s]} | ${f2(K[s])} | ${f3(raw.maeAvg)} | ${f3(raw.maeProj)} | ${f3(sh.maeProj)} |`);}
   md.push("");
+  // ---------- calibration: projection size, regression to the mean, spread ----------
+  const CR={};for(const s of SEASONS)CR[s]=score(sides[s],{...best.opts,benchScale:OUT_BENCH},10).filter(r=>r.act);
+  const calTrain=fitCal(CR[train]),calAll=fitCal(SEASONS.flatMap(s=>CR[s]));
+  md.push(`## Prop probabilities (calibration)`,"",
+    `The prop alert needs an honest probability, not just a projection. \`model.calibrate\` shrinks a starter's projected gap from his average by k, pulls every projection toward m by beta (a high season average is partly luck), and \`model.sdOf\` sets the spread as a + b·√projection. Fit on ${train}, checked on the rest. Real prop lines aren't available historically, so each player-game gets a **stand-in line: his average rounded to x.5**. Books' real lines are sharper than that, so these hit rates run higher than live ones; the point is whether "the model says 70%" means 70%. "Picks" are the ones the alert would send (P_MIN ${P_MIN}, minimum gaps ${JSON.stringify(ABS_MIN)}). Rotation and bench players (10+ MPG) who played.`,"",
+    "| Season | Probabilities | Said 55-60% → hit | Said 60-65% → hit | Said 65-75% → hit | Said 75%+ → hit | Picks | Pick hit rate | Log loss |","|---|---|---:|---:|---:|---:|---:|---:|---:|");
+  for(const s of SEASONS)for(const [lab,cal] of [["old fixed spreads, raw projection",null],[`calibrated (fit on ${train})`,calTrain]]){
+    const x=propSim(CR[s],cal),b=k=>x.bins[k]?`${pc(x.bins[k].said/x.bins[k].n)} → ${pc(x.bins[k].hit/x.bins[k].n)}`:"–";
+    md.push(`| ${s}${s===train?" (fit)":""} | ${lab} | ${b("55-60")} | ${b("60-65")} | ${b("65-75")} | ${b("75+")} | ${x.picks.toLocaleString()} | ${pc(x.wins/x.picks)} | ${x.ll.toFixed(4)} |`);}
+  md.push("",`Fit on all seasons (this goes in \`model.js\` CAL, or set \`NBA_CAL\`):`,"","```",JSON.stringify(calAll),"```","");
+  log("CAL "+JSON.stringify(calAll));
   // ---------- bench players (10-20 MPG) ----------
   const BENCH=[0,0.25,0.5,0.75,1,1.25];const benchRows=[];let bb=null;
   const benchOf=(season,opts)=>score(sides[season],opts,10).filter(r=>r.p.MIN<20);
