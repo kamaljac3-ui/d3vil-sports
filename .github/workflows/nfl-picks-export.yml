@@ -1,0 +1,39 @@
+name: NFL Picks Export
+
+# Manual only. Restores the NFL bots' latest state caches (read-only; this workflow never saves a cache)
+# and attaches their pick logs, sent markers and weekly snapshots as a downloadable artifact, for grading.
+on:
+  workflow_dispatch:
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Restore props state
+        uses: actions/cache/restore@v4
+        with:
+          path: nfl-props/.cache
+          key: np-export-${{ github.run_id }}
+          restore-keys: np-state-
+      - name: Restore lines state
+        uses: actions/cache/restore@v4
+        with:
+          path: nfl-lines/.cache
+          key: nl-export-${{ github.run_id }}
+          restore-keys: nl-state-
+      - name: List
+        run: ls -la nfl-props/.cache nfl-lines/.cache || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nfl-state
+          path: |
+            nfl-props/.cache/picks-*.json
+            nfl-props/.cache/sent-*.json
+            nfl-props/.cache/proj-*.json
+            nfl-props/.cache/odds-usage.json
+            nfl-lines/.cache/picks-*.json
+            nfl-lines/.cache/sent-*.json
+            nfl-lines/.cache/odds-usage.json
+          if-no-files-found: warn
+          retention-days: 7
