@@ -8,11 +8,14 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: "probe, backtest, auto, first, update, final, or gameday"
+        description: "probe, backtest, auto, first, update, final, gameday, or review (weekly scorecard now)"
         default: probe
       dry_run:
         description: "1 = print instead of sending (and mark nothing as sent)"
         default: "1"
+
+permissions:
+  contents: write   # the weekly review pushes its ledger to the bot-results branch (not main: no Pages deploy)
 
 concurrency:
   group: cfb-lines
@@ -59,9 +62,41 @@ jobs:
         run: |
           if [ "$MODE" = "backtest" ]; then
             node cfb-lines/backtest.js
+          elif [ "$MODE" = "review" ]; then
+            echo "review mode: see the Weekly review step"
           else
             node cfb-lines/run.js
           fi
+      # Mondays (or mode=review): grade last week's first-look card, update the ledger, send the scorecard
+      - name: Check out ledger (bot-results branch)
+        id: ledger
+        if: github.event.inputs.mode == 'review' || (github.event.inputs.mode || 'auto') == 'auto'
+        run: |
+          if [ "$(TZ=America/New_York date +%a)" != "Mon" ] && [ "${{ github.event.inputs.mode }}" != "review" ]; then exit 0; fi
+          git fetch -q origin bot-results:bot-results && git worktree add -q ledger bot-results
+          echo "ready=true" >> "$GITHUB_OUTPUT"
+      - name: Weekly review
+        if: steps.ledger.outputs.ready == 'true'
+        env:
+          NP_CACHE: cfb-lines/.cache
+          LEDGER_DIR: ledger
+          MODE: ${{ github.event.inputs.mode || 'auto' }}
+          DRY_RUN: ${{ github.event.inputs.dry_run || '0' }}
+          CFBD_API_KEY: ${{ secrets.CFBD_API_KEY }}
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC_CFB }}
+          NTFY_SERVER: ${{ secrets.NTFY_SERVER }}
+          NTFY_TOKEN: ${{ secrets.NTFY_TOKEN }}
+        run: node cfb-lines/review.js
+      - name: Save ledger
+        if: steps.ledger.outputs.ready == 'true' && (github.event.inputs.dry_run || '0') != '1'
+        working-directory: ledger
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add cfb
+          git diff --cached --quiet && { echo "no changes"; exit 0; }
+          git commit -q -m "cfb review: $(TZ=America/New_York date +%F)"
+          git pull -q --rebase origin bot-results && git push -q origin bot-results
       - name: Upload backtest results
         if: github.event.inputs.mode == 'backtest'
         uses: actions/upload-artifact@v4
