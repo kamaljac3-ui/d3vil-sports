@@ -24,6 +24,8 @@ NBA matchup alerts sent to ntfy: per-game stat projections (projection boosts, a
   - the prop probability uses the real spread, sd = a + b·√projection. The old fixed spreads were about 2/3 of it in the 8–20 pt range, so "90%" picks were really ~75%.
   - Alerts show the calibrated projection; picks log it as `proj` and the raw one as `projRaw`.
 
+**Before testing an idea or changing the model, read [`LEARNINGS.md`](LEARNINGS.md).** It lists every angle tried, its evidence and its status, plus what the weekly review checks on live picks.
+
 ## Backtest (`backtest.js`, results in `BACKTEST.md`)
 
 `node nba-edges/backtest.js` replays 2024–25 (the fit season) and 2025–26 (out of sample) with the bot's own `projectSide`/`flagRows`. There's no look-ahead: stats are season-to-date as of the day before each weekly bucket, blended with the prior season. Rosters and games played come from the box scores in date order (a player belongs to the team he last appeared for), because nba.com's historical snapshots list each player's *current* team. The first run downloads about 400 nba.com snapshots and 2,500 ESPN box scores into `.cache/bt`. Reruns take about 20 seconds.

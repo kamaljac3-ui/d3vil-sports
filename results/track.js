@@ -156,7 +156,7 @@ function mlbCard(recs){
     `- Launch window: ${pct(bbe?inW/bbe:NaN)} of ${bbe} batted balls at 25-35 deg vs ${pct(predW)} predicted`,...live];
 }
 // picks logged before nba-edges started tagging a model version
-const modelOf=r=>r.model||"pre-2026-10-24";
+const modelOf=r=>r.model||(r.modes&&r.modes.includes("news")?"nba-news":"pre-2026-10-24");
 function nbaCard(recs){
   const f=recs.filter(r=>r.result&&r.result.status==="final");if(!f.length)return ["NBA: no graded picks yet."];
   // one block per model version, newest first, so a model change is judged on its own picks
@@ -207,18 +207,74 @@ function recentLines(L,since){
   }
   return out.sort().reverse();
 }
+// ---------- NBA by tag: is an angle the alerts show actually worth anything? ----------
+// Tags and context fields are logged on picks from 2026-10-25 on (older picks have no tags field and are left out).
+// The DvP and rest groups use the logged fields, so every pick counts, not just the ones whose alert showed the tag.
+const hoursOut=r=>r.tip&&r.at?(Date.parse(r.tip)-Date.parse(r.at))/36e5:null;
+const NBA_FAMILIES=[
+  ["no tags",r=>!r.tags.length],
+  ["teammate out (w/o)",r=>r.tags.some(t=>t.startsWith("w/o"))],
+  ["b2b 2nd night",r=>r.rest===1],
+  ["2+ days rest",r=>r.rest>=3],
+  ["soft D vs position (bottom 3)",r=>r.dvp&&r.dvp.rank>r.dvp.of-3],
+  ["tough D vs position (top 3)",r=>r.dvp&&r.dvp.rank<=3],
+  ["D vs position: bottom half",r=>r.dvp&&r.dvp.rank>r.dvp.of/2],
+  ["D vs position: top half",r=>r.dvp&&r.dvp.rank<=r.dvp.of/2],
+  ["high team total",r=>r.tags.includes("high team total")],
+  ["blowout risk",r=>r.tags.includes("blowout risk")],
+  ["sent < 2h before tip",r=>hoursOut(r)!=null&&hoursOut(r)<2],
+  ["sent 2h+ before tip",r=>hoursOut(r)!=null&&hoursOut(r)>=2],
+];
+// one line for a group of player picks: props by W-L/units/closing line, boosts by beat-their-average
+function nbaGroup(g){
+  const parts=[],pr=g.filter(r=>r.kind==="prop"),bo=g.filter(r=>r.kind==="boost"||r.kind==="zone");
+  if(pr.length){let w=0,l=0,p=0;for(const r of pr){const a=r.result[r.stat];if(a===r.line)p++;else if((a>r.line)===(r.po>=0.5))w++;else l++;}
+    const c=pr.filter(r=>r.close!=null),clv=c.map(r=>(r.po>=0.5?1:-1)*(r.close-r.line));
+    parts.push(`props ${w}-${l}${p?`-${p}`:""} ${sg(w*0.909-l)}u`+(c.length?`, close our way ${clv.filter(x=>x>0).length}/${c.length} (avg ${sg(mean(clv))})`:""));}
+  if(bo.length){const beat=bo.filter(r=>r.result[r.stat]>r.avg).length;
+    parts.push(`boosts ${beat}/${bo.length} beat avg (${pct(beat/bo.length)}), said ${sg(mean(bo.map(r=>r.proj-r.avg)))} got ${sg(mean(bo.map(r=>r.result[r.stat]-r.avg)))}`);}
+  return parts.join("; ");
+}
+function nbaTagCard(recs){
+  const all=recs.filter(r=>r.result&&Array.isArray(r.tags)&&!["spread","total"].includes(r.kind)),f=all.filter(r=>r.result.status==="final");
+  if(!f.length)return [];
+  const out=[`NBA by tag: ${f.length} graded picks with tags logged${small(f.length)}`];
+  for(const [name,fn] of NBA_FAMILIES){const g=f.filter(fn);if(g.length)out.push(`- ${name} (${g.length}): ${nbaGroup(g)}`);}
+  // misses from minutes vs misses from the per-minute rate: says which half of the projection to fix
+  const m=f.filter(r=>r.result.min>0&&r.minProj>0&&r.proj>0);
+  if(m.length){const dm=m.map(r=>r.result.min-r.minProj),rate=m.map(r=>(r.result[r.stat]/r.result.min)/(r.proj/r.minProj));
+    out.push(`- Minutes: projected ${mean(m.map(r=>r.minProj)).toFixed(1)}, played ${mean(m.map(r=>r.result.min)).toFixed(1)} (avg miss ${mean(dm.map(Math.abs)).toFixed(1)}, ${dm.filter(x=>x<=-8).length} picks 8+ min short); per-minute rate ${Math.round(mean(rate)*100)}% of projected`);}
+  // didn't play (void): rest days and late scratches; the backtest says a b2b 2nd night should show more of these
+  const vd=all.filter(r=>r.result.status==="void").length,b=all.filter(r=>r.rest===1),bv=b.filter(r=>r.result.status==="void").length;
+  if(vd)out.push(`- Didn't play (void): ${vd}/${all.length} (${pct(vd/all.length)})`+(b.length?`; on a b2b 2nd night ${bv}/${b.length} (${pct(bv/b.length)})`:""));
+  return out;
+}
+// NBA weekly review, the file the weekly Claude review reads (ledger nba-review.md), next to nba-edges/LEARNINGS.md on main,
+// which lists every angle tested and what this review should check.
+function nbaReview(L){
+  const since=addDays(TODAY,-RECENT_DAYS),wk=L.nba.filter(r=>r.date>=since);
+  return [`# NBA weekly review`,``,`Updated ${TODAY}. Ledger: \`nba.json\` on this branch. Read with \`nba-edges/LEARNINGS.md\` on main.`,``,
+    `## Last ${RECENT_DAYS} days`,``,...nbaCard(wk),``,...nbaTagCard(wk),``,
+    `## Season (by model version when there's more than one)`,``,...nbaCard(L.nba),``,...nbaTagCard(L.nba),``,
+    `## How much to trust it`,``,
+    `- Under ~${SMALL} graded picks a group is noise. Closing-line value (did the line move our way after the alert?) settles faster than W-L: about 50 picks with a close.`,
+    `- A tag only matters against the "no tags" row in the same table, and only if it holds week after week.`,
+    `- ${L.nba.filter(r=>r.result&&r.result.status==="final").length} graded, ${L.nba.filter(r=>!r.result).length} pending, ${L.nba.filter(r=>r.result&&r.result.status==="void").length} void.`,``].join("\n");
+}
 function scorecard(L){
   const since=addDays(TODAY,-RECENT_DAYS),rec=a=>a.filter(r=>r.date>=since);
-  const last=[...mlbCard(rec(L.mlb)),"",...nbaCard(rec(L.nba))],all=[...mlbCard(L.mlb),"",...nbaCard(L.nba)];
+  const tg=a=>{const t=nbaTagCard(a);return t.length?["",...t]:[];};
+  const last=[...mlbCard(rec(L.mlb)),"",...nbaCard(rec(L.nba)),...tg(rec(L.nba))],all=[...mlbCard(L.mlb),"",...nbaCard(L.nba)],allMd=[...all,...tg(L.nba)];
   const pending=SPORTS.reduce((s,k)=>s+L[k].filter(r=>!r.result).length,0);
   const md=[`# Bot results`,``,`Updated ${TODAY}. ${pending} picks waiting on games to finish.`,``,
-    `## Last ${RECENT_DAYS} days`,``,...last,``,`## All time`,``,...all,``,
+    `## Last ${RECENT_DAYS} days`,``,...last,``,`## All time`,``,...allMd,``,
     `## How to read this`,``,
     `- **MLB "expected"** is each flagged hitter's chance of homering given his real plate appearances and his own HR rate before that day (shrunk toward league average). A ratio above 1.00x means the flagged hitters homered more than they normally do. |z| above 2 is where it starts to look real.`,
     `- **NBA boosts / zone edges** compare the actual stat to the player's own average. "Model said" is the projected gain; "got" is the real one. If "got" is near zero, the boost is noise.`,
     `- **Prop lines** win when the result lands on the side the model picked. You need 52.4% to break even at -110.`,
     ``,`## Recent picks`,``,...recentLines(L,since).map(l=>`- ${l}`),``].join("\n");
-  return {md,text:[`Last ${RECENT_DAYS} days`,...last,"","All time",...all].join("\n")};
+  // the phone scorecard carries tags for the last week only, to stay short
+  return {md,text:[`Last ${RECENT_DAYS} days`,...last,"","All time",...all].join("\n"),review:nbaReview(L)};
 }
 async function ntfy(title,message){
   if(DRY||!NTFY_TOPIC){log("DRY ntfy:",title,"\n"+message);return;}
@@ -236,5 +292,6 @@ async function ntfy(title,message){
   fs.mkdirSync(LEDGER,{recursive:true});
   for(const s of SPORTS)fs.writeFileSync(path.join(LEDGER,`${s}.json`),JSON.stringify(L[s],null,1));
   fs.writeFileSync(path.join(LEDGER,"SUMMARY.md"),card.md);
+  fs.writeFileSync(path.join(LEDGER,"nba-review.md"),card.review);
   if(SEND_SUMMARY&&SPORTS.some(s=>L[s].some(r=>r.result)))await ntfy(`Bot results, week to ${TODAY}`,card.text);
 })().catch(async e=>{console.error(e);await ntfy("Results tracker error",String(e.message||e)).catch(()=>{});process.exit(1);});

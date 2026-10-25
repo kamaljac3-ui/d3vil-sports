@@ -47,7 +47,7 @@ const save=()=>{if(!DRY&&NTFY_TOPIC)store(STATE,state);};
 function logPicks(rows){
   if(DRY||!NTFY_TOPIC||!rows.length)return;
   const key=`picks-${TODAY}.json`,at=new Date().toISOString();
-  store(key,(cached(key,24*30)||[]).concat(rows.map(({tags,...r})=>({sport:"nba",date:TODAY,mode:"news",at,...r}))));
+  store(key,(cached(key,24*30)||[]).concat(rows.map(r=>({sport:"nba",date:TODAY,mode:"news",at,...r}))));
 }
 
 // Out/Doubtful players per team from ESPN's game summary: {ESPN abbr: Map(key -> {name,status})}

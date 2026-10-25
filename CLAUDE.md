@@ -14,7 +14,7 @@ It's served by GitHub Pages from `main`.
 - `commentary/` holds occasional opinion pieces that Kamal publishes by hand. The daily routine must never touch it.
 - `scripts/` has `send-newsletter.js` (Kit), `send-commentary.js` and `generate-recap-audio.js` (ElevenLabs, Sundays).
 - `launch-angle/` is the MLB edge bot and `nfl-props/` is the NFL player-props bot (details below). `nba-edges/` is an
-  NBA bot built in a separate session, with the same ntfy and cache pattern. Read its `run.js` header and `README.md` before touching it.
+  NBA bot built in a separate session, with the same ntfy and cache pattern. Read its `run.js` header, `README.md` and `LEARNINGS.md` (every angle tested and its status) before touching it.
 - `nba-news/` sends NBA injury-news alerts. It polls ESPN injury reports every 2 min on game days and pushes who gains
   when a regular is newly ruled out. It reuses `nba-edges/run.js` exports (projectSide/flagRows/loadData/slate/roster)
   read-only, so changes to those exports must keep both bots working. See `nba-news/README.md`.

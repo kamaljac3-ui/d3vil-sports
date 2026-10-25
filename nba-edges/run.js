@@ -268,10 +268,11 @@ async function dvp(D){
   log(`defense vs position: ${ids.length} games, ${Object.keys(rank).length} teams ranked`);
   return DVP={rank,pos};
 }
-async function dvpTag(D,g,side,key){
+// the opponent's rank vs this player's position; show = top/bottom DVP_RANK (the tag), the rest is logged only
+async function dvpOf(D,g,side,key){
   try{const {rank,pos}=await dvp(D),q=pos[key],opp=g[side==="home"?"away":"home"],r=q&&rank[opp.espnAbbr]&&rank[opp.espnAbbr][q];
-    if(!r||(r.rank>DVP_RANK&&r.rank<=r.of-DVP_RANK))return null;
-    const d=Math.round((r.ratio-1)*100);return `${opp.abbr} ${ord(r.rank)} of ${r.of} vs ${POSN[q]} (${d>=0?"+":""}${d}% pts)`;}
+    if(!r)return null;const d=Math.round((r.ratio-1)*100);
+    return {pos:q,rank:r.rank,of:r.of,pct:d,show:r.rank<=DVP_RANK||r.rank>r.of-DVP_RANK,text:`${opp.abbr} ${ord(r.rank)} of ${r.of} vs ${POSN[q]} (${d>=0?"+":""}${d}% pts)`};}
   catch(e){return null;}
 }
 // points allowed per game this season (rank, 1 = fewest) and over the last 10
@@ -315,16 +316,18 @@ const linesMessage=rows=>rows.length?`Game lines (model vs line; no proven edge 
 // ---------- scoring ----------
 async function sideRows(g,side,D,outKeys,lines){
   const team=(await roster(g[side].espnId)).map(n=>D.players[nk(n)]).filter(Boolean);
-  const rows=flagRows(projectSide(team,g,side,D,outKeys),lines),b2b=await b2bNight(g,side);
-  for(const r of rows){const t=[...r.tags];if(b2b)t.push("b2b 2nd night");const dv=await dvpTag(D,g,side,r.key);if(dv)t.push(dv);r.tags=t;}
+  const rows=flagRows(projectSide(team,g,side,D,outKeys),lines),rest=await restOf(g,side);
+  // rest and dvp ride along on every logged pick so results/track.js can grade them, tagged or not
+  for(const r of rows){const t=[...r.tags],dv=await dvpOf(D,g,side,r.key);if(rest===1)t.push("b2b 2nd night");if(dv&&dv.show)t.push(dv.text);
+    r.tags=t;r.rest=isFinite(rest)?rest:null;r.dvp=dv&&{pos:dv.pos,rank:dv.rank,of:dv.of,pct:dv.pct};}
   return rows;
 }
 // Informational tag only, never in the projection: in the 2024-26 box scores regulars who played the 2nd night of a
 // back-to-back scored right at their projection (and a player's own b2b split barely repeated year to year), but sat
 // 21% of the time vs 16% otherwise. So the risk is a late rest day, not a cold night.
-async function b2bNight(g,side){
-  try{const {games}=await ratings();return LN.restDays(games.filter(x=>x.date<g.date),g[side].espnAbbr,g.date)===1;}
-  catch(e){return false;}
+async function restOf(g,side){
+  try{const {games}=await ratings();return LN.restDays(games.filter(x=>x.date<g.date),g[side].espnAbbr,g.date);}
+  catch(e){return null;}
 }
 // Pure scoring (also used by backtest.js): project every rotation player on one side of a game.
 // team: stat objects for that side's roster; g: {home,away:{abbr},total,homeSpread}; outKeys: Set of ruled-out name keys.
@@ -352,7 +355,7 @@ function projectSide(team,g,side,D,outKeys,outOpts,minProj=MIN_PROJ){
 function flagRows(side,lines){
   const rows=[];
   for(const {p,zone,pr} of side.players){
-    const base={name:p.name,key:p.key,team:side.me,opp:side.opp,tags:side.tags,mpg:p.MIN};
+    const base={name:p.name,key:p.key,team:side.me,opp:side.opp,tags:side.tags,mpg:p.MIN,minProj:pr.min};
     if(zone&&zone.delta>=ZONE_MIN&&p.PTS>=10)rows.push({kind:"zone",...base,stat:"pts",delta:zone.delta,best:zone.best,proj:pr.pts,avg:p.PTS});
     for(const s of STATS){
       // flags use the calibrated projection (model.calibrate: starters' gap shrunk, high averages pulled back)
@@ -379,7 +382,7 @@ const message=secs=>secs.map(([t,k,l])=>`${t}\n`+l.map((r,i)=>`${i+1}. ${LINE[k]
 function logPicks(mode,secs){
   const rows=secs.flatMap(s=>s[2]);if(DRY||!NTFY_TOPIC||!rows.length)return;
   const key=`picks-${TODAY}.json`,at=new Date().toISOString();
-  store(key,(cached(key,24*30)||[]).concat(rows.map(({tags,...r})=>({sport:"nba",date:TODAY,mode,at,model:MODEL_VERSION,...r}))));
+  store(key,(cached(key,24*30)||[]).concat(rows.map(r=>({sport:"nba",date:TODAY,mode,at,model:MODEL_VERSION,...r}))));
 }
 // Closing line for prop picks already sent: one more Odds API pull per game in the last CLOSE_WINDOW minutes before
 // tip, saved as `close` on those picks (results/track.js reports how often picks beat it). CLOSE_LINES=0 turns it off.
@@ -415,7 +418,7 @@ async function gameRows(g,D,withLines){
 // ✅ game-line picks, logged like the player picks (same sent-only rule) for results/track.js
 function logLinePicks(mode,lineRows){
   const picks=lineRows.flatMap(r=>r.picks.map(p=>({sport:"nba",date:TODAY,mode,at:new Date().toISOString(),model:MODEL_VERSION,key:"game",stat:p.kind,
-    gameId:r.gameId,tip:r.tip,home:r.home,away:r.away,name:`${r.away} @ ${r.home}`,proj:r.proj,projTotal:r.projTotal,...p})));
+    gameId:r.gameId,tip:r.tip,home:r.home,away:r.away,name:`${r.away} @ ${r.home}`,proj:r.proj,projTotal:r.projTotal,b2b:r.b2b,def:r.def,...p})));
   if(DRY||!NTFY_TOPIC||!picks.length)return;
   const key=`picks-${TODAY}.json`;store(key,(cached(key,24*30)||[]).concat(picks));
 }

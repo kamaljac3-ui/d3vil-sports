@@ -29,6 +29,13 @@ Grades every pick the alert bots actually sent and keeps a running scorecard, so
 - Every nba-edges pick carries `model` (nba-edges `MODEL_VERSION`). The NBA scorecard splits by version, so a model change is judged on its own picks; picks from before 2026-10-24 show as `pre-2026-10-24`.
 - **Closing-line value (CLV):** prop picks get `close` from nba-edges' pregame run in the last 45 minutes before tip (Odds API), game-line picks from ESPN when graded. The scorecard shows how often the line moved our way after the alert. CLV needs far fewer picks than win/loss to show a real edge (roughly 50 vs several hundred), so it's the first number to watch.
 
+## NBA by tag (picks from 2026-10-25 on)
+
+- nba-edges and nba-news picks keep their alert tags. nba-edges picks also log `rest` (days since the team's last game), `dvp` (opponent's rank vs the player's position: `{pos, rank, of, pct}`) and `minProj` (projected minutes). Game-line picks log `b2b` and `def` (points allowed).
+- The scorecard adds an "NBA by tag" block. It covers teammate out, b2b 2nd night, 2+ days rest, soft/tough defense vs position (bottom/top 3 and halves), high team total, blowout risk, and alerts sent under vs over 2 hours before tip, each next to a "no tags" baseline. It also shows projected vs played minutes, the per-minute rate, and the void rate on b2b 2nd nights. The rest and DvP groups use the logged fields, so every pick counts, not just the ones whose alert showed the tag.
+- `nba-review.md` on `bot-results` holds the NBA week and season by model version and by tag, for the Monday weekly review. What to look for is in `nba-edges/LEARNINGS.md`. The phone scorecard carries the tag block for the last 7 days only.
+- nba-news picks (no model version) show as `nba-news`.
+
 ## Not tracked yet
 
 - **Picks older than the cache:** the bots' caches are evicted after 7 days unused. If the tracker stops running for a week, picks from that week are lost.
