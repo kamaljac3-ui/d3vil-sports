@@ -128,6 +128,8 @@ const HEAD="| | graded | W-L-P | win % | units (-110) | beat the close | avg CLV
   const ctx={games,teams,venues:needStatic?await D.venues():null};
   for(const r of L.picks)if(!r.gid){const h=byAbbr[r.home]||r.home,a=byAbbr[r.away]||r.away;
     const g=games.find(x=>x.wk===r.wk&&x.home===h&&x.away===a);if(g){r.gid=g.id;if(r.key.startsWith("first|seed"))r.key=`first|${g.id}`;}}
+  const lost=L.picks.filter(r=>!r.gid);
+  if(lost.length)log(`review: ${lost.length} picks not matched to a game: ${lost.slice(0,8).map(r=>`wk${r.wk} ${r.away}@${r.home}`).join(", ")}`);
   const todo=L.picks.filter(r=>!r.graded&&r.gid&&G.get(r.gid)?.done);
   for(const wk of [...new Set(todo.map(r=>r.wk))].sort((a,b)=>a-b)){
     // the cached /lines copy only counts as the close if it was fetched after the week's last kickoff
