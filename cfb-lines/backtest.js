@@ -16,17 +16,19 @@ const TRAIN=list("BT_TRAIN","2021,2022"),TEST=list("BT_TEST","2023,2024,2025");
 const FITP=process.env.BT_FIT!=="0",USE_QB=process.env.BT_QB!=="0",USE_WX=process.env.BT_WX!=="0";
 const MIN_WEEK=+(process.env.BT_MIN_WEEK||4);
 const SEASONS=[...new Set([...TRAIN,...TEST])].sort();
+// the season in progress: graded week by week as the bot would have called it (never used by the fit)
+const LIVE=+(process.env.BT_LIVE??(new Date().getUTCFullYear()-(new Date().getUTCMonth()<2?1:0)))||0;
 const CUR=9999;   // every backtest season is finished: cache forever
 
 // ---------- load ----------
-async function loadSeason(S,venues){
-  const [games,adv,teams,talent,ret]=await Promise.all([D.games(S,CUR),D.advanced(S,CUR),D.teams(S,CUR),D.talent(S,CUR),D.returning(S,CUR)]);
+async function loadSeason(S,venues,cur=CUR){
+  const [games,adv,teams,talent,ret]=await Promise.all([D.games(S,cur),D.advanced(S,cur),D.teams(S,cur),D.talent(S,cur),D.returning(S,cur)]);
   const fbs=Object.fromEntries(Object.keys(teams).map(t=>[t,true]));
   const prev=await D.games(S-1,CUR),prevAdv=await D.advanced(S-1,CUR),prevTeams=await D.teams(S-1,CUR);
   const prevFinal=M.seasonFinal(prevAdv,prev,Object.fromEntries(Object.keys(prevTeams).map(t=>[t,true])));
-  const lines=await D.lines(S,CUR);
+  const lines=await D.lines(S,cur);
   const ctx={S,games,adv,fbs,teams,talent,ret,prevFinal,venues,lines,qb:{},wx:{}};
-  if(USE_QB)ctx.qb=await qbChanges(S,games);
+  if(USE_QB)ctx.qb=await qbChanges(S,games,cur);
   if(USE_WX){const W=await seasonWeather(S,games,venues);ctx.wx=W.games;
     // each team's usual air: the Sep-Nov kickoff-hours average dew point at its home stadium
     ctx.norm={};for(const [t,x] of Object.entries(teams))if(W.norm[x.venueId])ctx.norm[t]=W.norm[x.venueId];}
@@ -35,9 +37,9 @@ async function loadSeason(S,venues){
 }
 
 // For each game: did each team start someone other than its usual QB (most starts in its last 3 games)?
-async function qbChanges(S,games){
-  const weeks=[...new Set(games.filter(g=>g.wk<D.POST).map(g=>g.wk))].sort((a,b)=>a-b);
-  const box={};for(const w of weeks)Object.assign(box,await D.passers(S,CUR,w));
+async function qbChanges(S,games,cur=CUR){
+  const weeks=[...new Set(games.filter(g=>g.wk<D.POST&&(cur===CUR||g.done)).map(g=>g.wk))].sort((a,b)=>a-b);
+  const box={};for(const w of weeks)Object.assign(box,await D.passers(S,cur,w));
   const hist={},out={};
   for(const g of games){const B=box[g.id];if(!B)continue;out[g.id]={};
     for(const t of [g.home,g.away]){const st=B[t]&&B[t][0];if(!st||st.att<8)continue;   // < 8 attempts: no clear starter
@@ -51,7 +53,8 @@ async function qbChanges(S,games){
 
 // Game-window weather from the Open-Meteo archive: one call per venue per season, trimmed and cached.
 async function seasonWeather(S,games,venues){
-  const file=path.join(CACHE,`wx2-${S}.json`);
+  // a finished season is cached for good; the live one per day (the archive fills in a few days behind)
+  const file=path.join(CACHE,`wx2-${S}${S===LIVE?"-"+new Date().toISOString().slice(0,10):""}.json`);
   if(fs.existsSync(file))return JSON.parse(fs.readFileSync(file,"utf8"));
   const out={},norm={},byV={};
   for(const g of games)if(g.wk<D.POST&&g.homeFBS&&venues[g.venueId]&&venues[g.venueId].lat!=null)(byV[g.venueId]||(byV[g.venueId]=[])).push(g);
@@ -128,7 +131,15 @@ async function fit(ctxs){
   Object.assign(C,{PRIOR_GAMES:best.PG,PRIOR_REG:best.PR,TAL_K:best.TK,RET_K:best.RK});
   Object.assign(F,{PRIOR_GAMES:best.PG,PRIOR_REG:best.PR,TAL_K:best.TK,RET_K:best.RK});
   log(`priors: PRIOR_GAMES ${best.PG}, PRIOR_REG ${best.PR}, TAL_K ${best.TK}, RET_K ${best.RK} (raw MAE ${best.s.toFixed(2)})`);
-  // (c) margin scale + situational coefficients, ridge toward the defaults
+  fitSituational(tr,F);
+  log("fitted: "+JSON.stringify(F));
+  F._fit={train:TRAIN,at:new Date().toISOString().slice(0,10)};
+  fs.writeFileSync(M.PFILE,JSON.stringify(F,null,1)+"\n");
+  return F;
+}
+
+// (c)+(d): margin scale, situational and totals coefficients, ridge toward the defaults. pin = keys held at a value.
+function fitSituational(tr,F,pin={}){
   const rows=[];for(const c of tr)rows.push(...seasonPreds(c,{raw:true}));
   const K=["MARGIN_SCALE","HFA","HFA_CAP","TRAVEL","TZ","REST","ALT_UP","ALT_DOWN","HUMID","HEAT","QB_OUT"];
   const MX=rows.map(p=>{const f=p.P.f;return [p.P.margin,f.home,f.capZ,f.travel,f.tz,f.rest,f.climb,f.descend,f.humid,f.heat,p.qA-p.qH];});
@@ -136,6 +147,7 @@ async function fit(ctxs){
   // how hard each coefficient is pulled to its default. Altitude/humidity/heat are pinned (1e9): too few games for a
   // stable fit, so they stay at their evidence-based defaults and are judged by the evidence table instead.
   const lam=[0,50,200,300,300,300,1e9,1e9,1e9,1e9,20];
+  K.forEach((k,i)=>{if(k in pin){lam[i]=1e9;b0[i]=pin[k];}});
   const b=ridge(MX,rows.map(p=>p.am),b0,lam);
   K.forEach((k,i)=>{F[k]=+b[i].toFixed(3);C[k]=F[k];});
   // (d) totals: bias + weather + QB, ridge toward defaults
@@ -143,10 +155,6 @@ async function fit(ctxs){
   const TX=rows.map(p=>{const w=wxOf(p);return [1,w?Math.max(0,w.wind-C.WIND_MPH):0,w&&w.precip>=C.RAIN_IN?1:0,w&&w.temp<C.COLD_F?1:0,p.qA+p.qH];});
   const tb=ridge(TX,rows.map(p=>p.at-p.P.total),[0,M.DEF.WIND,M.DEF.RAIN,M.DEF.COLD,M.DEF.QB_TOTAL],[0,200,30,30,20]);
   ["TOTAL_BIAS","WIND","RAIN","COLD","QB_TOTAL"].forEach((k,i)=>{F[k]=+tb[i].toFixed(3);C[k]=F[k];});
-  const nWind=TX.filter(r=>r[1]>0).length,nRain=TX.filter(r=>r[2]).length;
-  log(`fitted: ${JSON.stringify(F)}  (games with wind>${C.WIND_MPH}: ${nWind}, rain: ${nRain})`);
-  F._fit={train:TRAIN,at:new Date().toISOString().slice(0,10),games:rows.length};
-  fs.writeFileSync(M.PFILE,JSON.stringify(F,null,1)+"\n");
   return F;
 }
 
@@ -177,6 +185,55 @@ function evidence(preds){
     });
   }
   L.push("","Fitted = one-factor regression over every game (± 1 standard error); |fitted| < 2 SE means the data can't tell it from zero.");
+  return L.join("\n");
+}
+
+// ---------- where the edge comes from: picks (edge >= 4 vs the opener) split by situation ----------
+function pickRows(preds,minE=4){
+  const out=[];
+  for(const p of preds){const L=p.L;if(!L||L.m==null)continue;const open=L.mOpen??L.m,e=p.P.margin-open;
+    if(Math.abs(e)<minE)continue;const s=Math.sign(e),d=s*(p.am-open),move=s*(L.m-open);
+    out.push({p,e:Math.abs(e),open,res:Math.sign(d),move,dog:s>0?open<0:open>0,home:s>0});}
+  return out;
+}
+function recap(rows){let w=0,l=0,mv=0,n=0;for(const r of rows){if(r.res>0)w++;else if(r.res<0)l++;n++;if(r.move>0)mv++;}
+  return `${w}-${l} | ${pct(w,l)} | ${n?(100*mv/n).toFixed(0)+"%":"-"}`;}
+function breakdown(title,preds){
+  const R=pickRows(preds),L=[`#### ${title}: spread picks (edge ≥ 4 vs the opener) by situation`,"","| split | record | win% vs open | line moved our way |","|---|---|---|---|"];
+  const add=(lab,f)=>L.push(`| ${lab} | ${recap(R.filter(f))} |`);
+  add("all",()=>1);add("edge 4-6",r=>r.e<6);add("edge 6-8",r=>r.e>=6&&r.e<8);add("edge 8+",r=>r.e>=8);
+  add("line under 7",r=>Math.abs(r.open)<7);add("line 7-14",r=>Math.abs(r.open)>=7&&Math.abs(r.open)<14);add("line 14+",r=>Math.abs(r.open)>=14);
+  add("on the underdog",r=>r.dog);add("on the favorite",r=>!r.dog);add("on the home team",r=>r.home);add("on the road team",r=>!r.home);
+  add("home stadium under ~30k seats",r=>{const v=r.p.P.f;return v.home>0&&v.capZ<=-0.8;});
+  return L.join("\n");
+}
+
+// Candidate adjustments. setup = a model change (situational part refit on TRAIN afterwards);
+// filter/min = a betting rule applied when grading. Graded on TEST and the live season.
+const VARIANTS=[
+  {name:"current model"},
+  {name:"home edge never below 1 pt",setup:()=>{C.HFA_FLOOR=1;}},
+  {name:"small-stadium penalty capped (crowd z ≥ -0.4)",setup:()=>{C.CAP_FLOOR=-0.4;}},
+  {name:"no crowd-size term",setup:()=>{},pin:{HFA_CAP:0}},
+  {name:"skip edges over 8",filter:r=>r.e<=8},
+  {name:"skip lines of 14+",filter:r=>Math.abs(r.open)<14},
+  {name:"edge ≥ 5",min:5},
+  {name:"edge ≥ 3",min:3},
+];
+function variants(ctxs,live){
+  const base={...C},tr=ctxs.filter(c=>TRAIN.includes(c.S)),te=ctxs.filter(c=>TEST.includes(c.S));
+  const L=["#### Candidate adjustments (model changes refit on train; graded vs the opener, weeks ≥ "+MIN_WEEK+")","",
+    "| change | TEST record | TEST win% | TEST moved our way |"+(live?` ${LIVE} record | ${LIVE} win% | ${LIVE} moved our way |`:""),
+    "|---|---|---|---|"+(live?"---|---|---|":"")];
+  for(const v of VARIANTS){
+    Object.assign(C,base);
+    if(v.setup){v.setup();fitSituational(tr,{},v.pin||{});}
+    const grab=cs=>{const ps=[];for(const c of cs)ps.push(...seasonPreds(c).filter(x=>x.wk>=MIN_WEEK));
+      return pickRows(ps,v.min||4).filter(v.filter||(()=>true));};
+    L.push(`| ${v.name} | ${recap(grab(te))} |`+(live?` ${recap(grab([live]))} |`:""));
+  }
+  Object.assign(C,base);
+  L.push("","Keep a change only if it helps on TEST (3 seasons, ~770 picks) and doesn't hurt the live season; the live season alone is too small to steer by.");
   return L.join("\n");
 }
 
@@ -212,7 +269,8 @@ function table(title,res){
   if(!cfbd.hasKey())throw new Error("Set CFBD_API_KEY (free at collegefootballdata.com/key)");
   const venues=await D.venues();
   const ctxs=[];for(const S of SEASONS)ctxs.push(await loadSeason(S,venues));
-  if(FITP)await fit(ctxs);
+  const F=FITP?await fit(ctxs):{};
+  const live=LIVE&&!SEASONS.includes(LIVE)?await loadSeason(LIVE,venues,LIVE):null;
   const md=[`## CFB lines backtest (${new Date().toISOString().slice(0,10)})`,"",
     `Train (params fitted on): ${TRAIN.join(", ")}. Test (never seen by the fit): ${TEST.join(", ")}. Weeks ≥ ${MIN_WEEK}, FBS vs FBS, regular season, consensus (median) line across CFBD's books. Breakeven at -110 is 52.4%.`,""];
   const all={train:[],test:[]};
@@ -223,6 +281,11 @@ function table(title,res){
   md.push("");
   for(const [k,label] of [["test",`TEST ${TEST.join("+")}`],["train",`train ${TRAIN.join("+")}`]]){
     md.push(table(`Spreads, ${label}`,grade(all[k],"spread")),"",table(`Totals, ${label}`,grade(all[k],"total")),"");}
+  if(live){const lp=seasonPreds(live).filter(x=>x.wk>=MIN_WEEK);
+    md.push("### "+LIVE+" so far (weeks "+MIN_WEEK+"+, "+lp.length+" finished FBS games; ratings rebuilt week by week, same as live)","",
+      table("Spreads, "+LIVE,grade(lp,"spread")),"",table("Totals, "+LIVE,grade(lp,"total")),"",breakdown(String(LIVE),lp),"");}
+  {const tp=[];for(const c of ctxs)if(TEST.includes(c.S))tp.push(...seasonPreds(c).filter(x=>x.wk>=MIN_WEEK));md.push(breakdown("TEST "+TEST.join("+"),tp),"");}
+  md.push(variants(ctxs,live),"");
   const everyGame=[];for(const c of ctxs)everyGame.push(...seasonPreds(c));
   md.push(evidence(everyGame),"");
   const early=[];for(const c of ctxs)if(TEST.includes(c.S))early.push(...seasonPreds(c).filter(x=>x.wk<MIN_WEEK));
