@@ -47,7 +47,7 @@ const save=()=>{if(!DRY&&NTFY_TOPIC)store(STATE,state);};
 function logPicks(rows){
   if(DRY||!NTFY_TOPIC||!rows.length)return;
   const key=`picks-${TODAY}.json`,at=new Date().toISOString();
-  store(key,(cached(key,24*30)||[]).concat(rows.map(({tags,...r})=>({sport:"nba",date:TODAY,mode:"news",at,...r}))));
+  store(key,(cached(key,24*30)||[]).concat(rows.map(r=>({sport:"nba",date:TODAY,mode:"news",at,...r}))));
 }
 
 // Out/Doubtful players per team from ESPN's game summary: {ESPN abbr: Map(key -> {name,status})}
@@ -73,7 +73,7 @@ async function onNews(g,side,D,outNow,newKeys){
   const before=new Set([...outNow].filter(k=>!newKeys.has(k)));
   const S0=R.projectSide(team,g,side,D,before),S1=R.projectSide(team,g,side,D,outNow);
   const prev=Object.fromEntries(S0.players.map(x=>[x.p.key,x.pr]));
-  const rows=R.flagRows(S1,null).filter(r=>r.kind==="boost").map(r=>({...r,gain:r.proj-(prev[r.key]?prev[r.key][r.stat]:r.avg)}))
+  const rows=R.flagRows(S1,null).filter(r=>r.kind==="boost").map(r=>({...r,gain:prev[r.key]?r.projRaw-prev[r.key][r.stat]:r.proj-r.avg}))
     .filter(r=>r.gain>0).sort((a,b)=>b.gain/b.avg-a.gain/a.avg).slice(0,NEWS_TOP);
   const opp=g[side==="home"?"away":"home"].abbr,who=news.map(p=>`${p.name} (${Math.round(p.MIN)} mpg)`).join(", ");
   const title=`${g[side].abbr}: ${news.map(p=>p.name).join(", ")} OUT vs ${opp}, ${tipStr(g)} ET`;

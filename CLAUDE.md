@@ -14,7 +14,7 @@ It's served by GitHub Pages from `main`.
 - `commentary/` holds occasional opinion pieces that Kamal publishes by hand. The daily routine must never touch it.
 - `scripts/` has `send-newsletter.js` (Kit), `send-commentary.js` and `generate-recap-audio.js` (ElevenLabs, Sundays).
 - `launch-angle/` is the MLB edge bot and `nfl-props/` is the NFL player-props bot (details below). `nba-edges/` is an
-  NBA bot built in a separate session, with the same ntfy and cache pattern. Read its `run.js` header and `README.md` before touching it.
+  NBA bot built in a separate session, with the same ntfy and cache pattern. Read its `run.js` header, `README.md` and `LEARNINGS.md` (every angle tested and its status) before touching it.
 - `nba-news/` sends NBA injury-news alerts. It polls ESPN injury reports every 2 min on game days and pushes who gains
   when a regular is newly ruled out. It reuses `nba-edges/run.js` exports (projectSide/flagRows/loadData/slate/roster)
   read-only, so changes to those exports must keep both bots working. See `nba-news/README.md`.
@@ -146,6 +146,11 @@ scoreboard, i.e. DraftKings; optionally The Odds API) next to a port of `nfl-edg
   - windy games (12+ mph), with wind direction relative to the field
   The evidence is in `nfl-lines/research/*-results.md`.
 - **Sleeper's trimmed copy** (`nfl-props/data.js`) also keeps defensive backs, keyed `n:<name>|<team>`, because most have no gsis id.
+- **Learning loop (NFL):**
+  - **Read first:** `nfl-props/LEARNINGS.md` and `nfl-lines/LEARNINGS.md`, which list every angle tested and its status, before changing a model or adding a tag.
+  - **The rule:** an angle goes into a model only if it beats an out-of-sample backtest. Otherwise it's a ⚠️ tag at most.
+  - **Pick context:** every logged pick carries `ctx`: tags, injuries/teammates out, weather, rest, minutes to kickoff, and `model_version` (`nfl-props/context.js`). Bump `VERSIONS` whenever a model's numbers change.
+  - **Weekly review:** grades by tag and by version, closing-line value first.
 - **Grading the NFL bots:** run the manual **NFL Picks Export** workflow, `gh run download <id> -n nfl-state -D <dir>`,
   then `node nfl-lines/grade.js <dir>` (W-L, units, closing-line value, per week). `results/track.js` still doesn't grade NFL.
   As of Oct 24, 2026: props model 23-20, lines ✅ 21-22-2 (now off by default via `MODEL_EDGES=0`).

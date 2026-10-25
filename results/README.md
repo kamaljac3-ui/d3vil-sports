@@ -8,6 +8,7 @@ Grades every pick the alert bots actually sent and keeps a running scorecard, so
 2. **The tracker grades them daily.** `.github/workflows/results-tracker.yml` runs at 11:00 UTC. It restores both bots' caches (read-only), adds any new picks to the ledger, and grades every pick whose game has finished:
    - **MLB** (MLB Stats API game feed): plate appearances, home runs, HR off the flagged starter, whether he actually started, and batted balls at 25-35°. The baseline is the hitter's own HR rate *before* that day (shrunk toward 3% HR/PA with 100 PA of league average), turned into a chance of homering given the plate appearances he actually got.
    - **NBA** (ESPN box score): minutes, PTS, REB, AST, 3PM against the player's average and projection, or against the posted line for prop picks.
+   - **NBA game lines** (`kind` spread/total, logged by nba-edges when the model is `MIN_SPREAD`+ off the line): final score against the line at alert time, plus ESPN's closing line.
    - Players who don't play are voided, not counted as losses. So are games still not final after `GIVE_UP_DAYS` (3).
 3. **The ledger lives on the `bot-results` branch** (`mlb.json`, `nba.json`, `SUMMARY.md`), not `main`. That way it outlives the 7-day Actions cache, doesn't trigger the Pages deploy, and doesn't send the newsletter. Read `SUMMARY.md` on that branch for the scorecard.
 4. **Weekly ntfy scorecard** on Mondays (or run the workflow manually with `send_summary: 1`).
@@ -23,7 +24,18 @@ Grades every pick the alert bots actually sent and keeps a running scorecard, so
 
 `RECENT_DAYS` (7), `GIVE_UP_DAYS` (3), `SMALL_SAMPLE` (100), `SEND_SUMMARY` (`1` = always, `0` = never, unset = Mondays), `DRY_RUN`, `LEDGER_DIR` (`ledger`), `PICK_DIRS` (`launch-angle/.cache,nba-edges/.cache`), `DATE`.
 
+## Model versions and closing lines
+
+- Every nba-edges pick carries `model` (nba-edges `MODEL_VERSION`). The NBA scorecard splits by version, so a model change is judged on its own picks; picks from before 2026-10-24 show as `pre-2026-10-24`.
+- **Closing-line value (CLV):** prop picks get `close` from nba-edges' pregame run in the last 45 minutes before tip (Odds API), game-line picks from ESPN when graded. The scorecard shows how often the line moved our way after the alert. CLV needs far fewer picks than win/loss to show a real edge (roughly 50 vs several hundred), so it's the first number to watch.
+
+## NBA by tag (picks from 2026-10-25 on)
+
+- nba-edges and nba-news picks keep their alert tags. nba-edges picks also log `rest` (days since the team's last game), `dvp` (opponent's rank vs the player's position: `{pos, rank, of, pct}`) and `minProj` (projected minutes). Game-line picks log `b2b` and `def` (points allowed).
+- The scorecard adds an "NBA by tag" block. It covers teammate out, b2b 2nd night, 2+ days rest, soft/tough defense vs position (bottom/top 3 and halves), high team total, blowout risk, and alerts sent under vs over 2 hours before tip, each next to a "no tags" baseline. It also shows projected vs played minutes, the per-minute rate, and the void rate on b2b 2nd nights. The rest and DvP groups use the logged fields, so every pick counts, not just the ones whose alert showed the tag.
+- `nba-review.md` on `bot-results` holds the NBA week and season by model version and by tag, for the Monday weekly review. What to look for is in `nba-edges/LEARNINGS.md`. The phone scorecard carries the tag block for the last 7 days only.
+- nba-news picks (no model version) show as `nba-news`.
+
 ## Not tracked yet
 
-- **Closing-line value:** prop picks record the line at alert time, but not where it closed.
 - **Picks older than the cache:** the bots' caches are evicted after 7 days unused. If the tracker stops running for a week, picks from that week are lost.

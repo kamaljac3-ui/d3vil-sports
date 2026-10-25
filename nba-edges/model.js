@@ -50,23 +50,37 @@ function project(pl,ctx){
     ast:pl.AST*minF*(ctx.oppAst||1)*e*b.ast,
     fg3m:pl.FG3M*z.threesFactor*minF*e*b.pts};
 }
-// rough per-game spread of each stat around its projection
-const SD={pts:p=>Math.max(4,0.28*p),reb:p=>Math.max(1.8,0.35*p),ast:p=>Math.max(1.5,0.38*p),fg3m:p=>Math.max(0.9,0.55*p)};
+// Calibration, fit by backtest.js on 2024-26 (rerun it and paste its "CAL" line here after a model change):
+//  k     - starters (20+ MPG) get only k of the projection's gap from their average (the gap showed up at 0.6-0.8x;
+//          bench gaps showed up at 1x or more, so the bench keeps the full gap)
+//  m,beta- then everything is pulled toward m: a high season average is partly luck (28+ ppg scorers came in ~2 under it)
+//  a,b   - real spread of the stat around that projection: sd = a + b*sqrt(proj). The old fixed spreads were ~2/3 of
+//          the real one in the 8-20 pt range, which made 60% spots look like 85-90%.
+const CAL=process.env.NBA_CAL?JSON.parse(process.env.NBA_CAL):{
+  pts:{k:0.842,m:9.37,beta:0.931,a:1.524,b:1.398},reb:{k:0.575,m:2.59,beta:0.938,a:-0.027,b:1.233},
+  ast:{k:0.666,m:2.366,beta:0.937,a:-0.036,b:1.17},fg3m:{k:0.612,m:1.198,beta:0.906,a:-0.081,b:1.164}};
+function calibrate(stat,proj,avg,mpg,cal=CAL){
+  const c=cal[stat];if(!c||!(avg>=0))return proj;
+  const p=mpg>=20?avg+c.k*(proj-avg):proj;
+  return Math.max(0,c.m+c.beta*(p-c.m));
+}
+const sdOf=(stat,p,cal=CAL)=>Math.max(0.5,cal[stat].a+cal[stat].b*Math.sqrt(Math.max(0,p)));
 function Phi(x){const t=1/(1+0.2316419*Math.abs(x)),d=0.3989423*Math.exp(-x*x/2);
   const q=d*t*(0.3193815+t*(-0.3565638+t*(1.781478+t*(-1.821256+t*1.330274))));return x>0?1-q:q;}
-const pOver=(proj,line,stat)=>1-Phi((line-proj)/SD[stat](proj));
+// proj should already be calibrated
+const pOver=(proj,line,stat,cal=CAL)=>1-Phi((line-proj)/sdOf(stat,proj,cal));
 
 // Teammates ruled out. Only counts regulars who have actually been playing (a long-term absence is already in
 // everyone's averages). Returns {out: names, forPlayer(p) -> {pts,reb,ast} multipliers}.
 //  mode "minutes" (default): the out players' minutes go to the rest of the rotation weighted by MIN x (MAX_MIN - MIN),
 //    so bench/rotation players with room absorb most of it and 36-minute starters little; each player's minutes
 //    factor is scaled by minScale. On top of that, per-minute production rises by usage x (share of that stat the
-//    team lost). Both fit by backtest.js: best on 2024-25 and held on 2025-26 was minScale 0.25, usage 0. For 20+ MPG
-//    players a teammate sitting barely moves their numbers; any usage bump made projections worse.
+//    team lost). Both fit by backtest.js on 2024-25: minScale 0.25, usage 0.15 (with box-score rosters; usage 0 was a
+//    hair better on 2025-26, 0.9930 vs 0.9937, so the usage bump is marginal). 0.5+ minutes or 0.3+ usage overshoot.
 //  mode "uniform": the original rule (everyone +70% x lost/remaining, capped at +25%); the 2024-26 backtest showed
 //    it overshoots ~5x, kept only so the backtest can compare.
-const OUT_OPTS={mode:process.env.NBA_OUT_MODE||"minutes",minScale:+(process.env.NBA_OUT_MIN_SCALE||0.25),usage:+(process.env.NBA_OUT_USAGE||0),maxMin:36,
-  // bench (under 20 MPG) share of a missing teammate's minutes: 0.25 picked on 2024-25, held on 2025-26 (0.5 was close)
+const OUT_OPTS={mode:process.env.NBA_OUT_MODE||"minutes",minScale:+(process.env.NBA_OUT_MIN_SCALE||0.25),usage:+(process.env.NBA_OUT_USAGE||0.15),maxMin:36,
+  // bench (under 20 MPG) share of a missing teammate's minutes: 0.25 picked on 2024-25 (0.5 tied there and was better on 2025-26)
   benchScale:+(process.env.NBA_OUT_BENCH_SCALE||0.25)};
 function outBoost(team,outKeys,teamGP,opts={}){
   const o={...OUT_OPTS,...opts};
@@ -91,4 +105,4 @@ function outBoost(team,outKeys,teamGP,opts={}){
   }};
 }
 
-module.exports={ZONES,zonesFromRow,leagueZones,zoneMatchup,project,pOver,outBoost,clamp};
+module.exports={ZONES,zonesFromRow,leagueZones,zoneMatchup,project,calibrate,sdOf,pOver,outBoost,clamp,CAL};

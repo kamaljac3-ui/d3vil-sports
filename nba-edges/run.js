@@ -1,10 +1,10 @@
 // NBA Edges: daily slate scan + ntfy alerts.
-// MODE=morning  -> whole slate, one push with the top shot-zone and projection edges
+// MODE=morning  -> whole slate, one push with the top shot-zone and projection edges, then every game's line vs model (lines.js)
 // MODE=pregame  -> games tipping within PREGAME_MIN minutes: fresh injuries (+ prop lines if ODDS_API_KEY), one push per game (sent once)
 // MODE=snapshot -> save stats.nba.com data to data/nba-stats.json (run on a PC; GitHub runners can't reach nba.com)
 // MODE=probe    -> report which data sources this machine can reach
 const fs=require("fs"),path=require("path");
-const M=require("./model");
+const M=require("./model"),LN=require("./lines");
 
 const MODE=process.env.MODE||"morning";
 const DRY=process.env.DRY_RUN==="1";
@@ -23,6 +23,9 @@ const MIN_PROJ=+(process.env.MIN_PROJ||10);
 const BOOST_MIN=+(process.env.BOOST_MIN||0.10);   // projection this far above the player's own average
 const P_MIN=+(process.env.P_MIN||0.58);           // model over/under probability vs a posted line
 const PREGAME_MIN=+(process.env.PREGAME_MIN||90);
+const CLOSE_LINES=process.env.CLOSE_LINES!=="0",CLOSE_WINDOW=+(process.env.CLOSE_WINDOW||45);  // closing-line capture, see captureCloses
+// tagged on every logged pick so results/track.js can grade each model version separately; bump it on any model change
+const MODEL_VERSION=process.env.MODEL_VERSION||"2026-10-24-rosters";
 const ABS_MIN={pts:2,reb:1,ast:1,fg3m:0.5};
 const STATS=["pts","reb","ast","fg3m"],AVG={pts:"PTS",reb:"REB",ast:"AST",fg3m:"FG3M"},LABEL={pts:"PTS",reb:"REB",ast:"AST",fg3m:"3PM"};
 const CACHE=path.join(__dirname,".cache");fs.mkdirSync(CACHE,{recursive:true});
@@ -200,10 +203,131 @@ async function propLines(g){
   return lines;
 }
 
+// ---------- game lines: spread and total (lines.js; backtest in BACKTEST-LINES.md) ----------
+// The backtest found no edge against closing lines at any size of disagreement (spreads ~50-53%, totals lose). Against
+// the opening line spreads did better (55-60%), but that leans on knowing who sat, and the bot sees the 11 AM line, not
+// the open. So every game shows line vs model with no ✅ (SPREAD_EDGES=1 / TOTAL_EDGES=1 turn them on), and spreads off
+// by MIN_SPREAD+ are still logged as tracked picks: results/track.js grades them against the result and the closing
+// line, which is what will show whether a morning disagreement is worth anything.
+const SPREAD_EDGES=process.env.SPREAD_EDGES==="1",TOTAL_EDGES=process.env.TOTAL_EDGES==="1";
+const MIN_SPREAD=+(process.env.MIN_SPREAD||4),MIN_TOTAL=+(process.env.MIN_TOTAL||6);
+const TEAM_IDS=[1,2,17,30,4,5,6,7,8,9,10,11,12,13,29,14,15,16,3,18,25,19,20,21,22,23,24,28,26,27];
+// a season's finished regular-season games from the 30 ESPN team schedules
+async function seasonResults(y,maxAgeH){
+  const key=`results-${y}.json`;const hit=cached(key,maxAgeH);if(hit)return hit;
+  const byId={};
+  for(let i=0;i<TEAM_IDS.length;i+=6)await Promise.all(TEAM_IDS.slice(i,i+6).map(async id=>{
+    const j=await get(`${ESPN}/teams/${id}/schedule?season=${y}&seasontype=2`);
+    for(const e of (j&&j.events)||[]){const c=e.competitions[0];if(!c.status||!c.status.type.completed)continue;
+      const t=h=>c.competitors.find(x=>x.homeAway===h),H=t("home"),A=t("away");
+      byId[e.id]={id:e.id,date:e.date,home:H.team.abbreviation,away:A.team.abbreviation,hs:+H.score.value,as:+A.score.value};}
+  }));
+  const games=Object.values(byId).filter(g=>g.hs>0&&g.as>0).sort((a,b)=>a.date<b.date?-1:1);
+  return games.length?store(key,games):games;
+}
+let RATINGS=null;
+async function ratings(){
+  if(RATINGS)return RATINGS;
+  const prev=await seasonResults(CUR.espn-1,24*30),cur=await seasonResults(CUR.espn,4),now=new Date().toISOString();
+  const prior=prev.length?LN.fitRatings(prev,prev[prev.length-1].date,null):null;
+  const played=cur.filter(g=>g.date<now);
+  log(`game ratings: ${played.length} games this season, prior from ${prev.length} last season`);
+  return RATINGS={games:played,R:LN.fitRatings(played,now,prior)};
+}
+// ---------- defense context (informational tags only, never in a projection) ----------
+// The 2024-26 backtest: players facing a bottom-3 defense vs their position beat their own average by ~0.7 pts more than
+// vs a top-3 one, but the projection (game total / pace) already carried that; adding the factor didn't help out of sample.
+const DVP_RANK=+(process.env.DVP_RANK||3),DVP_MIN_GP=+(process.env.DVP_MIN_GP||10),DEF_MIN_GP=+(process.env.DEF_MIN_GP||5);
+const POSG={PG:"G",SG:"G",G:"G",SF:"F",PF:"F",F:"F",C:"C"},POSN={G:"guards",F:"forwards",C:"centers"};
+const ord=n=>n+(n%100>=11&&n%100<=13?"th":["th","st","nd","rd"][n%10]||"th");
+// one finished game's box: {ESPN abbr: [{name,pos,min,pts}]}; finished games never change, so it's cached for good
+async function boxScore(id){
+  const key=`box-${id}.json`;const hit=cached(key,24*400);if(hit)return hit;
+  const s=await get(`${ESPN}/summary?event=${id}`);if(!s||!s.boxscore||!s.boxscore.players)return null;
+  const box={};
+  for(const t of s.boxscore.players){const g=t.statistics[0],L=g.labels;
+    box[t.team.abbreviation]=(g.athletes||[]).filter(a=>a.stats&&a.stats.length).map(a=>({name:a.athlete.displayName,
+      pos:POSG[a.athlete.position&&a.athlete.position.abbreviation]||null,min:parseInt(a.stats[L.indexOf("MIN")])||0,pts:+a.stats[L.indexOf("PTS")]||0}));}
+  return store(key,box);
+}
+// points each defense allows to guards/forwards/centers vs those players' own per-minute averages -> rank (1 = allows least)
+let DVP=null;
+async function dvp(D){
+  if(DVP)return DVP;
+  const {games}=await ratings(),def={},pos={};
+  const ids=games.filter(g=>g.id).map(g=>g.id);
+  for(let i=0;i<ids.length;i+=6){const boxes=await Promise.all(ids.slice(i,i+6).map(boxScore));
+    for(const b of boxes){if(!b)continue;const t=Object.keys(b);if(t.length!==2)continue;
+      for(const [me,opp] of [[t[0],t[1]],[t[1],t[0]]])for(const x of b[me]){const p=D.players[nk(x.name)];if(x.pos)pos[nk(x.name)]=x.pos;
+        if(!x.pos||!p||!(p.MIN>=8)||!(x.min>0))continue;
+        const c=((def[opp]=def[opp]||{gp:0})[x.pos]=def[opp][x.pos]||{a:0,e:0});c.a+=x.pts;c.e+=p.PTS*x.min/p.MIN;}
+      for(const tm of t)if(def[tm])def[tm].gp++;}}
+  const rank={};
+  for(const q of ["G","F","C"]){const L=Object.entries(def).filter(([,d])=>d.gp>=DVP_MIN_GP&&d[q]&&d[q].e>0).map(([tm,d])=>[tm,d[q].a/d[q].e]).sort((a,b)=>a[1]-b[1]);
+    L.forEach(([tm,r],i)=>{(rank[tm]=rank[tm]||{})[q]={rank:i+1,of:L.length,ratio:r};});}
+  log(`defense vs position: ${ids.length} games, ${Object.keys(rank).length} teams ranked`);
+  return DVP={rank,pos};
+}
+// the opponent's rank vs this player's position; show = top/bottom DVP_RANK (the tag), the rest is logged only
+async function dvpOf(D,g,side,key){
+  try{const {rank,pos}=await dvp(D),q=pos[key],opp=g[side==="home"?"away":"home"],r=q&&rank[opp.espnAbbr]&&rank[opp.espnAbbr][q];
+    if(!r)return null;const d=Math.round((r.ratio-1)*100);
+    return {pos:q,rank:r.rank,of:r.of,pct:d,show:r.rank<=DVP_RANK||r.rank>r.of-DVP_RANK,text:`${opp.abbr} ${ord(r.rank)} of ${r.of} vs ${POSN[q]} (${d>=0?"+":""}${d}% pts)`};}
+  catch(e){return null;}
+}
+// points allowed per game this season (rank, 1 = fewest) and over the last 10
+function defenseLine(games,team){
+  const L=games.filter(g=>g.home===team||g.away===team);if(L.length<DEF_MIN_GP)return null;
+  const pa=g=>g.home===team?g.as:g.hs,avg=a=>a.reduce((s,g)=>s+pa(g),0)/a.length;
+  const all={};for(const g of games)for(const t of [g.home,g.away])(all[t]=all[t]||[]).push(g);
+  const ranked=Object.entries(all).filter(([,a])=>a.length>=DEF_MIN_GP).map(([t,a])=>[t,a.reduce((s,g)=>s+(g.home===t?g.as:g.hs),0)/a.length]).sort((a,b)=>a[1]-b[1]);
+  return {n:L.length,pa:avg(L),l10:avg(L.slice(-10)),rank:ranked.findIndex(x=>x[0]===team)+1,of:ranked.length};
+}
+// one game's line vs model; out = Set of name keys ruled out (both teams)
+async function lineRow(g,D,out){
+  const {games,R}=await ratings(),ctx={};
+  for(const side of ["home","away"]){
+    const team=(await roster(g[side].espnId)).map(n=>D.players[nk(n)]).filter(Boolean),teamGP=Math.max(0,...team.map(p=>p.gpCur||0));
+    ctx[side==="home"?"outH":"outA"]=LN.outValue(team.filter(p=>out.has(p.key)),teamGP);
+    ctx[side==="home"?"restH":"restA"]=LN.restDays(games,g[side].espnAbbr,g.date);
+  }
+  const pr=LN.predict({home:g.home.espnAbbr,away:g.away.espnAbbr},R,ctx);
+  const row={kind:"lines",key:"game",gameId:g.id,tip:g.date,home:g.home.abbr,away:g.away.abbr,proj:pr.margin,projTotal:pr.total,
+    homeSpread:g.homeSpread,total:g.total,b2b:[ctx.restH===1?g.home.abbr:null,ctx.restA===1?g.away.abbr:null].filter(Boolean),picks:[],
+    def:{away:defenseLine(games,g.away.espnAbbr),home:defenseLine(games,g.home.espnAbbr)}};
+  if(g.homeSpread!=null){const e=pr.margin+g.homeSpread;   // model home margin minus the market's (-homeSpread)
+    if(Math.abs(e)>=MIN_SPREAD)row.picks.push({kind:"spread",side:e>0?"home":"away",team:e>0?g.home.abbr:g.away.abbr,line:e>0?g.homeSpread:-g.homeSpread,edge:Math.abs(e),tick:SPREAD_EDGES});}
+  if(g.total!=null&&TOTAL_EDGES){const e=pr.total-g.total;
+    if(Math.abs(e)>=MIN_TOTAL)row.picks.push({kind:"total",side:e>0?"over":"under",line:g.total,edge:Math.abs(e),tick:true});}
+  return row;
+}
+const sgn=v=>(v>0?"+":"")+(Math.round(v*2)/2);   // spreads to the half point
+function lineText(r){
+  const mkt=r.homeSpread!=null?`${r.home} ${sgn(r.homeSpread)}`:"no line",mt=r.total!=null?`, o/u ${r.total}`:"";
+  const apart=r.homeSpread!=null?` (${f1(Math.abs(r.proj+r.homeSpread))} apart)`:"";
+  const ticks=r.picks.filter(p=>p.tick).map(p=>p.kind==="spread"?` ✅ ${p.team} ${sgn(p.line)}`:` ✅ ${p.side} ${p.line}`).join("");
+  const dl=t=>{const d=r.def&&r.def[t==="away"?"away":"home"];return d&&`${r[t]} ${ord(d.rank)} (${f1(d.pa)}${d.n>10?`, L10 ${f1(d.l10)}`:""})`;};
+  const dd=[dl("away"),dl("home")].filter(Boolean),def=dd.length?`
+   pts allowed/g (1st = fewest): ${dd.join(", ")}`:"";
+  return `${r.away} @ ${r.home}: ${mkt}${mt} | model ${r.home} ${sgn(-r.proj)}${apart}, ${f1(r.projTotal)}${r.b2b.length?` [b2b: ${r.b2b.join(", ")}]`:""}${ticks}${def}`;
+}
+const linesMessage=rows=>rows.length?`Game lines (model vs line; no proven edge yet, see BACKTEST-LINES.md)\n`+rows.map(lineText).join("\n"):"";
+
 // ---------- scoring ----------
 async function sideRows(g,side,D,outKeys,lines){
   const team=(await roster(g[side].espnId)).map(n=>D.players[nk(n)]).filter(Boolean);
-  return flagRows(projectSide(team,g,side,D,outKeys),lines);
+  const rows=flagRows(projectSide(team,g,side,D,outKeys),lines),rest=await restOf(g,side);
+  // rest and dvp ride along on every logged pick so results/track.js can grade them, tagged or not
+  for(const r of rows){const t=[...r.tags],dv=await dvpOf(D,g,side,r.key);if(rest===1)t.push("b2b 2nd night");if(dv&&dv.show)t.push(dv.text);
+    r.tags=t;r.rest=isFinite(rest)?rest:null;r.dvp=dv&&{pos:dv.pos,rank:dv.rank,of:dv.of,pct:dv.pct};}
+  return rows;
+}
+// Informational tag only, never in the projection: in the 2024-26 box scores regulars who played the 2nd night of a
+// back-to-back scored right at their projection (and a player's own b2b split barely repeated year to year), but sat
+// 21% of the time vs 16% otherwise. So the risk is a late rest day, not a cold night.
+async function restOf(g,side){
+  try{const {games}=await ratings();return LN.restDays(games.filter(x=>x.date<g.date),g[side].espnAbbr,g.date);}
+  catch(e){return null;}
 }
 // Pure scoring (also used by backtest.js): project every rotation player on one side of a game.
 // team: stat objects for that side's roster; g: {home,away:{abbr},total,homeSpread}; outKeys: Set of ruled-out name keys.
@@ -231,12 +355,13 @@ function projectSide(team,g,side,D,outKeys,outOpts,minProj=MIN_PROJ){
 function flagRows(side,lines){
   const rows=[];
   for(const {p,zone,pr} of side.players){
-    const base={name:p.name,key:p.key,team:side.me,opp:side.opp,tags:side.tags,mpg:p.MIN};
+    const base={name:p.name,key:p.key,team:side.me,opp:side.opp,tags:side.tags,mpg:p.MIN,minProj:pr.min};
     if(zone&&zone.delta>=ZONE_MIN&&p.PTS>=10)rows.push({kind:"zone",...base,stat:"pts",delta:zone.delta,best:zone.best,proj:pr.pts,avg:p.PTS});
     for(const s of STATS){
-      const proj=pr[s],avg=p[AVG[s]],line=lines&&lines[p.key]&&lines[p.key][s];
-      if(line!=null){const po=M.pOver(proj,line,s);if((po>=P_MIN||po<=1-P_MIN)&&Math.abs(proj-line)>=ABS_MIN[s])rows.push({kind:"prop",...base,stat:s,proj,line,po});}
-      else if(avg>0&&proj/avg-1>=BOOST_MIN&&proj-avg>=ABS_MIN[s])rows.push({kind:"boost",...base,stat:s,proj,avg});
+      // flags use the calibrated projection (model.calibrate: starters' gap shrunk, high averages pulled back)
+      const avg=p[AVG[s]],projRaw=pr[s],proj=M.calibrate(s,projRaw,avg,p.MIN),line=lines&&lines[p.key]&&lines[p.key][s];
+      if(line!=null){const po=M.pOver(proj,line,s);if((po>=P_MIN||po<=1-P_MIN)&&Math.abs(proj-line)>=ABS_MIN[s])rows.push({kind:"prop",...base,stat:s,proj,projRaw,avg,line,po});}
+      else if(avg>0&&proj/avg-1>=BOOST_MIN&&proj-avg>=ABS_MIN[s])rows.push({kind:"boost",...base,stat:s,proj,projRaw,avg});
     }
   }
   return rows;
@@ -257,7 +382,22 @@ const message=secs=>secs.map(([t,k,l])=>`${t}\n`+l.map((r,i)=>`${i+1}. ${LINE[k]
 function logPicks(mode,secs){
   const rows=secs.flatMap(s=>s[2]);if(DRY||!NTFY_TOPIC||!rows.length)return;
   const key=`picks-${TODAY}.json`,at=new Date().toISOString();
-  store(key,(cached(key,24*30)||[]).concat(rows.map(({tags,...r})=>({sport:"nba",date:TODAY,mode,at,...r}))));
+  store(key,(cached(key,24*30)||[]).concat(rows.map(r=>({sport:"nba",date:TODAY,mode,at,model:MODEL_VERSION,...r}))));
+}
+// Closing line for prop picks already sent: one more Odds API pull per game in the last CLOSE_WINDOW minutes before
+// tip, saved as `close` on those picks (results/track.js reports how often picks beat it). CLOSE_LINES=0 turns it off.
+async function captureCloses(games){
+  if(!ODDS_KEY||!CLOSE_LINES||DRY)return;
+  const key=`picks-${TODAY}.json`,picks=cached(key,24*30);if(!picks)return;
+  let changed=false;
+  for(const g of games){
+    const mins=(new Date(g.date)-Date.now())/6e4;if(mins>CLOSE_WINDOW||mins<0)continue;
+    const mine=picks.filter(p=>p.gameId===g.id&&p.kind==="prop"&&p.close==null);if(!mine.length)continue;
+    const lines=await propLines(g);if(!lines)continue;
+    for(const p of mine){const c=lines[p.key]&&lines[p.key][p.stat];if(c!=null){p.close=c;p.closeAt=new Date().toISOString();changed=true;}}
+    log(`${label(g)}: closing lines for ${mine.filter(p=>p.close!=null).length}/${mine.length} props`);
+  }
+  if(changed)store(key,picks);
 }
 
 async function ntfy(title,message,priority=3,tags=["basketball"]){
@@ -268,9 +408,19 @@ async function ntfy(title,message,priority=3,tags=["basketball"]){
 }
 const label=g=>`${g.away.abbr} @ ${g.home.abbr}`;
 const tip=g=>new Date(g.date).toLocaleTimeString("en-US",{timeZone:"America/New_York",hour:"numeric",minute:"2-digit"});
+// player rows plus the game-lines row (null if the ratings can't be built; the player alerts still go out)
 async function gameRows(g,D,withLines){
   const out=await injuries(g),lines=withLines?await propLines(g):null;
-  return [...await sideRows(g,"home",D,out,lines),...await sideRows(g,"away",D,out,lines)].map(r=>({...r,gameId:g.id,tip:g.date}));
+  const rows=[...await sideRows(g,"home",D,out,lines),...await sideRows(g,"away",D,out,lines)].map(r=>({...r,gameId:g.id,tip:g.date}));
+  let line=null;try{line=await lineRow(g,D,out);}catch(e){log("game lines skipped:",e.message);}
+  return {rows,line};
+}
+// ✅ game-line picks, logged like the player picks (same sent-only rule) for results/track.js
+function logLinePicks(mode,lineRows){
+  const picks=lineRows.flatMap(r=>r.picks.map(p=>({sport:"nba",date:TODAY,mode,at:new Date().toISOString(),model:MODEL_VERSION,key:"game",stat:p.kind,
+    gameId:r.gameId,tip:r.tip,home:r.home,away:r.away,name:`${r.away} @ ${r.home}`,proj:r.proj,projTotal:r.projTotal,b2b:r.b2b,def:r.def,...p})));
+  if(DRY||!NTFY_TOPIC||!picks.length)return;
+  const key=`picks-${TODAY}.json`;store(key,(cached(key,24*30)||[]).concat(picks));
 }
 // MODE=probe: report which data sources this machine can reach (GitHub runners get blocked by some)
 async function probe(){
@@ -290,7 +440,7 @@ async function probe(){
     catch(e){log(`FAIL ${n}: ${e.message}`);}}
 }
 // require()d by backtest.js for the stats fetch and the scoring; only runs the bot when started directly
-module.exports={nba,nbaSeason,blend,projectSide,flagRows,nk,ESPN_TO_NBA,loadData,slate,roster,TODAY,SETTINGS:{ZONE_MIN,BOOST_MIN,ABS_MIN,STATS,AVG}};
+module.exports={nba,nbaSeason,blend,projectSide,flagRows,nk,ESPN_TO_NBA,loadData,slate,roster,TODAY,SETTINGS:{ZONE_MIN,BOOST_MIN,ABS_MIN,P_MIN,STATS,AVG}};
 if(require.main===module)(async()=>{
   if(MODE==="probe")return probe();
   if(MODE==="snapshot")return snapshot();
@@ -299,20 +449,25 @@ if(require.main===module)(async()=>{
   const D=await loadData();
   if(MODE==="morning"){
     const sentKey=`morning-${TODAY}.json`;if(cached(sentKey,30)&&!DRY){log("morning already sent");return;}
-    let all=[];for(const g of games)all=all.concat(await gameRows(g,D,ODDS_IN_MORNING));
-    const secs=shown(all,TOP_N),msg=message(secs)||"No edges clear the bar today.";
-    await ntfy(`NBA Edges ${TODAY} (${games.length} games)`,msg,all.length?4:2,["basketball","chart_with_upwards_trend"]);
-    logPicks("morning",secs);
+    let all=[];const lineRows=[];
+    for(const g of games){const x=await gameRows(g,D,ODDS_IN_MORNING);all=all.concat(x.rows);if(x.line)lineRows.push(x.line);}
+    const secs=shown(all,TOP_N),ticks=lineRows.some(r=>r.picks.some(p=>p.tick));
+    const msg=[message(secs)||"No player edges clear the bar today.",linesMessage(lineRows)].filter(Boolean).join("\n\n");
+    await ntfy(`NBA Edges ${TODAY} (${games.length} games)`,msg,all.length||ticks?4:2,["basketball","chart_with_upwards_trend"]);
+    logPicks("morning",secs);logLinePicks("morning",lineRows);
     if(!DRY&&NTFY_TOPIC)store(sentKey,true);
   }else{
     const sent=cached(`pregame-${TODAY}.json`,30)||{};
     for(const g of games){
       const mins=(new Date(g.date)-Date.now())/6e4;
       if(sent[g.id]||mins>PREGAME_MIN||mins<-10)continue;
-      const secs=shown(await gameRows(g,D,true),4),msg=message(secs);
-      if(msg){await ntfy(`${label(g)} ${tip(g)} ET: NBA edges`,msg,4,["basketball"]);logPicks("pregame",secs);}else log(`${label(g)}: no edges`);
+      const x=await gameRows(g,D,true),secs=shown(x.rows,4),pm=message(secs);
+      // the game line rides along when the push goes out anyway, or on its own when it has a ✅
+      const ln=x.line&&(pm||x.line.picks.some(p=>p.tick))?x.line:null,msg=[pm,ln?linesMessage([ln]):""].filter(Boolean).join("\n\n");
+      if(msg){await ntfy(`${label(g)} ${tip(g)} ET: NBA edges`,msg,4,["basketball"]);logPicks("pregame",secs);if(ln)logLinePicks("pregame",[ln]);}else log(`${label(g)}: no edges`);
       sent[g.id]=true;
     }
     if(!DRY&&NTFY_TOPIC)store(`pregame-${TODAY}.json`,sent);
+    await captureCloses(games);
   }
 })().catch(async e=>{console.error(e);await ntfy("NBA Edges bot error",String(e.message||e),2,["warning"]).catch(()=>{});process.exit(1);});
