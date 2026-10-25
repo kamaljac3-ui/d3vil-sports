@@ -21,6 +21,8 @@ const DEF={
   MARGIN_SCALE:1.0,TOTAL_BIAS:0,
   // margin coefficients (home perspective)
   HFA:2.5,HFA_CAP:0.6,          // base home edge; extra per 25k seats above 50k
+  CAP_FLOOR:-1.5,               // lowest crowd-size z (a ~12k stadium); raising it limits the small-stadium penalty
+  HFA_FLOOR:-99,                // net home edge (base + crowd) never below this many points; -99 = off
   HFA_AWAY_VENUE:0.5,           // home team "hosting" away from its own stadium keeps this share
   TRAVEL:0.3,                   // home pts per 1,000 more miles the visitor travelled than the home team
   TZ:0.3,                       // home pts per extra time zone the visitor crossed
@@ -163,7 +165,7 @@ function features(ctx,g,extra={}){
   const cap=V&&V.cap?V.cap:0;
   const f={
     home:g.neutral?0:(atHome?1:C.HFA_AWAY_VENUE),
-    capZ:g.neutral?0:clamp((cap-50000)/25000,-1.5,2)*(atHome?1:C.HFA_AWAY_VENUE),
+    capZ:g.neutral?0:clamp((cap-50000)/25000,C.CAP_FLOOR,2)*(atHome?1:C.HFA_AWAY_VENUE),
     travel:trav(A)-trav(H),tz:tzs(A)-tzs(H),
     rest:clamp(restDays(ctx.games,g.home,g)-restDays(ctx.games,g.away,g),-C.REST_CAP,C.REST_CAP),
     climb:elevGap(A,site,1)-elevGap(H,site,1),
@@ -199,6 +201,8 @@ function predict(R,ctx,g,extra={}){
   const hp=sidePts(R,g.home,g.away),ap=sidePts(R,g.away,g.home);
   let margin=(hp-ap)*C.MARGIN_SCALE,total=hp+ap+C.TOTAL_BIAS;
   for(const [k,c,label] of MARGIN_KEYS){const v=f[k]*C[c];if(v){margin+=v;parts.push({kind:"m",label,pts:v,f:f[k]});}}
+  const hf=f.home*C.HFA+f.capZ*C.HFA_CAP;
+  if(f.home>0&&hf<C.HFA_FLOOR*f.home){const v=C.HFA_FLOOR*f.home-hf;margin+=v;parts.push({kind:"m",label:"home field floor",pts:v});}
   const wx=extra.wx;
   if(wx&&!wx.indoor&&!f.dome){
     let w=0;

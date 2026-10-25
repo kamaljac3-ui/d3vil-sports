@@ -19,8 +19,10 @@ const CFG={
   MAX_EDGE:env("MAX_EDGE",14),           // bigger gaps are usually news the model hasn't seen: shown with ⚠️, not ✅
   MIN_WEEK:env("MIN_WEEK",4),            // weeks 1-3 lost in the backtest (priors-heavy)
   FIRST_HOUR:env("FIRST_HOUR",14),FIRST_COVER:env("FIRST_COVER",0.6),
-  UPDATE_HOUR:env("UPDATE_HOUR",12),FINAL_HOUR:env("FINAL_HOUR",9),
-  GD_MIN:env("GD_MIN",75),GD_MAX:env("GD_MAX",110),
+  // GitHub runs this cron only about every 3 hours, so the final card is due from 3 AM (an overnight run
+  // reliably lands 3-6 AM ET, before any kickoff) and anything sent before QUIET_UNTIL goes out silently.
+  UPDATE_HOUR:env("UPDATE_HOUR",12),FINAL_HOUR:env("FINAL_HOUR",3),QUIET_UNTIL:env("QUIET_UNTIL",8),
+  GD_MIN:env("GD_MIN",30),GD_MAX:env("GD_MAX",200),   // wide enough that a run every ~3 h still catches each game
   GD_MOVE:env("GD_MOVE",1.5),GD_WIND:env("GD_WIND",7),   // material change: our number moved this much / wind shift (mph)
 };
 const RUN_URL=process.env.GITHUB_RUN_ID?`${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`:"";
@@ -157,9 +159,19 @@ async function sendCard(ctx,kind,games,title){
   const msg=`${early}${head}\n\n${body}`.trim();
   summary(`## ${title}\n\n\`\`\`\n${msg}\n\`\`\`\n\n<details><summary>All games</summary>\n\n\`\`\`\n${ev.map(x=>block(ctx,x)).join("\n\n")}\n\`\`\`\n</details>\n`);
   log(title+"\n"+ev.map(x=>block(ctx,x)).join("\n\n"));
-  const ok=await ntfy(title,msg,hits.length?4:3,["football","moneybag"],RUN_URL);
+  const quiet=ET.h<CFG.QUIET_UNTIL;   // ntfy priority 2 = no sound or vibration
+  const ok=await ntfy(title,msg,quiet?2:hits.length?4:3,["football","moneybag"],RUN_URL);
   if(LIVE&&ok)saveSnaps(ev);
+  if(LIVE&&ok&&kind==="first")recordCard(ctx,ev);
   return ok;
+}
+// The first look is the card to bet, so its whole slate goes to review.js's ledger (home perspective).
+function recordCard(ctx,ev){
+  const all=readState(`picks-${S}.json`)||{},wk=ev[0]&&ev[0].g.wk;if(wk==null||all[wk])return;
+  all[wk]={sentAt:new Date(now).toISOString(),games:ev.filter(x=>x.line).map(x=>({gid:x.g.id,wk:x.g.wk,away:ab(ctx,x.g.away),home:ab(ctx,x.g.home),
+    lm:x.line.m,lt:x.line.t??null,om:+x.P.margin.toFixed(1),ot:+x.P.total.toFixed(1),se:x.spread?+x.spread.size.toFixed(1):0,
+    spick:!!(x.spread&&x.spread.ok&&!x.spread.wild),why:reasons(ctx,x).join("; ")}))};
+  writeState(`picks-${S}.json`,all);
 }
 
 // ---------- game-day: only material changes ----------
