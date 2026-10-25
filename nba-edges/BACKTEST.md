@@ -1,6 +1,6 @@
 # NBA Edges backtest
 
-Generated 2026-09-27 by `node nba-edges/backtest.js`. The bot's own scoring code (`run.js` projectSide/flagRows) replayed over whole regular seasons with **no look-ahead**: stats are season-to-date as of the day before each weekly bucket, blended with the prior season like the live bot.
+Generated 2026-10-25 by `node nba-edges/backtest.js`. The bot's own scoring code (`run.js` projectSide/flagRows) replayed over whole regular seasons with **no look-ahead**: stats are season-to-date as of the day before each weekly bucket, blended with the prior season like the live bot.
 
 **How to read it.** "Error" is the average miss in that stat per player-game. The projection has to beat simply using the player's season average. The **slope** asks: when the model says "+2 over his average", how much of that shows up? 1.00 means it's the right size, 0.50 means the real effect is half as big, and 0 means it's noise. **Got ÷ said** is the same idea for the picks the bot would actually alert on.
 
@@ -41,10 +41,9 @@ The sections below use the picked setting.
 
 | Flag | Picks | Beat their average | Model said (avg gain) | Actually got | Got ÷ said |
 |---|---:|---:|---:|---:|---:|
-| Projection boost: PTS | 318 | 61.9% | +2.57 | **+2.90** | 1.13 |
-| Projection boost: REB | 336 | 56.0% | +1.34 | **+0.82** | 0.62 |
-| Projection boost: AST | 178 | 60.1% | +1.21 | **+0.87** | 0.72 |
-| Projection boost: 3PM | 95 | 52.6% | +0.63 | **+0.46** | 0.72 |
+| Projection boost: PTS | 71 | 73.2% | +2.47 | **+5.59** | 2.27 |
+| Projection boost: REB | 8 | 75.0% | +1.28 | **+3.75** | 2.94 |
+| Projection boost: AST | 2 | 100.0% | +1.07 | **+4.50** | 4.22 |
 | *(no flag) everyone in this group, PTS* | 15,317 | 47.8% | – | +0.16 | – |
 | *(no flag) everyone in this group, REB* | 15,317 | 45.0% | – | -0.02 | – |
 | *(no flag) everyone in this group, AST* | 15,317 | 45.5% | – | +0.04 | – |
@@ -58,6 +57,10 @@ The sections below use the picked setting.
 | full model | REB | 15,317 | 2.066 | 2.078 | -0.1% | 0.52 ± 0.06 |
 | full model | AST | 15,317 | 1.585 | 1.584 | -1.2% | 0.76 ± 0.05 |
 | full model | 3PM | 15,317 | 1.062 | 1.067 | -0.2% | 0.63 ± 0.09 |
+| calibrated (what alerts use) | PTS | 15,317 | 5.377 | 5.351 | -1.4% | 1.20 ± 0.08 |
+| calibrated (what alerts use) | REB | 15,317 | 2.066 | 2.054 | -0.9% | 1.10 ± 0.09 |
+| calibrated (what alerts use) | AST | 15,317 | 1.585 | 1.576 | -1.7% | 1.28 ± 0.08 |
+| calibrated (what alerts use) | 3PM | 15,317 | 1.062 | 1.066 | -0.7% | 1.18 ± 0.11 |
 | without shot zones | PTS | 15,317 | 5.377 | 5.375 | -1.1% | 1.01 ± 0.08 |
 | without shot zones | REB | 15,317 | 2.066 | 2.078 | -0.1% | 0.52 ± 0.06 |
 | without shot zones | AST | 15,317 | 1.585 | 1.584 | -1.2% | 0.76 ± 0.05 |
@@ -91,10 +94,9 @@ The sections below use the picked setting.
 
 | Flag | Picks | Beat their average | Model said (avg gain) | Actually got | Got ÷ said |
 |---|---:|---:|---:|---:|---:|
-| Projection boost: PTS | 655 | 57.9% | +2.74 | **+1.85** | 0.68 |
-| Projection boost: REB | 299 | 55.2% | +1.28 | **+0.68** | 0.53 |
-| Projection boost: AST | 238 | 52.5% | +1.29 | **+0.53** | 0.41 |
-| Projection boost: 3PM | 150 | 50.0% | +0.62 | **+0.26** | 0.41 |
+| Projection boost: PTS | 133 | 64.7% | +2.56 | **+3.32** | 1.30 |
+| Projection boost: REB | 1 | 0.0% | +1.03 | **-1.20** | -1.16 |
+| Projection boost: AST | 9 | 55.6% | +1.10 | **+0.71** | 0.64 |
 | *(no flag) everyone in this group, PTS* | 15,530 | 46.3% | – | -0.15 | – |
 | *(no flag) everyone in this group, REB* | 15,530 | 44.4% | – | -0.10 | – |
 | *(no flag) everyone in this group, AST* | 15,530 | 44.5% | – | -0.00 | – |
@@ -108,6 +110,10 @@ The sections below use the picked setting.
 | full model | REB | 15,530 | 2.036 | 2.038 | -0.6% | 0.64 ± 0.06 |
 | full model | AST | 15,530 | 1.583 | 1.585 | -0.4% | 0.57 ± 0.05 |
 | full model | 3PM | 15,530 | 1.049 | 1.052 | -0.2% | 0.59 ± 0.08 |
+| calibrated (what alerts use) | PTS | 15,530 | 5.367 | 5.327 | -1.8% | 1.05 ± 0.06 |
+| calibrated (what alerts use) | REB | 15,530 | 2.036 | 2.020 | -1.6% | 1.41 ± 0.09 |
+| calibrated (what alerts use) | AST | 15,530 | 1.583 | 1.575 | -1.3% | 0.99 ± 0.07 |
+| calibrated (what alerts use) | 3PM | 15,530 | 1.049 | 1.052 | -0.9% | 1.17 ± 0.10 |
 | without shot zones | PTS | 15,530 | 5.367 | 5.357 | -0.9% | 0.80 ± 0.06 |
 | without shot zones | REB | 15,530 | 2.036 | 2.038 | -0.6% | 0.64 ± 0.06 |
 | without shot zones | AST | 15,530 | 1.583 | 1.585 | -0.4% | 0.57 ± 0.05 |
@@ -161,6 +167,23 @@ Fit on 2024-25: projection' = average + k × (projection − average), with k = 
 | 2025-26 | AST | 0.76 | 1.583 | 1.585 | 1.581 |
 | 2025-26 | 3PM | 0.63 | 1.049 | 1.052 | 1.049 |
 
+## Prop probabilities (calibration)
+
+The prop alert needs an honest probability, not just a projection. `model.calibrate` shrinks a starter's projected gap from his average by k, pulls every projection toward m by beta (a high season average is partly luck), and `model.sdOf` sets the spread as a + b·√projection. Fit on 2024-25, checked on the rest. Real prop lines aren't available historically, so each player-game gets a **stand-in line: his average rounded to x.5**. Books' real lines are sharper than that, so these hit rates run higher than live ones; the point is whether "the model says 70%" means 70%. "Picks" are the ones the alert would send (P_MIN 0.58, minimum gaps {"pts":2,"reb":1,"ast":1,"fg3m":0.5}). Rotation and bench players (10+ MPG) who played.
+
+| Season | Probabilities | Said 55-60% → hit | Said 60-65% → hit | Said 65-75% → hit | Said 75%+ → hit | Picks | Pick hit rate | Log loss |
+|---|---|---:|---:|---:|---:|---:|---:|---:|
+| 2024-25 (fit) | old fixed spreads, raw projection | 57.3% → 53.9% | 62.2% → 58.3% | 68.3% → 61.2% | 80.2% → 73.8% | 4,378 | 64.2% | 0.6879 |
+| 2024-25 (fit) | calibrated (fit on 2024-25) | 57.2% → 56.4% | 62.1% → 60.4% | 67.7% → 64.8% | 78.5% → 81.0% | 3,556 | 68.7% | 0.6838 |
+| 2025-26 | old fixed spreads, raw projection | 57.4% → 54.5% | 62.2% → 58.3% | 68.4% → 61.9% | 79.7% → 72.8% | 5,351 | 63.1% | 0.6868 |
+| 2025-26 | calibrated (fit on 2024-25) | 57.3% → 56.3% | 62.1% → 61.1% | 67.6% → 63.9% | 78.6% → 86.8% | 4,116 | 66.6% | 0.6830 |
+
+Fit on all seasons (this goes in `model.js` CAL, or set `NBA_CAL`):
+
+```
+{"pts":{"k":0.798,"m":9.739,"beta":0.941,"a":1.559,"b":1.394},"reb":{"k":0.58,"m":2.515,"beta":0.941,"a":-0.03,"b":1.237},"ast":{"k":0.651,"m":2.432,"beta":0.942,"a":-0.033,"b":1.17},"fg3m":{"k":0.604,"m":1.213,"beta":0.91,"a":-0.082,"b":1.166}}
+```
+
 ## Bench players (10–20 MPG)
 
 Same replay with players averaging 10–20 minutes also projected. Starters keep the picked setting; the bench gets its own share of a missing teammate's minutes (bench scale). Coach's-decision DNPs aren't treated as known before the game: those players are projected and count as "didn't play". Picked on 2024-25 by squared error in games where someone was out: **bench scale 0.25**.
@@ -174,16 +197,16 @@ Same replay with players averaging 10–20 minutes also projected. Starters keep
 | 1 | 1.1284 | 1.1437 | 0.41 | 1.0615 | 1.0712 | 0.47 |
 | 1.25 | 1.2933 | 1.3263 | 0.33 | 1.1806 | 1.2061 | 0.38 |
 
-### Bench, 2024-25: 7,715 player-games; 811 flagged, 6.3% of those didn't play (coach's decision)
+### Bench, 2024-25: 7,715 player-games; 649 flagged, 5.4% of those didn't play (coach's decision)
 
 All bench games:
 
 | Flag | Picks | Beat their average | Model said (avg gain) | Actually got | Got ÷ said |
 |---|---:|---:|---:|---:|---:|
-| Projection boost: PTS | 437 | 77.1% | +2.99 | **+4.97** | 1.66 |
-| Projection boost: REB | 528 | 68.0% | +1.46 | **+1.74** | 1.19 |
-| Projection boost: AST | 101 | 79.2% | +1.44 | **+2.07** | 1.43 |
-| Projection boost: 3PM | 145 | 67.6% | +0.67 | **+0.87** | 1.30 |
+| Projection boost: PTS | 488 | 77.7% | +2.91 | **+4.93** | 1.70 |
+| Projection boost: REB | 347 | 72.6% | +1.49 | **+2.11** | 1.42 |
+| Projection boost: AST | 87 | 78.2% | +1.41 | **+1.92** | 1.36 |
+| Projection boost: 3PM | 113 | 69.0% | +0.65 | **+0.91** | 1.40 |
 | *(no flag) everyone in this group, PTS* | 7,715 | 47.9% | – | +0.72 | – |
 | *(no flag) everyone in this group, REB* | 7,715 | 46.0% | – | +0.25 | – |
 | *(no flag) everyone in this group, AST* | 7,715 | 45.1% | – | +0.15 | – |
@@ -193,25 +216,25 @@ Only games where a teammate was out:
 
 | Flag | Picks | Beat their average | Model said (avg gain) | Actually got | Got ÷ said |
 |---|---:|---:|---:|---:|---:|
-| Projection boost: PTS | 437 | 77.1% | +2.99 | **+4.97** | 1.66 |
-| Projection boost: REB | 528 | 68.0% | +1.46 | **+1.74** | 1.19 |
-| Projection boost: AST | 100 | 80.0% | +1.45 | **+2.09** | 1.45 |
-| Projection boost: 3PM | 145 | 67.6% | +0.67 | **+0.87** | 1.30 |
+| Projection boost: PTS | 487 | 77.8% | +2.91 | **+4.94** | 1.70 |
+| Projection boost: REB | 347 | 72.6% | +1.49 | **+2.11** | 1.42 |
+| Projection boost: AST | 87 | 78.2% | +1.41 | **+1.92** | 1.36 |
+| Projection boost: 3PM | 113 | 69.0% | +0.65 | **+0.91** | 1.40 |
 | *(no flag) everyone in this group, PTS* | 6,714 | 49.5% | – | +0.95 | – |
 | *(no flag) everyone in this group, REB* | 6,714 | 47.8% | – | +0.34 | – |
 | *(no flag) everyone in this group, AST* | 6,714 | 46.7% | – | +0.20 | – |
 | *(no flag) everyone in this group, 3PM* | 6,714 | 37.0% | – | +0.13 | – |
 
-### Bench, 2025-26: 8,218 player-games; 674 flagged, 10.2% of those didn't play (coach's decision)
+### Bench, 2025-26: 8,218 player-games; 547 flagged, 9.0% of those didn't play (coach's decision)
 
 All bench games:
 
 | Flag | Picks | Beat their average | Model said (avg gain) | Actually got | Got ÷ said |
 |---|---:|---:|---:|---:|---:|
-| Projection boost: PTS | 323 | 70.0% | +3.03 | **+4.53** | 1.50 |
-| Projection boost: REB | 426 | 65.7% | +1.48 | **+1.84** | 1.24 |
-| Projection boost: AST | 86 | 68.6% | +1.32 | **+1.89** | 1.43 |
-| Projection boost: 3PM | 99 | 57.6% | +0.73 | **+0.71** | 0.97 |
+| Projection boost: PTS | 360 | 68.6% | +2.93 | **+4.42** | 1.51 |
+| Projection boost: REB | 286 | 72.4% | +1.49 | **+2.37** | 1.59 |
+| Projection boost: AST | 75 | 66.7% | +1.27 | **+1.83** | 1.45 |
+| Projection boost: 3PM | 77 | 58.4% | +0.72 | **+0.66** | 0.92 |
 | *(no flag) everyone in this group, PTS* | 8,218 | 48.5% | – | +0.80 | – |
 | *(no flag) everyone in this group, REB* | 8,218 | 46.9% | – | +0.26 | – |
 | *(no flag) everyone in this group, AST* | 8,218 | 45.3% | – | +0.19 | – |
@@ -221,10 +244,10 @@ Only games where a teammate was out:
 
 | Flag | Picks | Beat their average | Model said (avg gain) | Actually got | Got ÷ said |
 |---|---:|---:|---:|---:|---:|
-| Projection boost: PTS | 321 | 69.8% | +3.03 | **+4.51** | 1.49 |
-| Projection boost: REB | 425 | 65.9% | +1.49 | **+1.86** | 1.25 |
-| Projection boost: AST | 86 | 68.6% | +1.32 | **+1.89** | 1.43 |
-| Projection boost: 3PM | 98 | 57.1% | +0.73 | **+0.71** | 0.97 |
+| Projection boost: PTS | 356 | 68.5% | +2.93 | **+4.43** | 1.51 |
+| Projection boost: REB | 285 | 72.6% | +1.49 | **+2.39** | 1.61 |
+| Projection boost: AST | 75 | 66.7% | +1.27 | **+1.83** | 1.45 |
+| Projection boost: 3PM | 76 | 57.9% | +0.72 | **+0.66** | 0.91 |
 | *(no flag) everyone in this group, PTS* | 7,020 | 50.4% | – | +1.06 | – |
 | *(no flag) everyone in this group, REB* | 7,020 | 48.6% | – | +0.37 | – |
 | *(no flag) everyone in this group, AST* | 7,020 | 46.9% | – | +0.25 | – |
