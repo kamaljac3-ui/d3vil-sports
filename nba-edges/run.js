@@ -220,7 +220,7 @@ async function seasonResults(y,maxAgeH){
     const j=await get(`${ESPN}/teams/${id}/schedule?season=${y}&seasontype=2`);
     for(const e of (j&&j.events)||[]){const c=e.competitions[0];if(!c.status||!c.status.type.completed)continue;
       const t=h=>c.competitors.find(x=>x.homeAway===h),H=t("home"),A=t("away");
-      byId[e.id]={date:e.date,home:H.team.abbreviation,away:A.team.abbreviation,hs:+H.score.value,as:+A.score.value};}
+      byId[e.id]={id:e.id,date:e.date,home:H.team.abbreviation,away:A.team.abbreviation,hs:+H.score.value,as:+A.score.value};}
   }));
   const games=Object.values(byId).filter(g=>g.hs>0&&g.as>0).sort((a,b)=>a.date<b.date?-1:1);
   return games.length?store(key,games):games;
@@ -234,6 +234,54 @@ async function ratings(){
   log(`game ratings: ${played.length} games this season, prior from ${prev.length} last season`);
   return RATINGS={games:played,R:LN.fitRatings(played,now,prior)};
 }
+// ---------- defense context (informational tags only, never in a projection) ----------
+// The 2024-26 backtest: players facing a bottom-3 defense vs their position beat their own average by ~0.7 pts more than
+// vs a top-3 one, but the projection (game total / pace) already carried that; adding the factor didn't help out of sample.
+const DVP_RANK=+(process.env.DVP_RANK||3),DVP_MIN_GP=+(process.env.DVP_MIN_GP||10),DEF_MIN_GP=+(process.env.DEF_MIN_GP||5);
+const POSG={PG:"G",SG:"G",G:"G",SF:"F",PF:"F",F:"F",C:"C"},POSN={G:"guards",F:"forwards",C:"centers"};
+const ord=n=>n+(n%100>=11&&n%100<=13?"th":["th","st","nd","rd"][n%10]||"th");
+// one finished game's box: {ESPN abbr: [{name,pos,min,pts}]}; finished games never change, so it's cached for good
+async function boxScore(id){
+  const key=`box-${id}.json`;const hit=cached(key,24*400);if(hit)return hit;
+  const s=await get(`${ESPN}/summary?event=${id}`);if(!s||!s.boxscore||!s.boxscore.players)return null;
+  const box={};
+  for(const t of s.boxscore.players){const g=t.statistics[0],L=g.labels;
+    box[t.team.abbreviation]=(g.athletes||[]).filter(a=>a.stats&&a.stats.length).map(a=>({name:a.athlete.displayName,
+      pos:POSG[a.athlete.position&&a.athlete.position.abbreviation]||null,min:parseInt(a.stats[L.indexOf("MIN")])||0,pts:+a.stats[L.indexOf("PTS")]||0}));}
+  return store(key,box);
+}
+// points each defense allows to guards/forwards/centers vs those players' own per-minute averages -> rank (1 = allows least)
+let DVP=null;
+async function dvp(D){
+  if(DVP)return DVP;
+  const {games}=await ratings(),def={},pos={};
+  const ids=games.filter(g=>g.id).map(g=>g.id);
+  for(let i=0;i<ids.length;i+=6){const boxes=await Promise.all(ids.slice(i,i+6).map(boxScore));
+    for(const b of boxes){if(!b)continue;const t=Object.keys(b);if(t.length!==2)continue;
+      for(const [me,opp] of [[t[0],t[1]],[t[1],t[0]]])for(const x of b[me]){const p=D.players[nk(x.name)];if(x.pos)pos[nk(x.name)]=x.pos;
+        if(!x.pos||!p||!(p.MIN>=8)||!(x.min>0))continue;
+        const c=((def[opp]=def[opp]||{gp:0})[x.pos]=def[opp][x.pos]||{a:0,e:0});c.a+=x.pts;c.e+=p.PTS*x.min/p.MIN;}
+      for(const tm of t)if(def[tm])def[tm].gp++;}}
+  const rank={};
+  for(const q of ["G","F","C"]){const L=Object.entries(def).filter(([,d])=>d.gp>=DVP_MIN_GP&&d[q]&&d[q].e>0).map(([tm,d])=>[tm,d[q].a/d[q].e]).sort((a,b)=>a[1]-b[1]);
+    L.forEach(([tm,r],i)=>{(rank[tm]=rank[tm]||{})[q]={rank:i+1,of:L.length,ratio:r};});}
+  log(`defense vs position: ${ids.length} games, ${Object.keys(rank).length} teams ranked`);
+  return DVP={rank,pos};
+}
+async function dvpTag(D,g,side,key){
+  try{const {rank,pos}=await dvp(D),q=pos[key],opp=g[side==="home"?"away":"home"],r=q&&rank[opp.espnAbbr]&&rank[opp.espnAbbr][q];
+    if(!r||(r.rank>DVP_RANK&&r.rank<=r.of-DVP_RANK))return null;
+    const d=Math.round((r.ratio-1)*100);return `${opp.abbr} ${ord(r.rank)} of ${r.of} vs ${POSN[q]} (${d>=0?"+":""}${d}% pts)`;}
+  catch(e){return null;}
+}
+// points allowed per game this season (rank, 1 = fewest) and over the last 10
+function defenseLine(games,team){
+  const L=games.filter(g=>g.home===team||g.away===team);if(L.length<DEF_MIN_GP)return null;
+  const pa=g=>g.home===team?g.as:g.hs,avg=a=>a.reduce((s,g)=>s+pa(g),0)/a.length;
+  const all={};for(const g of games)for(const t of [g.home,g.away])(all[t]=all[t]||[]).push(g);
+  const ranked=Object.entries(all).filter(([,a])=>a.length>=DEF_MIN_GP).map(([t,a])=>[t,a.reduce((s,g)=>s+(g.home===t?g.as:g.hs),0)/a.length]).sort((a,b)=>a[1]-b[1]);
+  return {n:L.length,pa:avg(L),l10:avg(L.slice(-10)),rank:ranked.findIndex(x=>x[0]===team)+1,of:ranked.length};
+}
 // one game's line vs model; out = Set of name keys ruled out (both teams)
 async function lineRow(g,D,out){
   const {games,R}=await ratings(),ctx={};
@@ -244,7 +292,8 @@ async function lineRow(g,D,out){
   }
   const pr=LN.predict({home:g.home.espnAbbr,away:g.away.espnAbbr},R,ctx);
   const row={kind:"lines",key:"game",gameId:g.id,tip:g.date,home:g.home.abbr,away:g.away.abbr,proj:pr.margin,projTotal:pr.total,
-    homeSpread:g.homeSpread,total:g.total,b2b:[ctx.restH===1?g.home.abbr:null,ctx.restA===1?g.away.abbr:null].filter(Boolean),picks:[]};
+    homeSpread:g.homeSpread,total:g.total,b2b:[ctx.restH===1?g.home.abbr:null,ctx.restA===1?g.away.abbr:null].filter(Boolean),picks:[],
+    def:{away:defenseLine(games,g.away.espnAbbr),home:defenseLine(games,g.home.espnAbbr)}};
   if(g.homeSpread!=null){const e=pr.margin+g.homeSpread;   // model home margin minus the market's (-homeSpread)
     if(Math.abs(e)>=MIN_SPREAD)row.picks.push({kind:"spread",side:e>0?"home":"away",team:e>0?g.home.abbr:g.away.abbr,line:e>0?g.homeSpread:-g.homeSpread,edge:Math.abs(e),tick:SPREAD_EDGES});}
   if(g.total!=null&&TOTAL_EDGES){const e=pr.total-g.total;
@@ -256,15 +305,19 @@ function lineText(r){
   const mkt=r.homeSpread!=null?`${r.home} ${sgn(r.homeSpread)}`:"no line",mt=r.total!=null?`, o/u ${r.total}`:"";
   const apart=r.homeSpread!=null?` (${f1(Math.abs(r.proj+r.homeSpread))} apart)`:"";
   const ticks=r.picks.filter(p=>p.tick).map(p=>p.kind==="spread"?` ✅ ${p.team} ${sgn(p.line)}`:` ✅ ${p.side} ${p.line}`).join("");
-  return `${r.away} @ ${r.home}: ${mkt}${mt} | model ${r.home} ${sgn(-r.proj)}${apart}, ${f1(r.projTotal)}${r.b2b.length?` [b2b: ${r.b2b.join(", ")}]`:""}${ticks}`;
+  const dl=t=>{const d=r.def&&r.def[t==="away"?"away":"home"];return d&&`${r[t]} ${ord(d.rank)} (${f1(d.pa)}${d.n>10?`, L10 ${f1(d.l10)}`:""})`;};
+  const dd=[dl("away"),dl("home")].filter(Boolean),def=dd.length?`
+   pts allowed/g (1st = fewest): ${dd.join(", ")}`:"";
+  return `${r.away} @ ${r.home}: ${mkt}${mt} | model ${r.home} ${sgn(-r.proj)}${apart}, ${f1(r.projTotal)}${r.b2b.length?` [b2b: ${r.b2b.join(", ")}]`:""}${ticks}${def}`;
 }
 const linesMessage=rows=>rows.length?`Game lines (model vs line; no proven edge yet, see BACKTEST-LINES.md)\n`+rows.map(lineText).join("\n"):"";
 
 // ---------- scoring ----------
 async function sideRows(g,side,D,outKeys,lines){
   const team=(await roster(g[side].espnId)).map(n=>D.players[nk(n)]).filter(Boolean);
-  const rows=flagRows(projectSide(team,g,side,D,outKeys),lines);
-  return await b2bNight(g,side)?rows.map(r=>({...r,tags:[...r.tags,"b2b 2nd night"]})):rows;
+  const rows=flagRows(projectSide(team,g,side,D,outKeys),lines),b2b=await b2bNight(g,side);
+  for(const r of rows){const t=[...r.tags];if(b2b)t.push("b2b 2nd night");const dv=await dvpTag(D,g,side,r.key);if(dv)t.push(dv);r.tags=t;}
+  return rows;
 }
 // Informational tag only, never in the projection: in the 2024-26 box scores regulars who played the 2nd night of a
 // back-to-back scored right at their projection (and a player's own b2b split barely repeated year to year), but sat
