@@ -3,7 +3,7 @@
 // bookmakers= list is billed as one region per 10 books. We always ask for the sharp book plus
 // your books (<= 10, see sharp.js), only the markets needed, and stop before the budget runs out.
 const {env,log,readState,writeState,normName}=require("./lib");
-const {BOOKMAKERS}=require("./sharp");
+const {BOOKMAKERS,MINE}=require("./sharp");
 
 const KEY=process.env.ODDS_API_KEY||"";
 const BASE="https://api.the-odds-api.com/v4/sports/americanfootball_nfl";
@@ -57,8 +57,10 @@ async function eventIds(games){
   return out;
 }
 
-// Per player per stat: consensus (median) line, best price each side at that number, and every
-// book's individual offer (for the stale-line check).
+// Per player per stat: the line and prices at YOUR books (MY_BOOKS, first one that lists him), every
+// book's individual offer (for the stale-line check), and the median line across all books.
+// Model edges are judged on the number you can actually bet: until Oct 2026 the price shown was the best
+// across every book pulled, sharp reference books included (e.g. "Pinnacle -105"), which you can't bet.
 function parse(j){
   const acc={};
   for(const b of j.bookmakers||[])for(const m of b.markets||[]){
@@ -71,8 +73,12 @@ function parse(j){
   }
   const out={};
   for(const [k,st] of Object.entries(acc))for(const [stat,e] of Object.entries(st)){
-    if(!e.pts.length)continue;const s=e.pts.slice().sort((a,b)=>a-b),line=s[Math.floor(s.length/2)];
-    (out[k]||(out[k]={}))[stat]={line,over:e.o[line]||null,under:e.u[line]||null,books:e.pts.length,offers:e.offers,name:e.name};
+    if(!e.pts.length)continue;const s=e.pts.slice().sort((a,b)=>a-b),median=s[Math.floor(s.length/2)];
+    const mine=MINE.map(key=>{const ov=e.offers.find(o=>o.key===key&&o.side==="A");if(!ov)return null;
+      const un=e.offers.find(o=>o.key===key&&o.side==="B"&&o.L===ov.L);return {line:ov.L,over:{price:ov.price,book:ov.title},under:un?{price:un.price,book:un.title}:null};}).find(Boolean);
+    // no line at your books -> keep the median for reference, but with no bettable price
+    (out[k]||(out[k]={}))[stat]={line:mine?mine.line:median,median,over:mine?mine.over:null,under:mine?mine.under:null,atMyBook:!!mine,
+      books:e.pts.length,offers:e.offers,name:e.name};
   }
   return out;
 }

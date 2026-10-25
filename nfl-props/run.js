@@ -75,7 +75,8 @@ async function projectGame(ctx,g){
 
 // ---------- picks ----------
 function evaluate(p,stat,lines){
-  const proj=p.stats[stat],L=lines&&lines[stat];
+  // only a line you can bet counts as a line; otherwise judge against the recent average as usual
+  const proj=p.stats[stat],L=lines&&lines[stat]&&lines[stat].atMyBook!==false?lines[stat]:null;
   if(L){const pO=M.pOver(stat,proj,L.line),over=pO>=0.5,prob=over?pO:1-pO,edge=proj-L.line;
     return {p,stat,proj,ref:L.line,refKind:"line",over,prob,edge,price:over?L.over:L.under,
       ok:Math.abs(edge)>=CFG.MIN_EDGE[stat]&&prob>=CFG.MIN_PROB};}

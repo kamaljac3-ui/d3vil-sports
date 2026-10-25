@@ -1,0 +1,74 @@
+name: NFL Weekly Review
+
+# Tuesday mornings, after Monday night's game is final: grade every pick the NFL bots logged, merge the grades
+# into the permanent ledger on the bot-results branch (nfl/), and send a scorecard to the NFL ntfy feed.
+# Read-only on the bots: their caches are restored, never saved. Claude's weekly review reads nfl/SUMMARY.md.
+on:
+  schedule:
+    - cron: "17 12 * * 2"   # Tue 8:17 AM EDT / 7:17 AM EST; GitHub may start it late, which is fine here
+    - cron: "17 15 * * 2"   # second try in case the first is skipped; reruns just re-merge the same grades
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "1 = grade and print, don't save the ledger or send"
+        default: "0"
+
+permissions:
+  contents: write   # pushes the ledger to bot-results (not main, so no Pages deploy and no newsletter)
+
+concurrency:
+  group: nfl-weekly-review
+  cancel-in-progress: false
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Restore props state (read-only)
+        uses: actions/cache/restore@v4
+        with:
+          path: nfl-props/.cache
+          key: np-review-${{ github.run_id }}
+          restore-keys: np-state-
+      - name: Restore lines state (read-only)
+        uses: actions/cache/restore@v4
+        with:
+          path: nfl-lines/.cache
+          key: nl-review-${{ github.run_id }}
+          restore-keys: nl-state-
+      - name: Check out ledger (bot-results branch)
+        run: |
+          if git ls-remote --exit-code --heads origin bot-results >/dev/null; then
+            git fetch -q origin bot-results:bot-results
+            git worktree add -q ledger bot-results
+          else
+            git worktree add -q --orphan -b bot-results ledger
+          fi
+      - name: Grade
+        run: node nfl-lines/grade.js .
+      - name: Review and scorecard
+        env:
+          DRY_RUN: ${{ github.event.inputs.dry_run || '0' }}
+          FORCE_SEND: ${{ github.event_name == 'workflow_dispatch' && '1' || '0' }}   # manual runs always send
+          LEDGER_DIR: ledger
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC_NFL || secrets.NTFY_TOPIC }}
+          NTFY_SERVER: ${{ secrets.NTFY_SERVER }}
+          NTFY_TOKEN: ${{ secrets.NTFY_TOKEN }}
+        run: node nfl-lines/weekly-review.js
+      - name: Save ledger
+        if: ${{ (github.event.inputs.dry_run || '0') != '1' }}
+        working-directory: ledger
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add nfl
+          git diff --cached --quiet && { echo "no changes"; exit 0; }
+          git commit -q -m "nfl review: $(TZ=America/New_York date +%F)"
+          # the results tracker pushes to this branch too: rebase onto it and retry if it moved
+          for i in 1 2 3; do git push -q origin bot-results && exit 0; git pull -q --rebase origin bot-results; done
+          exit 1
