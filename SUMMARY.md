@@ -1,6 +1,6 @@
 # Bot results
 
-Updated 2026-10-24. 0 picks waiting on games to finish.
+Updated 2026-10-25. 0 picks waiting on games to finish.
 
 ## Last 7 days
 
@@ -9,9 +9,9 @@ MLB: 1 hitter-games (small sample: noise until ~100+)
 - Off the flagged starter: HR in 0 of 1 games he started
 - Launch window: 0% of 3 batted balls at 25-35 deg vs 12% predicted
 
-NBA: 86 picks (small sample: noise until ~100+)
-- Projection boosts: 8/18 beat their average (44%); model said +2.1, got -0.4 per pick
-- Prop lines: 38-30 (56%), +4.5 units at -110 (break-even 52.4%)
+NBA: 125 picks
+- Projection boosts: 12/29 beat their average (41%); model said +2.1, got -0.2 per pick
+- Prop lines: 56-40 (58%), +10.9 units at -110 (break-even 52.4%)
 
 ## All time
 
@@ -22,9 +22,9 @@ MLB: 22 hitter-games (small sample: noise until ~100+)
 MLB live (pitching changes): 29 picks, 20 faced the new pitcher (small sample: noise until ~100+)
 - Homered off him in 1 vs 0.6 expected over 20 PA: 1.59x, z +0.5
 
-NBA: 86 picks (small sample: noise until ~100+)
-- Projection boosts: 8/18 beat their average (44%); model said +2.1, got -0.4 per pick
-- Prop lines: 38-30 (56%), +4.5 units at -110 (break-even 52.4%)
+NBA: 125 picks
+- Projection boosts: 12/29 beat their average (41%); model said +2.1, got -0.2 per pick
+- Prop lines: 56-40 (58%), +10.9 units at -110 (break-even 52.4%)
 
 ## How to read this
 
@@ -34,6 +34,46 @@ NBA: 86 picks (small sample: noise until ~100+)
 
 ## Recent picks
 
+- 2026-10-24 VJ Edgecombe REB (prop, u6.5): 13
+- 2026-10-24 Tyler Herro PTS (prop, u21.5): 13
+- 2026-10-24 Trey Murphy III PTS (prop, o16.5): 26
+- 2026-10-24 Trey Murphy III AST (prop, o2.5): 4
+- 2026-10-24 Trevon Brazile REB (boost, proj 13.3, avg 12.0): 9
+- 2026-10-24 Tre Jones PTS (prop, o9.5): 10
+- 2026-10-24 Tre Jones PTS (boost, proj 15.7, avg 13.5): 10
+- 2026-10-24 Trae Young PTS (boost, proj 20.5, avg 18.1): 25
+- 2026-10-24 Trae Young AST (boost, proj 9.5, avg 8.3): 9
+- 2026-10-24 Reed Sheppard PTS (prop, o11.5): 19
+- 2026-10-24 Reed Sheppard 3PM (prop, o2.5): 5
+- 2026-10-24 Oscar Tshiebwe REB (boost): void (COACH'S DECISION)
+- 2026-10-24 Norman Powell PTS (boost, proj 24.1, avg 21.3): 18
+- 2026-10-24 Noah Clowney PTS (prop, o7.5): 4
+- 2026-10-24 Naz Reid PTS (prop, u17.5): 23
+- 2026-10-24 Naji Marshall PTS (prop, u18.5): 10
+- 2026-10-24 Naji Marshall AST (prop, u4.5): 5
+- 2026-10-24 Naji Marshall 3PM (prop, u1.5): 1
+- 2026-10-24 Matas Buzelis PTS (boost, proj 18.2, avg 16.0): 21
+- 2026-10-24 Keon Ellis AST (prop, u2.5): 1
+- 2026-10-24 Josh Giddey PTS (boost, proj 17.3, avg 15.3): 9
+- 2026-10-24 Jabari Smith Jr. 3PM (prop, o1.5): 2
+- 2026-10-24 Grayson Allen PTS (prop, o14.5): 20
+- 2026-10-24 Giannis Antetokounmpo AST (prop, u6.5): 3
+- 2026-10-24 Evan Mobley 3PM (prop, u1.5): 2
+- 2026-10-24 Dylan Harper PTS (prop, u17.5): 22
+- 2026-10-24 Deandre Ayton REB (prop, o4.5): 5
+- 2026-10-24 Deandre Ayton PTS (prop, o6.5): 6
+- 2026-10-24 Dean Wade 3PM (prop, o0.5): 2
+- 2026-10-24 DeMar DeRozan AST (prop, o2.5): 3
+- 2026-10-24 Day'Ron Sharpe REB (prop, u8.5): 8
+- 2026-10-24 Clint Capela REB (boost, proj 5.7, avg 4.6): 3
+- 2026-10-24 Christian Braun AST (prop, o1.5): 2
+- 2026-10-24 Caleb Wilson REB (prop, u6.5): 14
+- 2026-10-24 Caleb Wilson PTS (boost, proj 18.7, avg 16.5): 30
+- 2026-10-24 Bobby Portis PTS (prop, o9.5): 13
+- 2026-10-24 Anthony Davis PTS (boost, proj 24.0, avg 21.3): 19
+- 2026-10-24 Anfernee Simons PTS (prop, o10.5): 4
+- 2026-10-24 Alperen Sengun PTS (prop, o19.5): 17
+- 2026-10-24 Alex Sarr PTS (boost, proj 17.7, avg 15.6): 10
 - 2026-10-23 Yaxel Lendeborg REB (prop, u6.5): 13
 - 2026-10-23 Wendell Carter Jr. PTS (prop, o10.5): 20
 - 2026-10-23 Tre Jones PTS (prop, o9.5): 11
