@@ -146,6 +146,9 @@ scoreboard, i.e. DraftKings; optionally The Odds API) next to a port of `nfl-edg
   - windy games (12+ mph), with wind direction relative to the field
   The evidence is in `nfl-lines/research/*-results.md`.
 - **Sleeper's trimmed copy** (`nfl-props/data.js`) also keeps defensive backs, keyed `n:<name>|<team>`, because most have no gsis id.
+- **Grading the NFL bots:** run the manual **NFL Picks Export** workflow, `gh run download <id> -n nfl-state -D <dir>`,
+  then `node nfl-lines/grade.js <dir>` (W-L, units, closing-line value, per week). `results/track.js` still doesn't grade NFL.
+  As of Oct 24, 2026: props model 23-20, lines ✅ 21-22-2 (now off by default via `MODEL_EDGES=0`).
 - **ESPN returns 403 to the custom browser User-Agent**, so ESPN requests go out with no custom User-Agent.
 
 ## CFB game lines: `cfb-lines/` ("CFB Lines")
