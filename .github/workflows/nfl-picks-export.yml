@@ -36,4 +36,5 @@ jobs:
             nfl-lines/.cache/sent-*.json
             nfl-lines/.cache/odds-usage.json
           if-no-files-found: warn
+          include-hidden-files: true   # the caches live in .cache folders
           retention-days: 7
