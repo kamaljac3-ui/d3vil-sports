@@ -1,0 +1,44 @@
+[
+ {
+  "area": "Alert timing",
+  "problem": "Alerts went out about 110 minutes before kickoff, before the inactives list (about 90 minutes out)",
+  "change": "Window now opens 80 minutes before kickoff",
+  "setting": "GD_MAX 110 → 80",
+  "date": "2026-10-24"
+ },
+ {
+  "area": "Missed alerts",
+  "problem": "GitHub started scheduled runs only every 5-6 hours; 3 week-5 slots were missed by minutes",
+  "change": "A late run still sends up to 10 minutes before kickoff; runs stay up about 5.75 hours",
+  "setting": "GD_MIN 75 → 10, LOOP_MIN 300 → 345",
+  "date": "2026-10-24"
+ },
+ {
+  "area": "Lines model ✅",
+  "problem": "Flagged spreads 9-11-1, moneylines 12-11-1; closing price moved against 21 of 24 moneyline picks",
+  "change": "Model ✅ picks off by default; numbers, 💰 stale prices and ⚠️ tags stay",
+  "setting": "MODEL_EDGES = 0",
+  "date": "2026-10-24"
+ },
+ {
+  "area": "Props passing yards",
+  "problem": "QB passing projected about 12 yards low; 2026 teams pass more than 2025",
+  "change": "League baselines follow the current season within about 2 weeks",
+  "setting": "LG_PRIOR_GAMES = 64",
+  "date": "2026-10-24"
+ },
+ {
+  "area": "Missing-CB tag",
+  "problem": "Offenses facing a missing starting CB covered 8 of 19 this season",
+  "change": "Kept as information; watch it, drop it if it keeps missing",
+  "setting": "no change",
+  "date": "2026-10-24"
+ },
+ {
+  "area": "Props pricing",
+  "problem": "Model picks were priced at the best price across every book pulled, including sharp reference books you cannot bet (e.g. Pinnacle -105)",
+  "change": "Lines and prices now come from your book (FanDuel); players it does not list fall back to the recent-average check",
+  "setting": "MY_BOOKS = fanduel",
+  "date": "2026-10-24"
+ }
+]
