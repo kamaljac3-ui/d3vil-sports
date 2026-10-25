@@ -50,11 +50,25 @@ function project(pl,ctx){
     ast:pl.AST*minF*(ctx.oppAst||1)*e*b.ast,
     fg3m:pl.FG3M*z.threesFactor*minF*e*b.pts};
 }
-// rough per-game spread of each stat around its projection
-const SD={pts:p=>Math.max(4,0.28*p),reb:p=>Math.max(1.8,0.35*p),ast:p=>Math.max(1.5,0.38*p),fg3m:p=>Math.max(0.9,0.55*p)};
+// Calibration, fit by backtest.js on 2024-26 (rerun it and paste its "CAL" line here after a model change):
+//  k     - starters (20+ MPG) get only k of the projection's gap from their average (the gap showed up at 0.6-0.8x;
+//          bench gaps showed up at 1x or more, so the bench keeps the full gap)
+//  m,beta- then everything is pulled toward m: a high season average is partly luck (28+ ppg scorers came in ~2 under it)
+//  a,b   - real spread of the stat around that projection: sd = a + b*sqrt(proj). The old fixed spreads were ~2/3 of
+//          the real one in the 8-20 pt range, which made 60% spots look like 85-90%.
+const CAL=process.env.NBA_CAL?JSON.parse(process.env.NBA_CAL):{
+  pts:{k:0.798,m:9.74,beta:0.941,a:1.559,b:1.394},reb:{k:0.58,m:2.51,beta:0.941,a:-0.03,b:1.237},
+  ast:{k:0.651,m:2.43,beta:0.942,a:-0.033,b:1.17},fg3m:{k:0.604,m:1.21,beta:0.91,a:-0.082,b:1.166}};
+function calibrate(stat,proj,avg,mpg,cal=CAL){
+  const c=cal[stat];if(!c||!(avg>=0))return proj;
+  const p=mpg>=20?avg+c.k*(proj-avg):proj;
+  return Math.max(0,c.m+c.beta*(p-c.m));
+}
+const sdOf=(stat,p,cal=CAL)=>Math.max(0.5,cal[stat].a+cal[stat].b*Math.sqrt(Math.max(0,p)));
 function Phi(x){const t=1/(1+0.2316419*Math.abs(x)),d=0.3989423*Math.exp(-x*x/2);
   const q=d*t*(0.3193815+t*(-0.3565638+t*(1.781478+t*(-1.821256+t*1.330274))));return x>0?1-q:q;}
-const pOver=(proj,line,stat)=>1-Phi((line-proj)/SD[stat](proj));
+// proj should already be calibrated
+const pOver=(proj,line,stat,cal=CAL)=>1-Phi((line-proj)/sdOf(stat,proj,cal));
 
 // Teammates ruled out. Only counts regulars who have actually been playing (a long-term absence is already in
 // everyone's averages). Returns {out: names, forPlayer(p) -> {pts,reb,ast} multipliers}.
@@ -91,4 +105,4 @@ function outBoost(team,outKeys,teamGP,opts={}){
   }};
 }
 
-module.exports={ZONES,zonesFromRow,leagueZones,zoneMatchup,project,pOver,outBoost,clamp};
+module.exports={ZONES,zonesFromRow,leagueZones,zoneMatchup,project,calibrate,sdOf,pOver,outBoost,clamp,CAL};

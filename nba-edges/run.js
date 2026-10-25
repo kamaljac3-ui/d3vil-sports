@@ -234,9 +234,10 @@ function flagRows(side,lines){
     const base={name:p.name,key:p.key,team:side.me,opp:side.opp,tags:side.tags,mpg:p.MIN};
     if(zone&&zone.delta>=ZONE_MIN&&p.PTS>=10)rows.push({kind:"zone",...base,stat:"pts",delta:zone.delta,best:zone.best,proj:pr.pts,avg:p.PTS});
     for(const s of STATS){
-      const proj=pr[s],avg=p[AVG[s]],line=lines&&lines[p.key]&&lines[p.key][s];
-      if(line!=null){const po=M.pOver(proj,line,s);if((po>=P_MIN||po<=1-P_MIN)&&Math.abs(proj-line)>=ABS_MIN[s])rows.push({kind:"prop",...base,stat:s,proj,line,po});}
-      else if(avg>0&&proj/avg-1>=BOOST_MIN&&proj-avg>=ABS_MIN[s])rows.push({kind:"boost",...base,stat:s,proj,avg});
+      // flags use the calibrated projection (model.calibrate: starters' gap shrunk, high averages pulled back)
+      const avg=p[AVG[s]],projRaw=pr[s],proj=M.calibrate(s,projRaw,avg,p.MIN),line=lines&&lines[p.key]&&lines[p.key][s];
+      if(line!=null){const po=M.pOver(proj,line,s);if((po>=P_MIN||po<=1-P_MIN)&&Math.abs(proj-line)>=ABS_MIN[s])rows.push({kind:"prop",...base,stat:s,proj,projRaw,avg,line,po});}
+      else if(avg>0&&proj/avg-1>=BOOST_MIN&&proj-avg>=ABS_MIN[s])rows.push({kind:"boost",...base,stat:s,proj,projRaw,avg});
     }
   }
   return rows;
@@ -290,7 +291,7 @@ async function probe(){
     catch(e){log(`FAIL ${n}: ${e.message}`);}}
 }
 // require()d by backtest.js for the stats fetch and the scoring; only runs the bot when started directly
-module.exports={nba,nbaSeason,blend,projectSide,flagRows,nk,ESPN_TO_NBA,loadData,slate,roster,TODAY,SETTINGS:{ZONE_MIN,BOOST_MIN,ABS_MIN,STATS,AVG}};
+module.exports={nba,nbaSeason,blend,projectSide,flagRows,nk,ESPN_TO_NBA,loadData,slate,roster,TODAY,SETTINGS:{ZONE_MIN,BOOST_MIN,ABS_MIN,P_MIN,STATS,AVG}};
 if(require.main===module)(async()=>{
   if(MODE==="probe")return probe();
   if(MODE==="snapshot")return snapshot();

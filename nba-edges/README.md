@@ -13,6 +13,11 @@ NBA matchup alerts sent to ntfy: per-game stat projections (projection boosts, a
   - blowout trim for starters when the spread is 12 or more
   - teammates ruled out: their minutes go to the rest of the rotation, weighted toward players with room to play more (MIN × (36 − MIN)), at a quarter strength (`NBA_OUT_MIN_SCALE` 0.25). There's no usage bump (`NBA_OUT_USAGE` 0). This only counts players who have been playing, since a long absence is already in everyone's averages.
 - **Season blend:** until a player has about 15 games, last season is mixed in.
+- **Calibration** (`calibrate`, `sdOf`; the `CAL` constants, fit by the backtest on 2024–26). Every alert uses it:
+  - starters (20+ MPG) keep only k (0.6–0.8) of the projection's gap from their average; bench players keep all of it
+  - then every projection is pulled toward the middle (beta ≈ 0.94): a 28+ ppg scorer comes in about 2 under his average
+  - the prop probability uses the real spread, sd = a + b·√projection. The old fixed spreads were about 2/3 of it in the 8–20 pt range, so "90%" picks were really ~75%.
+  - Alerts show the calibrated projection; picks log it as `proj` and the raw one as `projRaw`.
 
 ## Backtest (`backtest.js`, results in `BACKTEST.md`)
 
@@ -28,6 +33,7 @@ NBA matchup alerts sent to ntfy: per-game stat projections (projection boosts, a
   - 6–10% of flagged bench players got a coach's-decision DNP. The backtest counts those as "didn't play", not as known in advance. A prop on a player who doesn't play is usually voided.
   - **The big caveat:** these spots depend on knowing who's out. The backtest knows every absence, and the live bot only knows what the injury report says 90 minutes before tip. Late scratches will cost some of this.
   - Bench boosts are large in % terms, so they tend to fill the morning list. Alerts label them `bench N mpg`.
+- **Calibration (added 2026-10-24) makes the probabilities honest and the picks fewer and better.** With stand-in lines (each player's average rounded to x.5; there are no historical prop lines), out of sample on 2025-26: picks went from 5,351 at 63.1% to 4,116 at 66.6%, and "said 65–75%" now hits 64% instead of 62% from a claimed 68%. Starter points boosts went from 655 flags beating their average 57.9% of the time to 133 at 64.7%. Real books are sharper than the stand-in line, so live hit rates will be lower. After a model change, rerun the backtest and paste its `CAL` line into `model.js`.
 - **Whole-model accuracy barely moves.** Projections beat the plain average by only 0.1–1% in squared error. The value is in the flagged tail, not in every projection.
 - **Caveats:**
   - "Ruled out" means a regular who didn't play, because ESPN keeps no historical injury lists. That's slightly optimistic.
@@ -53,7 +59,7 @@ Workflow: `.github/workflows/nba-edges-alerts.yml`. Morning runs at 15:00 UTC, a
 
 ## Settings (env)
 
-`TOP_N` (6), `ZONE_MIN` (99 = shot-zone alerts off; 1.0 to turn them on), `NBA_OUT_MIN_SCALE` (0.25), `NBA_OUT_USAGE` (0), `NBA_OUT_MODE` (`minutes`; `uniform` = the old rule), `NBA_OUT_BENCH_SCALE` (0.25), `MIN_PROJ` (10; 20 = starters only), `BOOST_MIN` (0.10), `P_MIN` (0.58), `PREGAME_MIN` (90), `ODDS_IN_MORNING` (0), `DATE` (test a past slate; keeps finished games), `FORCE_ESPN` (1 = skip nba.com), `DRY_RUN`.
+`TOP_N` (6), `ZONE_MIN` (99 = shot-zone alerts off; 1.0 to turn them on), `NBA_OUT_MIN_SCALE` (0.25), `NBA_OUT_USAGE` (0), `NBA_OUT_MODE` (`minutes`; `uniform` = the old rule), `NBA_OUT_BENCH_SCALE` (0.25), `MIN_PROJ` (10; 20 = starters only), `BOOST_MIN` (0.10), `P_MIN` (0.58), `NBA_CAL` (JSON override of the calibration constants), `PREGAME_MIN` (90), `ODDS_IN_MORNING` (0), `DATE` (test a past slate; keeps finished games), `FORCE_ESPN` (1 = skip nba.com), `DRY_RUN`.
 
 ## Cache (`.cache/`)
 
