@@ -1,6 +1,6 @@
 # Bot results
 
-Updated 2026-10-25. 0 picks waiting on games to finish.
+Updated 2026-10-26. 0 picks waiting on games to finish.
 
 ## Last 7 days
 
@@ -9,9 +9,19 @@ MLB: 1 hitter-games (small sample: noise until ~100+)
 - Off the flagged starter: HR in 0 of 1 games he started
 - Launch window: 0% of 3 batted balls at 25-35 deg vs 12% predicted
 
-NBA: 125 picks
-- Projection boosts: 12/29 beat their average (41%); model said +2.1, got -0.2 per pick
-- Prop lines: 56-40 (58%), +10.9 units at -110 (break-even 52.4%)
+NBA (model pre-2026-10-24): 130 picks
+- Projection boosts: 11/19 beat their average (58%); model said +2.1, got +1.2 per pick
+- Prop lines: 65-46 (59%), +13.1 units at -110 (break-even 52.4%)
+NBA (model nba-news): 14 picks (small sample: noise until ~100+)
+- Projection boosts: 4/14 beat their average (29%); model said +2.0, got -1.7 per pick
+NBA (model 2026-10-24-rosters): 4 picks (small sample: noise until ~100+)
+- Prop lines: 3-1 (75%), +1.7 units at -110 (break-even 52.4%)
+
+NBA by tag: 4 graded picks with tags logged (small sample: noise until ~100+)
+- teammate out (w/o) (4): props 3-1 +1.7u
+- high team total (2): props 1-1 -0.1u
+- sent < 2h before tip (4): props 3-1 +1.7u
+- Minutes: projected 32.7, played 31.0 (avg miss 3.9, 0 picks 8+ min short); per-minute rate 98% of projected
 
 ## All time
 
@@ -22,9 +32,19 @@ MLB: 22 hitter-games (small sample: noise until ~100+)
 MLB live (pitching changes): 29 picks, 20 faced the new pitcher (small sample: noise until ~100+)
 - Homered off him in 1 vs 0.6 expected over 20 PA: 1.59x, z +0.5
 
-NBA: 125 picks
-- Projection boosts: 12/29 beat their average (41%); model said +2.1, got -0.2 per pick
-- Prop lines: 56-40 (58%), +10.9 units at -110 (break-even 52.4%)
+NBA (model pre-2026-10-24): 130 picks
+- Projection boosts: 11/19 beat their average (58%); model said +2.1, got +1.2 per pick
+- Prop lines: 65-46 (59%), +13.1 units at -110 (break-even 52.4%)
+NBA (model nba-news): 14 picks (small sample: noise until ~100+)
+- Projection boosts: 4/14 beat their average (29%); model said +2.0, got -1.7 per pick
+NBA (model 2026-10-24-rosters): 4 picks (small sample: noise until ~100+)
+- Prop lines: 3-1 (75%), +1.7 units at -110 (break-even 52.4%)
+
+NBA by tag: 4 graded picks with tags logged (small sample: noise until ~100+)
+- teammate out (w/o) (4): props 3-1 +1.7u
+- high team total (2): props 1-1 -0.1u
+- sent < 2h before tip (4): props 3-1 +1.7u
+- Minutes: projected 32.7, played 31.0 (avg miss 3.9, 0 picks 8+ min short); per-minute rate 98% of projected
 
 ## How to read this
 
@@ -34,6 +54,30 @@ NBA: 125 picks
 
 ## Recent picks
 
+- 2026-10-25 Tyrese Haliburton PTS (boost, proj 22.7, avg 20.5): 24
+- 2026-10-25 Tyrese Haliburton AST (boost, proj 10.5, avg 9.5): 10
+- 2026-10-25 Tyrese Haliburton 3PM (prop, u2.5): 4
+- 2026-10-25 Tristan da Silva 3PM (prop, u2.5): 5
+- 2026-10-25 Terrence Shannon Jr. REB (prop, u2.5): 4
+- 2026-10-25 Terrence Shannon Jr. PTS (prop, u8.5): 15
+- 2026-10-25 Rui Hachimura REB (prop, u5.5): 4
+- 2026-10-25 Rui Hachimura PTS (prop, u16.5): 5
+- 2026-10-25 Rudy Gobert REB (prop, o10.5): 13
+- 2026-10-25 Pascal Siakam PTS (boost, proj 26.9, avg 24.3): 21
+- 2026-10-25 Obi Toppin PTS (boost, proj 14.5, avg 12.3): 16
+- 2026-10-25 Miles McBride PTS (prop, o8.5): 1
+- 2026-10-25 Miles McBride 3PM (prop, o1.5): 0
+- 2026-10-25 Kelly Oubre Jr. PTS (prop, o8.5): 14
+- 2026-10-25 Kelly Oubre Jr. 3PM (prop, o0.5): 1
+- 2026-10-25 Keaton Wagler PTS (prop, o10.5): 11
+- 2026-10-25 Kawhi Leonard REB (prop): void (LEFT KNEE SWELLING)
+- 2026-10-25 Jerami Grant PTS (prop, o12.5): 5
+- 2026-10-25 Jared McCain 3PM (prop, u2.5): 1
+- 2026-10-25 Domantas Sabonis AST (prop, u6.5): 3
+- 2026-10-25 Darius Acuff Jr. 3PM (prop, u2.5): 2
+- 2026-10-25 Cameron Boozer REB (prop, o9.5): 11
+- 2026-10-25 Anthony Black PTS (prop, o9.5): 18
+- 2026-10-25 Aaron Nesmith PTS (prop, o9.5): 13
 - 2026-10-24 VJ Edgecombe REB (prop, u6.5): 13
 - 2026-10-24 Tyler Herro PTS (prop, u21.5): 13
 - 2026-10-24 Trey Murphy III PTS (prop, o16.5): 26
