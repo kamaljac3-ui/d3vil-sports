@@ -1,0 +1,37 @@
+[
+ {
+  "week": 3,
+  "lines_slots": 5,
+  "lines_sent": 1,
+  "props_games": 15,
+  "props_checked": 9
+ },
+ {
+  "week": 4,
+  "lines_slots": 7,
+  "lines_sent": 2,
+  "props_games": 16,
+  "props_checked": 4
+ },
+ {
+  "week": 5,
+  "lines_slots": 7,
+  "lines_sent": 4,
+  "props_games": 15,
+  "props_checked": 11
+ },
+ {
+  "week": 6,
+  "lines_slots": 7,
+  "lines_sent": 7,
+  "props_games": 14,
+  "props_checked": 14
+ },
+ {
+  "week": 7,
+  "lines_slots": 7,
+  "lines_sent": 7,
+  "props_games": 14,
+  "props_checked": 14
+ }
+]
