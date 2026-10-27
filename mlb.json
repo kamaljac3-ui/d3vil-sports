@@ -2011,5 +2011,81 @@
    "pHRvs": 0.08371620504520494,
    "gradedOn": "2026-10-24"
   }
+ },
+ {
+  "id": "2026-10-26|849804|641343",
+  "sport": "mlb",
+  "date": "2026-10-26",
+  "at": "2026-10-26T19:39:58.134Z",
+  "name": "Jake Bauers",
+  "team": "MIL",
+  "pitcher": "Freddy Peralta",
+  "win": 0.1373234213362176,
+  "hr": 0.23571030373086618,
+  "edge": 0.04688873630621336,
+  "hrEdge": -0.014927743520033204,
+  "gap": 7.125552332878327,
+  "prim": "4-seam",
+  "hitterId": "641343",
+  "pitcherId": "642547",
+  "gamePk": 849804,
+  "envMult": 0.9270737168867166,
+  "wx": "dome",
+  "modes": [
+   "morning",
+   "lineups"
+  ],
+  "result": {
+   "status": "final",
+   "pa": 5,
+   "hr": 0,
+   "paVsSP": 3,
+   "hrVsSP": 0,
+   "bbe": 3,
+   "inWin": 1,
+   "starterMatched": true,
+   "baseHrPA": 0.04277286135693215,
+   "pHR": 0.19633507464602085,
+   "pHRvs": 0.12290828477041005,
+   "gradedOn": "2026-10-27"
+  }
+ },
+ {
+  "id": "2026-10-26|849804|694192",
+  "sport": "mlb",
+  "date": "2026-10-26",
+  "at": "2026-10-26T19:39:58.134Z",
+  "name": "Jackson Chourio",
+  "team": "MIL",
+  "pitcher": "Freddy Peralta",
+  "win": 0.1373234213362176,
+  "hr": 0.18064898426455533,
+  "edge": 0.04688873630621336,
+  "hrEdge": -0.038943904842616894,
+  "gap": 5.578916942754427,
+  "prim": "4-seam",
+  "hitterId": "694192",
+  "pitcherId": "642547",
+  "gamePk": 849804,
+  "envMult": 0.9121112878997997,
+  "wx": "dome",
+  "modes": [
+   "morning",
+   "lineups"
+  ],
+  "result": {
+   "status": "final",
+   "pa": 5,
+   "hr": 0,
+   "paVsSP": 3,
+   "hrVsSP": 0,
+   "bbe": 4,
+   "inWin": 0,
+   "starterMatched": true,
+   "baseHrPA": 0.041604754829123326,
+   "pHR": 0.19141952136503604,
+   "pHRvs": 0.11969341359856844,
+   "gradedOn": "2026-10-27"
+  }
  }
 ]

@@ -4510,5 +4510,675 @@
    "fg3m": 2,
    "gradedOn": "2026-10-26"
   }
+ },
+ {
+  "id": "2026-10-26|401909872|obitoppin|boost|pts",
+  "sport": "nba",
+  "date": "2026-10-26",
+  "at": "2026-10-26T20:20:16.928Z",
+  "model": "2026-10-24-rosters",
+  "kind": "boost",
+  "name": "Obi Toppin",
+  "key": "obitoppin",
+  "team": "IND",
+  "opp": "MIL",
+  "tags": [
+   "w/o McConnell, Sheppard, Zubac",
+   "high team total",
+   "b2b 2nd night"
+  ],
+  "mpg": 18.7999996,
+  "minProj": 18.7999996,
+  "stat": "pts",
+  "proj": 14.830136149477116,
+  "projRaw": 15.234807894175205,
+  "avg": 12.5666668,
+  "rest": 1,
+  "dvp": null,
+  "gameId": "401909872",
+  "tip": "2026-10-27T00:00Z",
+  "modes": [
+   "morning",
+   "news"
+  ],
+  "result": {
+   "status": "final",
+   "min": 23,
+   "pts": 14,
+   "reb": 6,
+   "ast": 2,
+   "fg3m": 2,
+   "gradedOn": "2026-10-27"
+  }
+ },
+ {
+  "id": "2026-10-26|401909869|game|spread|spread",
+  "sport": "nba",
+  "date": "2026-10-26",
+  "at": "2026-10-26T20:20:16.928Z",
+  "model": "2026-10-24-rosters",
+  "key": "game",
+  "stat": "spread",
+  "gameId": "401909869",
+  "tip": "2026-10-26T23:00Z",
+  "home": "CLE",
+  "away": "MIN",
+  "name": "MIN @ CLE",
+  "proj": -8.437455942966162,
+  "projTotal": 227.97947947985742,
+  "b2b": [
+   "MIN"
+  ],
+  "def": {
+   "away": null,
+   "home": null
+  },
+  "kind": "spread",
+  "side": "away",
+  "team": "MIN",
+  "line": 4.5,
+  "edge": 12.937455942966162,
+  "tick": false,
+  "modes": [
+   "morning"
+  ],
+  "result": {
+   "status": "final",
+   "hs": 127,
+   "as": 125,
+   "cover": 2.5,
+   "gradedOn": "2026-10-27"
+  },
+  "close": 3.5
+ },
+ {
+  "id": "2026-10-26|401909871|game|spread|spread",
+  "sport": "nba",
+  "date": "2026-10-26",
+  "at": "2026-10-26T20:20:16.928Z",
+  "model": "2026-10-24-rosters",
+  "key": "game",
+  "stat": "spread",
+  "gameId": "401909871",
+  "tip": "2026-10-26T23:30Z",
+  "home": "MIA",
+  "away": "DAL",
+  "name": "DAL @ MIA",
+  "proj": 2.0719511828178447,
+  "projTotal": 239.16178095940015,
+  "b2b": [],
+  "def": {
+   "away": null,
+   "home": null
+  },
+  "kind": "spread",
+  "side": "away",
+  "team": "DAL",
+  "line": 7.5,
+  "edge": 5.428048817182155,
+  "tick": false,
+  "modes": [
+   "morning"
+  ],
+  "result": {
+   "status": "final",
+   "hs": 109,
+   "as": 113,
+   "cover": 11.5,
+   "gradedOn": "2026-10-27"
+  },
+  "close": 7.5
+ },
+ {
+  "id": "2026-10-26|401909874|game|spread|spread",
+  "sport": "nba",
+  "date": "2026-10-26",
+  "at": "2026-10-26T20:20:16.928Z",
+  "model": "2026-10-24-rosters",
+  "key": "game",
+  "stat": "spread",
+  "gameId": "401909874",
+  "tip": "2026-10-27T00:30Z",
+  "home": "HOU",
+  "away": "ATL",
+  "name": "ATL @ HOU",
+  "proj": -0.6348240482251365,
+  "projTotal": 231.45376963333263,
+  "b2b": [],
+  "def": {
+   "away": null,
+   "home": null
+  },
+  "kind": "spread",
+  "side": "away",
+  "team": "ATL",
+  "line": 4.5,
+  "edge": 5.134824048225137,
+  "tick": false,
+  "modes": [
+   "morning",
+   "pregame"
+  ],
+  "result": {
+   "status": "final",
+   "hs": 120,
+   "as": 110,
+   "cover": -5.5,
+   "gradedOn": "2026-10-27"
+  },
+  "close": 4.5
+ },
+ {
+  "id": "2026-10-26|401909875|game|spread|spread",
+  "sport": "nba",
+  "date": "2026-10-26",
+  "at": "2026-10-26T20:20:16.928Z",
+  "model": "2026-10-24-rosters",
+  "key": "game",
+  "stat": "spread",
+  "gameId": "401909875",
+  "tip": "2026-10-27T01:00Z",
+  "home": "UTA",
+  "away": "MEM",
+  "name": "MEM @ UTA",
+  "proj": -3.5678578159009096,
+  "projTotal": 235.15410536790833,
+  "b2b": [
+   "UTA",
+   "MEM"
+  ],
+  "def": {
+   "away": null,
+   "home": null
+  },
+  "kind": "spread",
+  "side": "away",
+  "team": "MEM",
+  "line": 1.5,
+  "edge": 5.06785781590091,
+  "tick": false,
+  "modes": [
+   "morning"
+  ],
+  "result": {
+   "status": "final",
+   "hs": 105,
+   "as": 110,
+   "cover": 6.5,
+   "gradedOn": "2026-10-27"
+  },
+  "close": -1.5
+ },
+ {
+  "id": "2026-10-26|401909874|reedsheppard|prop|pts",
+  "sport": "nba",
+  "date": "2026-10-26",
+  "at": "2026-10-27T00:21:38.309Z",
+  "model": "2026-10-24-rosters",
+  "kind": "prop",
+  "name": "Reed Sheppard",
+  "key": "reedsheppard",
+  "team": "HOU",
+  "opp": "ATL",
+  "tags": [
+   "w/o Adams, Smart"
+  ],
+  "mpg": 25.758535866666666,
+  "minProj": 25.758535866666666,
+  "stat": "pts",
+  "proj": 13.803072087967692,
+  "projRaw": 14.306747005191243,
+  "avg": 13.198374533333334,
+  "line": 8.5,
+  "po": 0.785058724331563,
+  "rest": 2,
+  "dvp": null,
+  "gameId": "401909874",
+  "tip": "2026-10-27T00:30Z",
+  "close": 8.5,
+  "closeAt": "2026-10-27T00:21:38.710Z",
+  "modes": [
+   "pregame"
+  ],
+  "result": {
+   "status": "final",
+   "min": 24,
+   "pts": 13,
+   "reb": 0,
+   "ast": 4,
+   "fg3m": 2,
+   "gradedOn": "2026-10-27"
+  }
+ },
+ {
+  "id": "2026-10-26|401909874|fredvanvleet|prop|ast",
+  "sport": "nba",
+  "date": "2026-10-26",
+  "at": "2026-10-27T00:21:38.309Z",
+  "model": "2026-10-24-rosters",
+  "kind": "prop",
+  "name": "Fred VanVleet",
+  "key": "fredvanvleet",
+  "team": "HOU",
+  "opp": "ATL",
+  "tags": [
+   "w/o Adams, Smart"
+  ],
+  "mpg": 30.5,
+  "minProj": 30.5,
+  "stat": "ast",
+  "proj": 7.920810479180291,
+  "projRaw": 8.441881282318,
+  "avg": 8,
+  "line": 5.5,
+  "po": 0.7713501869645427,
+  "rest": 2,
+  "dvp": null,
+  "gameId": "401909874",
+  "tip": "2026-10-27T00:30Z",
+  "close": 5.5,
+  "closeAt": "2026-10-27T00:21:38.710Z",
+  "modes": [
+   "pregame"
+  ],
+  "result": {
+   "status": "final",
+   "min": 29,
+   "pts": 5,
+   "reb": 4,
+   "ast": 5,
+   "fg3m": 0,
+   "gradedOn": "2026-10-27"
+  }
+ },
+ {
+  "id": "2026-10-26|401909874|reedsheppard|prop|fg3m",
+  "sport": "nba",
+  "date": "2026-10-26",
+  "at": "2026-10-27T00:21:38.309Z",
+  "model": "2026-10-24-rosters",
+  "kind": "prop",
+  "name": "Reed Sheppard",
+  "key": "reedsheppard",
+  "team": "HOU",
+  "opp": "ATL",
+  "tags": [
+   "w/o Adams, Smart"
+  ],
+  "mpg": 25.758535866666666,
+  "minProj": 25.758535866666666,
+  "stat": "fg3m",
+  "proj": 2.779015157728435,
+  "projRaw": 3.0342570006220595,
+  "avg": 2.7991870066666666,
+  "line": 1.5,
+  "po": 0.7542273233928695,
+  "rest": 2,
+  "dvp": null,
+  "gameId": "401909874",
+  "tip": "2026-10-27T00:30Z",
+  "close": 1.5,
+  "closeAt": "2026-10-27T00:21:38.710Z",
+  "modes": [
+   "pregame"
+  ],
+  "result": {
+   "status": "final",
+   "min": 24,
+   "pts": 13,
+   "reb": 0,
+   "ast": 4,
+   "fg3m": 2,
+   "gradedOn": "2026-10-27"
+  }
+ },
+ {
+  "id": "2026-10-26|401909874|jocklandale|prop|reb",
+  "sport": "nba",
+  "date": "2026-10-26",
+  "at": "2026-10-27T00:21:38.309Z",
+  "model": "2026-10-24-rosters",
+  "kind": "prop",
+  "name": "Jock Landale",
+  "key": "jocklandale",
+  "team": "ATL",
+  "opp": "HOU",
+  "tags": [
+   "w/o Gueye"
+  ],
+  "mpg": 21.384313200000005,
+  "minProj": 21.384313200000005,
+  "stat": "reb",
+  "proj": 5.250451169431714,
+  "projRaw": 5.480525061543922,
+  "avg": 5.35294112,
+  "line": 3.5,
+  "po": 0.7341935922733409,
+  "rest": 2,
+  "dvp": null,
+  "gameId": "401909874",
+  "tip": "2026-10-27T00:30Z",
+  "close": 3.5,
+  "closeAt": "2026-10-27T00:21:38.710Z",
+  "modes": [
+   "pregame"
+  ],
+  "result": {
+   "status": "final",
+   "min": 18,
+   "pts": 8,
+   "reb": 6,
+   "ast": 4,
+   "fg3m": 0,
+   "gradedOn": "2026-10-27"
+  }
+ },
+ {
+  "id": "2026-10-26|401909875|darrynpeterson|prop|fg3m",
+  "sport": "nba",
+  "date": "2026-10-26",
+  "at": "2026-10-27T00:21:38.493Z",
+  "model": "2026-10-24-rosters",
+  "kind": "prop",
+  "name": "Darryn Peterson",
+  "key": "darrynpeterson",
+  "team": "UTA",
+  "opp": "MEM",
+  "tags": [
+   "w/o Hayes, Nurkic",
+   "b2b 2nd night"
+  ],
+  "mpg": 30.333334,
+  "minProj": 30.333334,
+  "stat": "fg3m",
+  "proj": 0.40395457092082254,
+  "projRaw": 0.31411246839750717,
+  "avg": 0.33333334,
+  "line": 1.5,
+  "po": 0.04808830402512998,
+  "rest": 1,
+  "dvp": null,
+  "gameId": "401909875",
+  "tip": "2026-10-27T01:00Z",
+  "close": 1.5,
+  "closeAt": "2026-10-27T00:21:38.920Z",
+  "modes": [
+   "pregame"
+  ],
+  "result": {
+   "status": "final",
+   "min": 26,
+   "pts": 14,
+   "reb": 7,
+   "ast": 4,
+   "fg3m": 3,
+   "gradedOn": "2026-10-27"
+  }
+ },
+ {
+  "id": "2026-10-26|401909875|bricesensabaugh|prop|pts",
+  "sport": "nba",
+  "date": "2026-10-26",
+  "at": "2026-10-27T00:21:38.493Z",
+  "model": "2026-10-24-rosters",
+  "kind": "prop",
+  "name": "Brice Sensabaugh",
+  "key": "bricesensabaugh",
+  "team": "UTA",
+  "opp": "MEM",
+  "tags": [
+   "w/o Hayes, Nurkic",
+   "b2b 2nd night"
+  ],
+  "mpg": 21.861333800000004,
+  "minProj": 21.861333800000004,
+  "stat": "pts",
+  "proj": 12.58078315244304,
+  "projRaw": 12.75270942312488,
+  "avg": 13.170666700000002,
+  "line": 7.5,
+  "po": 0.7834079786723644,
+  "rest": 1,
+  "dvp": null,
+  "gameId": "401909875",
+  "tip": "2026-10-27T01:00Z",
+  "close": 7.5,
+  "closeAt": "2026-10-27T00:21:38.920Z",
+  "modes": [
+   "pregame"
+  ],
+  "result": {
+   "status": "final",
+   "min": 9,
+   "pts": 11,
+   "reb": 2,
+   "ast": 0,
+   "fg3m": 3,
+   "gradedOn": "2026-10-27"
+  }
+ },
+ {
+  "id": "2026-10-26|401909875|camspencer|prop|pts",
+  "sport": "nba",
+  "date": "2026-10-26",
+  "at": "2026-10-27T00:21:38.493Z",
+  "model": "2026-10-24-rosters",
+  "kind": "prop",
+  "name": "Cam Spencer",
+  "key": "camspencer",
+  "team": "MEM",
+  "opp": "UTA",
+  "tags": [
+   "high team total",
+   "b2b 2nd night"
+  ],
+  "mpg": 22.311110799999998,
+  "minProj": 22.311110799999998,
+  "stat": "pts",
+  "proj": 10.925428568370283,
+  "projRaw": 11.110895589325047,
+  "avg": 10.6666664,
+  "line": 6.5,
+  "po": 0.7642928236363014,
+  "rest": 1,
+  "dvp": null,
+  "gameId": "401909875",
+  "tip": "2026-10-27T01:00Z",
+  "close": 6.5,
+  "closeAt": "2026-10-27T00:21:38.920Z",
+  "modes": [
+   "pregame"
+  ],
+  "result": {
+   "status": "final",
+   "min": 18,
+   "pts": 8,
+   "reb": 5,
+   "ast": 5,
+   "fg3m": 2,
+   "gradedOn": "2026-10-27"
+  }
+ },
+ {
+  "id": "2026-10-26|401909875|jeramigrant|prop|pts",
+  "sport": "nba",
+  "date": "2026-10-26",
+  "at": "2026-10-27T00:21:38.493Z",
+  "model": "2026-10-24-rosters",
+  "kind": "prop",
+  "name": "Jerami Grant",
+  "key": "jeramigrant",
+  "team": "MEM",
+  "opp": "UTA",
+  "tags": [
+   "high team total",
+   "b2b 2nd night"
+  ],
+  "mpg": 28.6561396,
+  "minProj": 28.6561396,
+  "stat": "pts",
+  "proj": 16.653209064598684,
+  "projRaw": 17.302295439110353,
+  "avg": 16.6105254,
+  "line": 11.5,
+  "po": 0.7620313434364603,
+  "rest": 1,
+  "dvp": null,
+  "gameId": "401909875",
+  "tip": "2026-10-27T01:00Z",
+  "close": 11.5,
+  "closeAt": "2026-10-27T00:21:38.920Z",
+  "modes": [
+   "pregame"
+  ],
+  "result": {
+   "status": "final",
+   "min": 24,
+   "pts": 13,
+   "reb": 3,
+   "ast": 0,
+   "fg3m": 3,
+   "gradedOn": "2026-10-27"
+  }
+ },
+ {
+  "id": "2026-10-26|401909872|kobebrown|boost|pts",
+  "sport": "nba",
+  "date": "2026-10-26",
+  "at": "2026-10-26T22:54:48.825Z",
+  "kind": "boost",
+  "name": "Kobe Brown",
+  "key": "kobebrown",
+  "team": "IND",
+  "opp": "MIL",
+  "tags": [
+   "w/o Furphy, McConnell, Nembhard, Sheppard, Zubac",
+   "high team total"
+  ],
+  "mpg": 15.770492,
+  "minProj": 15.770492,
+  "stat": "pts",
+  "proj": 8.043953601845757,
+  "projRaw": 7.945675189952478,
+  "avg": 5.7868853,
+  "gain": 0.8301297184538479,
+  "gameId": "401909872",
+  "tip": "2026-10-27T00:00Z",
+  "modes": [
+   "news"
+  ],
+  "result": {
+   "status": "void",
+   "why": "0 minutes",
+   "gradedOn": "2026-10-27"
+  }
+ },
+ {
+  "id": "2026-10-26|401909872|quentonjackson|boost|pts",
+  "sport": "nba",
+  "date": "2026-10-26",
+  "at": "2026-10-26T22:54:48.825Z",
+  "kind": "boost",
+  "name": "Quenton Jackson",
+  "key": "quentonjackson",
+  "team": "IND",
+  "opp": "MIL",
+  "tags": [
+   "w/o Furphy, McConnell, Nembhard, Sheppard, Zubac",
+   "high team total"
+  ],
+  "mpg": 17.9782308,
+  "minProj": 17.9782308,
+  "stat": "pts",
+  "proj": 11.40731370330779,
+  "projRaw": 11.55830687788162,
+  "avg": 8.5809531,
+  "gain": 1.1152347094412267,
+  "gameId": "401909872",
+  "tip": "2026-10-27T00:00Z",
+  "modes": [
+   "news"
+  ],
+  "result": {
+   "status": "final",
+   "min": 27,
+   "pts": 4,
+   "reb": 2,
+   "ast": 4,
+   "fg3m": 0,
+   "gradedOn": "2026-10-27"
+  }
+ },
+ {
+  "id": "2026-10-26|401909872|jayhuff|boost|pts",
+  "sport": "nba",
+  "date": "2026-10-26",
+  "at": "2026-10-26T22:54:48.825Z",
+  "kind": "boost",
+  "name": "Jay Huff",
+  "key": "jayhuff",
+  "team": "IND",
+  "opp": "MIL",
+  "tags": [
+   "w/o Furphy, McConnell, Nembhard, Sheppard, Zubac",
+   "high team total"
+  ],
+  "mpg": 19.901626333333336,
+  "minProj": 19.901626333333336,
+  "stat": "pts",
+  "proj": 12.000060449650034,
+  "projRaw": 12.194984371267491,
+  "avg": 9.208942666666667,
+  "gain": 1.088672554053863,
+  "gameId": "401909872",
+  "tip": "2026-10-27T00:00Z",
+  "modes": [
+   "news"
+  ],
+  "result": {
+   "status": "final",
+   "min": 23,
+   "pts": 6,
+   "reb": 6,
+   "ast": 1,
+   "fg3m": 0,
+   "gradedOn": "2026-10-27"
+  }
+ },
+ {
+  "id": "2026-10-26|401909872|jaracewalker|boost|pts",
+  "sport": "nba",
+  "date": "2026-10-26",
+  "at": "2026-10-26T22:54:48.825Z",
+  "kind": "boost",
+  "name": "Jarace Walker",
+  "key": "jaracewalker",
+  "team": "IND",
+  "opp": "MIL",
+  "tags": [
+   "w/o Furphy, McConnell, Nembhard, Sheppard, Zubac",
+   "high team total"
+  ],
+  "mpg": 24.224562000000002,
+  "minProj": 24.224562000000002,
+  "stat": "pts",
+  "proj": 12.142310460766003,
+  "projRaw": 12.781091242177062,
+  "avg": 10.03859654,
+  "gain": 0.9217088862287746,
+  "gameId": "401909872",
+  "tip": "2026-10-27T00:00Z",
+  "modes": [
+   "news"
+  ],
+  "result": {
+   "status": "final",
+   "min": 29,
+   "pts": 10,
+   "reb": 8,
+   "ast": 2,
+   "fg3m": 2,
+   "gradedOn": "2026-10-27"
+  }
  }
 ]
