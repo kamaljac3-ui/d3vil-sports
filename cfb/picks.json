@@ -11197,6 +11197,122 @@
    },
    "outs": {},
    "why": "home field MOST +1.6; small crowd SHSU +1.8"
+  },
+  {
+   "key": "update|401871058",
+   "S": 2026,
+   "wk": 9,
+   "gid": 401871058,
+   "card": "update",
+   "ver": "v1",
+   "params": "2026-09-27",
+   "sentAt": "2026-10-27T17:55:42.608Z",
+   "mins": 1744,
+   "kick": "2026-10-28T23:00:00.000Z",
+   "away": "KENN",
+   "home": "MTSU",
+   "conf": true,
+   "neutral": false,
+   "lm": 2.5,
+   "lt": 50.5,
+   "lmOpen": 2.75,
+   "ltOpen": 50.25,
+   "src": "Draft Kings",
+   "om": -3.3,
+   "ot": 52,
+   "se": 5.8,
+   "te": 1.5,
+   "spick": true,
+   "tpick": false,
+   "swild": false,
+   "min": {
+    "spread": 4,
+    "total": 8,
+    "week": 4
+   },
+   "f": {
+    "home": 1,
+    "capZ": -0.8,
+    "travel": 0.2,
+    "tz": 1,
+    "rest": 2,
+    "climb": 0,
+    "descend": 0,
+    "humid": 0,
+    "heat": 0,
+    "dome": false
+   },
+   "rest": {
+    "home": 8,
+    "away": 6
+   },
+   "wx": {
+    "wind": 5.8,
+    "gust": 8,
+    "precip": 0,
+    "temp": 65,
+    "dew": 30
+   },
+   "outs": {},
+   "why": "home field MTSU +1.6; small crowd KENN +1.1"
+  },
+  {
+   "key": "update|401871057",
+   "S": 2026,
+   "wk": 9,
+   "gid": 401871057,
+   "card": "update",
+   "ver": "v1",
+   "params": "2026-09-27",
+   "sentAt": "2026-10-27T17:55:42.608Z",
+   "mins": 1804,
+   "kick": "2026-10-29T00:00:00.000Z",
+   "away": "JXST",
+   "home": "NMSU",
+   "conf": true,
+   "neutral": false,
+   "lm": -3.5,
+   "lt": 49.5,
+   "lmOpen": -3,
+   "ltOpen": 50,
+   "src": "Draft Kings",
+   "om": -4.5,
+   "ot": 52.2,
+   "se": 1,
+   "te": 2.7,
+   "spick": false,
+   "tpick": false,
+   "swild": false,
+   "min": {
+    "spread": 4,
+    "total": 8,
+    "week": 4
+   },
+   "f": {
+    "home": 1,
+    "capZ": -0.8,
+    "travel": 1.2,
+    "tz": 1,
+    "rest": -7,
+    "climb": 0.21,
+    "descend": 0,
+    "humid": 0,
+    "heat": 0,
+    "dome": false
+   },
+   "rest": {
+    "home": 7,
+    "away": 15
+   },
+   "wx": {
+    "wind": 2.6,
+    "gust": 5,
+    "precip": 0,
+    "temp": 72,
+    "dew": 37
+   },
+   "outs": {},
+   "why": "home field NMSU +1.6; small crowd JXST +1.2; travel NMSU +0.9; rest JXST +1.0"
   }
  ]
 }
