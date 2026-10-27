@@ -11025,6 +11025,64 @@
    "why": "home field WKU +1.6; small crowd DEL +1.5; rest WKU +0.8"
   },
   {
+   "key": "gameday|401871071",
+   "S": 2026,
+   "wk": 9,
+   "gid": 401871071,
+   "card": "gameday",
+   "ver": "v1",
+   "params": "2026-09-27",
+   "sentAt": "2026-10-27T22:07:20.892Z",
+   "mins": 53,
+   "kick": "2026-10-27T23:00:00.000Z",
+   "away": "DEL",
+   "home": "WKU",
+   "conf": true,
+   "neutral": false,
+   "lm": 1.5,
+   "lt": 55.5,
+   "lmOpen": -1.75,
+   "ltOpen": 57.25,
+   "src": "DraftKings",
+   "om": 5.2,
+   "ot": 56.9,
+   "se": 3.7,
+   "te": 1.4,
+   "spick": false,
+   "tpick": false,
+   "swild": false,
+   "min": {
+    "spread": 4,
+    "total": 8,
+    "week": 4
+   },
+   "f": {
+    "home": 1,
+    "capZ": -1.1,
+    "travel": 0.6,
+    "tz": 1,
+    "rest": 6,
+    "climb": 0,
+    "descend": 0,
+    "humid": 0,
+    "heat": 0,
+    "dome": false
+   },
+   "rest": {
+    "home": 13,
+    "away": 7
+   },
+   "wx": {
+    "wind": 4.4,
+    "gust": 6,
+    "precip": 0,
+    "temp": 64,
+    "dew": 42
+   },
+   "outs": {},
+   "why": "home field WKU +1.6; small crowd DEL +1.5; rest WKU +0.8"
+  },
+  {
    "key": "update|401871071",
    "S": 2026,
    "wk": 9,
