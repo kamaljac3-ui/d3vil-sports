@@ -1,6 +1,6 @@
 # Bot results
 
-Updated 2026-10-27. 0 picks waiting on games to finish.
+Updated 2026-10-28. 0 picks waiting on games to finish.
 
 ## Last 7 days
 
@@ -9,16 +9,16 @@ MLB: 3 hitter-games (small sample: noise until ~100+)
 - Off the flagged starter: HR in 0 of 3 games he started
 - Launch window: 10% of 10 batted balls at 25-35 deg vs 13% predicted
 
-NBA (model pre-2026-10-24): 130 picks
+NBA (model pre-2026-10-24): 126 picks
 - Projection boosts: 11/19 beat their average (58%); model said +2.1, got +1.2 per pick
-- Prop lines: 65-46 (59%), +13.1 units at -110 (break-even 52.4%)
+- Prop lines: 63-44 (59%), +13.3 units at -110 (break-even 52.4%)
 NBA (model nba-news): 17 picks (small sample: noise until ~100+)
 - Projection boosts: 4/17 beat their average (24%); model said +2.1, got -1.8 per pick
-NBA (model 2026-10-24-rosters): 17 picks (small sample: noise until ~100+)
+NBA (model 2026-10-24-rosters): 19 picks (small sample: noise until ~100+)
 - Projection boosts: 1/1 beat their average (100%); model said +2.3, got +1.4 per pick
 - Prop lines: 9-3 (75%), +5.2 units at -110 (break-even 52.4%)
   - Closing line: 8 with a close; it moved our way 0, against us 0, avg +0.0 (beating the close is the early sign of a real edge)
-- Game spreads (model 5+ pts off the line): 3-1 (75%), +1.7 units at -110; vs the close: our way 2, against 0, avg +1.0
+- Game spreads (model 4+ pts off the line): 3-3 (50%), -0.3 units at -110; vs the close: our way 3, against 0, avg +0.8
 
 NBA by tag: 16 graded picks with tags logged (small sample: noise until ~100+)
 - teammate out (w/o) (14): props 7-3 +3.4u, close our way 0/6 (avg +0.0); boosts 1/4 beat avg (25%), said +2.5 got -1.6
@@ -43,11 +43,11 @@ NBA (model pre-2026-10-24): 130 picks
 - Prop lines: 65-46 (59%), +13.1 units at -110 (break-even 52.4%)
 NBA (model nba-news): 17 picks (small sample: noise until ~100+)
 - Projection boosts: 4/17 beat their average (24%); model said +2.1, got -1.8 per pick
-NBA (model 2026-10-24-rosters): 17 picks (small sample: noise until ~100+)
+NBA (model 2026-10-24-rosters): 19 picks (small sample: noise until ~100+)
 - Projection boosts: 1/1 beat their average (100%); model said +2.3, got +1.4 per pick
 - Prop lines: 9-3 (75%), +5.2 units at -110 (break-even 52.4%)
   - Closing line: 8 with a close; it moved our way 0, against us 0, avg +0.0 (beating the close is the early sign of a real edge)
-- Game spreads (model 5+ pts off the line): 3-1 (75%), +1.7 units at -110; vs the close: our way 2, against 0, avg +1.0
+- Game spreads (model 4+ pts off the line): 3-3 (50%), -0.3 units at -110; vs the close: our way 3, against 0, avg +0.8
 
 NBA by tag: 16 graded picks with tags logged (small sample: noise until ~100+)
 - teammate out (w/o) (14): props 7-3 +3.4u, close our way 0/6 (avg +0.0); boosts 1/4 beat avg (25%), said +2.5 got -1.6
@@ -66,6 +66,8 @@ NBA by tag: 16 graded picks with tags logged (small sample: noise until ~100+)
 
 ## Recent picks
 
+- 2026-10-27 DET @ NYK DET +4.5 (spread, closed 4.5): 97-111
+- 2026-10-27 BKN @ BOS BOS -12.5 (spread, closed -13.5): 124-125
 - 2026-10-26 Reed Sheppard PTS (prop, o8.5): 13
 - 2026-10-26 Reed Sheppard 3PM (prop, o1.5): 2
 - 2026-10-26 Quenton Jackson PTS (boost, proj 11.4, avg 8.6): 4
@@ -232,7 +234,3 @@ NBA by tag: 16 graded picks with tags logged (small sample: noise until ~100+)
 - 2026-10-21 Anthony Davis PTS (boost, proj 23.0, avg 20.4): 34
 - 2026-10-21 Alperen Sengun AST (prop, o4.5): 5
 - 2026-10-21 Alex Sarr PTS (boost, proj 18.5, avg 16.3): 6
-- 2026-10-20 VJ Edgecombe AST (prop, o2.5): 1
-- 2026-10-20 Miles McBride PTS (prop, o6.5): 3
-- 2026-10-20 Karl-Anthony Towns AST (prop, u4.5): 1
-- 2026-10-20 Anfernee Simons PTS (prop, o7.5): 13
