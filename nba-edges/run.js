@@ -711,7 +711,8 @@ function shortLines(picks){
 // (bg "matrix", sport "nba": rain -> LED jumbotron -> blue CRT -> tracking cam, a glitch on every cut; palette and opening
 // scene vary by date). Written to nba-edges/.out/short-<date>.json, uploaded as the run's "nba-short" artifact, and appended
 // to KJ's OneDrive "YYYY-MM-DD shorts.txt" by his local "NBA Short to Shorts file" task so make_audio.py voices it.
-const SHORT_PALETTES=["blue","crimson","purple","emerald","amber","teal","magenta"],SHORT_FIRST=["rain","led","crt","track"];
+// "retro" = the 8-bit Double Dribble-style court slide (kamal, Oct 29), so some Shorts open on it
+const SHORT_PALETTES=["blue","crimson","purple","emerald","amber","teal","magenta"],SHORT_FIRST=["rain","led","retro","crt","track"];
 function shortData(cands,games){
   const picks=shortPicks(cands);if(picks.length<5)return null;
   const day=DAYS[etWeekday()]||etWeekday(),soft=picks.some(r=>r.soft!=null&&r.soft>=1);
@@ -733,7 +734,7 @@ function shortData(cands,games){
       chance:+r.prob.toFixed(3),market:r.mktP==null?null:+r.mktP.toFixed(3),softer:r.soft})),
     // glitch "surveillance" = the Enemy of the State spy-feed scrambles (NBA picks Shorts only; KJ's other Shorts keep "cut");
     // avatar = KJ in the NWA-style shades from his Oct 25 Jets rant (path relative to the OneDrive "48th State Shorts" folder)
-    build:{bg:"matrix",sport:"nba",glitch:"surveillance",avatar:"assets/kj_avatar_shades_frame.png",avatar_crop:[330,840,480],
+    build:{bg:"matrix",sport:"nba",glitch:"surveillance",retro:true,avatar:"assets/kj_avatar_shades_frame.png",avatar_crop:[330,840,480],
       palette:SHORT_PALETTES[doy%SHORT_PALETTES.length],first:SHORT_FIRST[doy%SHORT_FIRST.length],
       tag:"NBA PROPS",headline:["5 PRA BETS",`${day.toUpperCase()} NIGHT`],
       // real lines for the LED jumbotron and the CRT screen (never filler stats)
