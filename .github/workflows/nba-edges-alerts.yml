@@ -44,4 +44,6 @@ jobs:
           NTFY_SERVER: ${{ secrets.NTFY_SERVER }}
           NTFY_TOKEN: ${{ secrets.NTFY_TOKEN }}
           ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+          # the books you bet at (repo Variable, shared with the NFL bots), for the 💰 stale-price check
+          MY_BOOKS: ${{ vars.MY_BOOKS }}
         run: node nba-edges/run.js

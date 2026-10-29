@@ -25,7 +25,7 @@ const P_MIN=+(process.env.P_MIN||0.58);           // model over/under probabilit
 const PREGAME_MIN=+(process.env.PREGAME_MIN||90);
 const CLOSE_LINES=process.env.CLOSE_LINES!=="0",CLOSE_WINDOW=+(process.env.CLOSE_WINDOW||45);  // closing-line capture, see captureCloses
 // tagged on every logged pick so results/track.js can grade each model version separately; bump it on any model change
-const MODEL_VERSION=process.env.MODEL_VERSION||"2026-10-28-pra-blowout";
+const MODEL_VERSION=process.env.MODEL_VERSION||"2026-10-28-ev";
 const ABS_MIN={pra:3,pts:2,reb:1,ast:1,fg3m:0.5};
 // PRA (points + rebounds + assists) first: it's Kamal's main bet. Its average is the PRA field (withPRA below).
 const STATS=["pra","pts","reb","ast","fg3m"],AVG={pra:"PRA",pts:"PTS",reb:"REB",ast:"AST",fg3m:"FG3M"},LABEL={pra:"PRA",pts:"PTS",reb:"REB",ast:"AST",fg3m:"3PM"};
@@ -188,22 +188,71 @@ async function injuries(g){
   for(const t of (j&&j.injuries)||[])for(const i of t.injuries||[])if(/^(out|doubtful)$/i.test(i.status||""))out.add(nk(i.athlete&&i.athlete.displayName));
   return out;
 }
-// ---------- prop lines (optional, The Odds API) ----------
-// PRA is its own market (player_points_rebounds_assists); each market costs Odds API credits per game
-const MKT={player_points_rebounds_assists:"pra",player_points:"pts",player_rebounds:"reb",player_assists:"ast",player_threes:"fg3m"};
-async function propLines(g){
-  if(!ODDS_KEY)return null;
-  let ev=cached(`odds-events-${TODAY}.json`,3);
+// ---------- prop lines and prices (The Odds API, optional ODDS_API_KEY) ----------
+// The key is shared with the NFL bots and on the free tier (500 credits/month), so this bot keeps its own monthly
+// budget (NBA_ODDS_BUDGET) and stops while NBA_ODDS_RESERVE credits are still left on the key for the NFL bots.
+// A call costs (markets x regions); asking for <= 10 named bookmakers counts as one region. By default only PRA is
+// pulled (Kamal's main bet, 1 credit a game); NBA_PROP_MARKETS=pra,pts,reb,ast,fg3m pulls everything (5 a game).
+const ODDS_BUDGET=+(process.env.NBA_ODDS_BUDGET||150),ODDS_RESERVE=+(process.env.NBA_ODDS_RESERVE||100);
+const MKT_OF={pra:"player_points_rebounds_assists",pts:"player_points",reb:"player_rebounds",ast:"player_assists",fg3m:"player_threes"};
+const PROP_MARKETS=(process.env.NBA_PROP_MARKETS||"pra").split(",").map(s=>s.trim()).filter(s=>MKT_OF[s]);
+const MKT=Object.fromEntries(PROP_MARKETS.map(s=>[MKT_OF[s],s]));
+// stale-line finder (shared with the NFL bots, read-only): your books (MY_BOOKS, FanDuel) vs the sharp book's no-vig price
+const SH=require("../nfl-props/sharp.js");
+const MIN_EV_PROPS=+(process.env.MIN_EV_PROPS||0.03),EV_MAX_GAP=+(process.env.EV_MAX_GAP||2);
+// the sharp book + your books + enough US books for a median line, 10 at most (one region)
+const LINE_BOOKS=(process.env.NBA_LINE_BOOKS||"draftkings,betmgm,williamhill_us,fanatics,betrivers,espnbet").split(",").map(s=>s.trim()).filter(Boolean);
+const BOOKS=[...new Set([...SH.SHARP,...SH.MINE,...LINE_BOOKS])].slice(0,10);
+const oddsUsageKey=()=>`odds-usage-${TODAY.slice(0,7)}.json`;
+async function oddsGet(url,cost,what){
+  const u=cached(oddsUsageKey(),24*40)||{used:0,remaining:null};
+  if(u.used+cost>ODDS_BUDGET||(u.remaining!=null&&u.remaining-cost<ODDS_RESERVE)){
+    log(`Odds API budget: skipping ${what} (NBA used ${u.used}/${ODDS_BUDGET} this month, ${u.remaining??"?"} left on the key, reserve ${ODDS_RESERVE})`);return null;}
+  try{
+    const r=await fetch(url,{signal:AbortSignal.timeout(30000)});
+    const last=+r.headers.get("x-requests-last")||0,rem=r.headers.get("x-requests-remaining");
+    if(last||rem!=null){u.used+=last;if(rem!=null)u.remaining=+rem;store(oddsUsageKey(),u);}   // credits are real even on dry runs
+    if(!r.ok){log("Odds API HTTP",r.status,what);return null;}
+    log(`Odds API: ${what} (${last} credits; NBA ${u.used}/${ODDS_BUDGET} this month, ${u.remaining??"?"} left on the key)`);
+    return r.json();
+  }catch(e){log("Odds API error",e.message,what);return null;}
+}
+// {lines: {key: {stat: median line}}, offers: {key: {stat: [{key: book, title, side A=over/B=under, L, price}]}}}
+const BOOK_MEMO={};
+async function propBook(g){
+  if(!ODDS_KEY||!PROP_MARKETS.length)return null;
+  if(g.id in BOOK_MEMO)return BOOK_MEMO[g.id];
+  let ev=cached(`odds-events-${TODAY}.json`,3);   // listing events costs nothing
   if(!ev)ev=store(`odds-events-${TODAY}.json`,await get(`https://api.the-odds-api.com/v4/sports/basketball_nba/events?apiKey=${ODDS_KEY}`)||[]);
-  const e=ev.find(x=>x.home_team.endsWith(g.home.name)&&x.away_team.endsWith(g.away.name));if(!e)return null;
-  const j=await get(`https://api.the-odds-api.com/v4/sports/basketball_nba/events/${e.id}/odds?apiKey=${ODDS_KEY}&regions=us&oddsFormat=american&markets=${Object.keys(MKT).join(",")}`);
-  if(!j)return null;const acc={};
+  const e=ev.find(x=>x.home_team.endsWith(g.home.name)&&x.away_team.endsWith(g.away.name));if(!e)return BOOK_MEMO[g.id]=null;
+  const j=await oddsGet(`https://api.the-odds-api.com/v4/sports/basketball_nba/events/${e.id}/odds?apiKey=${ODDS_KEY}&bookmakers=${BOOKS.join(",")}&oddsFormat=american&markets=${Object.keys(MKT).join(",")}`,
+    Object.keys(MKT).length,`${label(g)} props`);
+  if(!j)return BOOK_MEMO[g.id]=null;
+  const acc={},offers={};
   for(const b of j.bookmakers||[])for(const m of b.markets||[])for(const o of m.outcomes||[]){
-    if(o.name!=="Over"||o.point==null||!MKT[m.key])continue;const k=nk(o.description);
-    ((acc[k]=acc[k]||{})[MKT[m.key]]=acc[k][MKT[m.key]]||[]).push(o.point);}
+    const s=MKT[m.key];if(!s||o.point==null||!/^(Over|Under)$/.test(o.name))continue;const k=nk(o.description);
+    ((offers[k]=offers[k]||{})[s]=offers[k][s]||[]).push({key:b.key,title:b.title,side:o.name==="Over"?"A":"B",L:o.point,price:o.price});
+    if(o.name==="Over")((acc[k]=acc[k]||{})[s]=acc[k][s]||[]).push(o.point);}
   const med=a=>{a=a.slice().sort((x,y)=>x-y);return a[Math.floor(a.length/2)];};
   const lines={};for(const k in acc){lines[k]={};for(const s in acc[k])lines[k][s]=med(acc[k][s]);}
-  return lines;
+  return BOOK_MEMO[g.id]={lines,offers};
+}
+async function propLines(g){const b=await propBook(g);return b&&b.lines;}
+// 💰 rows: a price at your books worth MIN_EV_PROPS+ against the sharp book's no-vig line (spread = the model's own sd)
+function evRows(g,D,book,players){
+  const out=[];if(!book)return out;
+  for(const k in book.offers)for(const s in book.offers[k]){
+    const list=book.offers[k][s],L0=book.lines[k]&&book.lines[k][s];if(L0==null)continue;
+    const hits=SH.bestPerSide(SH.staleTwoWay(list,{sigma:M.sdOf(s,L0),maxGap:EV_MAX_GAP,minEV:MIN_EV_PROPS}));
+    const pl=D.players[k],pr=players[k];
+    for(const h of hits){
+      const over=h.side==="A",mp=pr&&pr[s]!=null?M.pOver(pr[s],h.L,s):null;
+      out.push({kind:"ev",name:pl?pl.name:k,key:k,team:pl?pl.team:"",stat:s,side:over?"over":"under",line:h.L,price:h.price,book:h.title,
+        fair:h.fair,ev:h.ev,sharp:{book:h.sharp.title,L:h.sharp.L,over:h.sharp.A.price,under:h.sharp.B.price},
+        model:mp==null?null:(over?mp:1-mp),proj:pr?pr[s]:null,gameId:g.id,tip:g.date,tags:[]});
+    }
+  }
+  return out.sort((a,b)=>b.ev-a.ev);
 }
 
 // ---------- game lines: spread and total (lines.js; backtest in BACKTEST-LINES.md) ----------
@@ -349,7 +398,9 @@ async function h2hOf(g,D,key){
 }
 async function sideRows(g,side,D,outKeys,lines){
   const team=(await roster(g[side].espnId)).map(n=>D.players[nk(n)]).filter(Boolean);
-  const rows=flagRows(projectSide(team,g,side,D,outKeys),lines),rest=await restOf(g,side);
+  const S=projectSide(team,g,side,D,outKeys),rows=flagRows(S,lines),rest=await restOf(g,side);
+  // every projected player's calibrated numbers, for the model column next to a 💰 price
+  rows.proj=Object.fromEntries(S.players.map(x=>[x.p.key,Object.fromEntries(STATS.map(st=>[st,M.calibrate(st,x.pr[st],x.p[AVG[st]],x.p.MIN)]))]));
   // rest and dvp ride along on every logged pick so results/track.js can grade them, tagged or not
   const opp=g[side==="home"?"away":"home"].abbr;
   for(const r of rows){const t=[...r.tags],dv=await dvpOf(D,g,side,r.key),h=await h2hOf(g,D,r.key);if(rest===1)t.push("b2b 2nd night");if(dv&&dv.show)t.push(dv.text);
@@ -415,6 +466,9 @@ const rank={zone:r=>r.delta,boost:r=>r.proj/r.avg-1,prop:r=>Math.abs(r.po-0.5)};
 // the rows that make it into an alert: top n of each section
 const SECTIONS=[["Shot-zone edges","zone"],["Prop lines","prop"],["Projection boosts","boost"]];
 const shown=(rows,n)=>SECTIONS.map(([t,k])=>[t,k,rows.filter(r=>r.kind===k).sort((a,b)=>rank[k](b)-rank[k](a)).slice(0,n)]).filter(s=>s[2].length);
+const EV_TOP=+(process.env.EV_TOP||5);
+const evLine=r=>`${r.name}${r.team?` (${r.team})`:""} ${LABEL[r.stat]} ${r.side==="over"?"o":"u"}${r.line} ${SH.fmt(r.price)} at ${r.book}: fair ${pct(r.fair)}, +${(r.ev*100).toFixed(1)}% EV vs ${r.sharp.book} ${r.sharp.L} ${SH.fmt(r.sharp.over)}/${SH.fmt(r.sharp.under)}${r.model!=null?`; model ${pct(r.model)}`:""}`;
+const evMessage=rows=>rows.length?`💰 ${SH.MINE.length===1?rows[0].book:"Your books"} vs sharp no-vig\n`+rows.slice(0,EV_TOP).map((r,i)=>`${i+1}. ${evLine(r)}`).join("\n"):"";
 const message=secs=>secs.map(([t,k,l])=>`${t}\n`+l.map((r,i)=>`${i+1}. ${LINE[k](r)}`).join("\n")).join("\n\n");
 // picks results/track.js grades later; only alerts that were really sent (same rule as the sent markers)
 function logPicks(mode,secs){
@@ -430,7 +484,7 @@ async function captureCloses(games){
   let changed=false;
   for(const g of games){
     const mins=(new Date(g.date)-Date.now())/6e4;if(mins>CLOSE_WINDOW||mins<0)continue;
-    const mine=picks.filter(p=>p.gameId===g.id&&p.kind==="prop"&&p.close==null);if(!mine.length)continue;
+    const mine=picks.filter(p=>p.gameId===g.id&&(p.kind==="prop"||p.kind==="ev")&&p.close==null);if(!mine.length)continue;
     const lines=await propLines(g);if(!lines)continue;
     for(const p of mine){const c=lines[p.key]&&lines[p.key][p.stat];if(c!=null){p.close=c;p.closeAt=new Date().toISOString();changed=true;}}
     log(`${label(g)}: closing lines for ${mine.filter(p=>p.close!=null).length}/${mine.length} props`);
@@ -448,10 +502,13 @@ const label=g=>`${g.away.abbr} @ ${g.home.abbr}`;
 const tip=g=>new Date(g.date).toLocaleTimeString("en-US",{timeZone:"America/New_York",hour:"numeric",minute:"2-digit"});
 // player rows plus the game-lines row (null if the ratings can't be built; the player alerts still go out)
 async function gameRows(g,D,withLines){
-  const out=await injuries(g),lines=withLines?await propLines(g):null;
-  const rows=[...await sideRows(g,"home",D,out,lines),...await sideRows(g,"away",D,out,lines)].map(r=>({...r,gameId:g.id,tip:g.date}));
+  const out=await injuries(g),book=withLines?await propBook(g):null,lines=book&&book.lines;
+  const H=await sideRows(g,"home",D,out,lines),A=await sideRows(g,"away",D,out,lines);
+  const rows=[...H,...A].map(r=>({...r,gameId:g.id,tip:g.date}));
+  // 💰: ruled-out players can't be bet, so drop them
+  const ev=evRows(g,D,book,{...H.proj,...A.proj}).filter(r=>!out.has(r.key));
   let line=null;try{line=await lineRow(g,D,out);}catch(e){log("game lines skipped:",e.message);}
-  return {rows,line};
+  return {rows,line,ev};
 }
 // ✅ game-line picks, logged like the player picks (same sent-only rule) for results/track.js
 function logLinePicks(mode,lineRows){
@@ -478,7 +535,7 @@ async function probe(){
     catch(e){log(`FAIL ${n}: ${e.message}`);}}
 }
 // require()d by backtest.js for the stats fetch and the scoring; only runs the bot when started directly
-module.exports={nba,nbaSeason,blend,projectSide,flagRows,nk,ESPN_TO_NBA,loadData,slate,roster,TODAY,SETTINGS:{ZONE_MIN,BOOST_MIN,ABS_MIN,P_MIN,STATS,AVG}};
+module.exports={nba,nbaSeason,blend,projectSide,flagRows,evRows,evMessage,nk,ESPN_TO_NBA,loadData,slate,roster,TODAY,SETTINGS:{ZONE_MIN,BOOST_MIN,ABS_MIN,P_MIN,STATS,AVG}};
 if(require.main===module)(async()=>{
   if(MODE==="probe")return probe();
   if(MODE==="snapshot")return snapshot();
@@ -499,10 +556,11 @@ if(require.main===module)(async()=>{
     for(const g of games){
       const mins=(new Date(g.date)-Date.now())/6e4;
       if(sent[g.id]||mins>PREGAME_MIN||mins<-10)continue;
-      const x=await gameRows(g,D,true),secs=shown(x.rows,4),pm=message(secs);
-      // the game line rides along when the push goes out anyway, or on its own when it has a ✅
-      const ln=x.line&&(pm||x.line.picks.some(p=>p.tick))?x.line:null,msg=[pm,ln?linesMessage([ln]):""].filter(Boolean).join("\n\n");
-      if(msg){await ntfy(`${label(g)} ${tip(g)} ET: NBA edges`,msg,4,["basketball"]);logPicks("pregame",secs);if(ln)logLinePicks("pregame",[ln]);}else log(`${label(g)}: no edges`);
+      const x=await gameRows(g,D,true),secs=shown(x.rows,4),pm=message(secs),em=evMessage(x.ev);
+      // the game line rides along when the push goes out anyway, or on its own when it has a ✅; 💰 prices go first
+      const ln=x.line&&(pm||em||x.line.picks.some(p=>p.tick))?x.line:null,msg=[em,pm,ln?linesMessage([ln]):""].filter(Boolean).join("\n\n");
+      if(msg){await ntfy(`${label(g)} ${tip(g)} ET: NBA edges${em?" 💰":""}`,msg,4,["basketball"]);
+        logPicks("pregame",[...secs,...(x.ev.length?[["💰","ev",x.ev.slice(0,EV_TOP)]]:[])]);if(ln)logLinePicks("pregame",[ln]);}else log(`${label(g)}: no edges`);
       sent[g.id]=true;
     }
     if(!DRY&&NTFY_TOPIC)store(`pregame-${TODAY}.json`,sent);

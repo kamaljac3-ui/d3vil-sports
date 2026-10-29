@@ -179,6 +179,7 @@ function nbaCard(recs){
       out.push(`- ${names[k]}: ${beat}/${g.length} beat their average (${pct(beat/g.length)}); model said ${sg(mean(g.map(r=>r.proj-r.avg)))}, got ${sg(mean(g.map(r=>r.result[r.stat]-r.avg)))} per pick`);
     }
   }
+  const evp=f.filter(r=>r.kind==="ev");if(evp.length)out.push(`- 💰 Stale prices (your book vs the sharp no-vig line): ${evSummary(evp)}`);
   // game lines: tracked spread/total disagreements (no ✅ by default), against the result and the closing line
   for(const k of ["spread","total"]){
     const g=f.filter(r=>r.kind===k);if(!g.length)continue;
@@ -202,7 +203,7 @@ function recentLines(L,since){
     if(r.kind==="spread"||r.kind==="total"){
       const what=r.kind==="spread"?`${r.team} ${r.line>0?"+":""}${r.line}`:`${r.side} ${r.line}`,cl=r.close!=null?`, closed ${r.close}`:"";
       out.push(r.result.status==="void"?`${r.date} ${r.name} ${what}: void (${r.result.why})`:`${r.date} ${r.name} ${what} (${r.kind}${cl}): ${r.result.as}-${r.result.hs}`);continue;}
-    const tgt=r.kind==="prop"?`${r.po>=0.5?"o":"u"}${r.line}`:`proj ${r.proj.toFixed(1)}, avg ${r.avg.toFixed(1)}`;
+    const tgt=r.kind==="prop"?`${r.po>=0.5?"o":"u"}${r.line}`:r.kind==="ev"?`${r.side==="over"?"o":"u"}${r.line} ${r.price>0?"+":""}${r.price} ${r.book}, +${(100*r.ev).toFixed(1)}% EV`:`proj ${r.proj.toFixed(1)}, avg ${r.avg.toFixed(1)}`;
     out.push(r.result.status==="void"?`${r.date} ${r.name} ${LBL[r.stat]} (${r.kind}): void (${r.result.why})`:
       `${r.date} ${r.name} ${LBL[r.stat]} (${r.kind}, ${tgt}): ${r.result[r.stat]}`);
   }
@@ -231,12 +232,21 @@ const NBA_FAMILIES=[
   ["sent < 2h before tip",r=>hoursOut(r)!=null&&hoursOut(r)<2],
   ["sent 2h+ before tip",r=>hoursOut(r)!=null&&hoursOut(r)>=2],
 ];
+// 💰 picks (nba-edges kind "ev": your book's price vs the sharp no-vig line), graded at the price actually offered
+const payout=ml=>ml>0?ml/100:100/-ml;
+function evSummary(g){
+  let w=0,l=0,p=0,u=0;for(const r of g){const a=r.result[r.stat];if(a===r.line){p++;continue;}if((a>r.line)===(r.side==="over")){w++;u+=payout(r.price);}else{l++;u-=1;}}
+  const c=g.filter(r=>r.close!=null),clv=c.map(r=>(r.side==="over"?1:-1)*(r.close-r.line));
+  return `${w}-${l}${p?`-${p}`:""} (${pct(w/(w+l))}), ${sg(u)} units at the prices taken, promised +${(100*mean(g.map(r=>r.ev))).toFixed(1)}% EV a bet`+
+    (c.length?`; vs the close: our way ${clv.filter(x=>x>0).length}, against ${clv.filter(x=>x<0).length}, avg ${sg(mean(clv))}`:"");
+}
 // one line for a group of player picks: props by W-L/units/closing line, boosts by beat-their-average
 function nbaGroup(g){
   const parts=[],pr=g.filter(r=>r.kind==="prop"),bo=g.filter(r=>r.kind==="boost"||r.kind==="zone");
   if(pr.length){let w=0,l=0,p=0;for(const r of pr){const a=r.result[r.stat];if(a===r.line)p++;else if((a>r.line)===(r.po>=0.5))w++;else l++;}
     const c=pr.filter(r=>r.close!=null),clv=c.map(r=>(r.po>=0.5?1:-1)*(r.close-r.line));
     parts.push(`props ${w}-${l}${p?`-${p}`:""} ${sg(w*0.909-l)}u`+(c.length?`, close our way ${clv.filter(x=>x>0).length}/${c.length} (avg ${sg(mean(clv))})`:""));}
+  const ev=g.filter(r=>r.kind==="ev");if(ev.length)parts.push(`💰 ${evSummary(ev)}`);
   if(bo.length){const beat=bo.filter(r=>r.result[r.stat]>r.avg).length;
     parts.push(`boosts ${beat}/${bo.length} beat avg (${pct(beat/bo.length)}), said ${sg(mean(bo.map(r=>r.proj-r.avg)))} got ${sg(mean(bo.map(r=>r.result[r.stat]-r.avg)))}`);}
   return parts.join("; ");
