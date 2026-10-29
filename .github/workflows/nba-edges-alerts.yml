@@ -47,3 +47,11 @@ jobs:
           # the books you bet at (repo Variable, shared with the NFL bots), for the 💰 stale-price check
           MY_BOOKS: ${{ vars.MY_BOOKS }}
         run: node nba-edges/run.js
+      # Mon/Wed/Fri: the NBA Short (script + shorts.py build settings) for KJ's local "NBA Short to Shorts file" task
+      - name: Upload the NBA Short
+        if: always() && hashFiles('nba-edges/.out/short-*.json') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: nba-short
+          path: nba-edges/.out/short-*.json
+          retention-days: 7

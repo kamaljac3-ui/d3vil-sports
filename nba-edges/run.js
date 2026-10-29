@@ -707,24 +707,49 @@ function shortLines(picks){
     return `${r.name}, ${over?"over":"under"} ${PL.spokenLine(r.line)}. ${why}`;
   });
 }
-function shortScript(top){
-  const picks=shortPicks(top);if(picks.length<5)return null;
+// The Short as data: the scout-format fields plus shorts.py build settings for KJ's approved "Matrix meets sports" look
+// (bg "matrix", sport "nba": rain -> LED jumbotron -> blue CRT -> tracking cam, a glitch on every cut; palette and opening
+// scene vary by date). Written to nba-edges/.out/short-<date>.json, uploaded as the run's "nba-short" artifact, and appended
+// to KJ's OneDrive "YYYY-MM-DD shorts.txt" by his local "NBA Short to Shorts file" task so make_audio.py voices it.
+const SHORT_PALETTES=["blue","crimson","purple","emerald","amber","teal","magenta"],SHORT_FIRST=["rain","led","crt","track"];
+function shortData(cands,games){
+  const picks=shortPicks(cands);if(picks.length<5)return null;
   const day=DAYS[etWeekday()]||etWeekday(),soft=picks.some(r=>r.soft!=null&&r.soft>=1);
   const hook=soft?`Five P-R-A bets tonight. Let's be real, the books left one wide open.`:`Five P-R-A bets tonight. Let's be real, this ${day} slate is loaded.`;
   const doy=Math.floor((Date.parse(TODAY)-Date.parse(TODAY.slice(0,4)+"-01-01"))/864e5),joke=SHORT_ONELINERS[doy%SHORT_ONELINERS.length];
-  const vo=[hook,"Points, rebounds and assists, all combined.",...shortLines(picks),joke,`${lastName(picks[0].name)}: you riding or fading? Comments.`,
+  const voiceover=[hook,"Points, rebounds and assists, all combined.",...shortLines(picks),joke,`${lastName(picks[0].name)}: you riding or fading? Comments.`,
     "Twenty-one and up, bet responsible. Newsletters, link's in the bio. We out."].join(" ");
-  const words=vo.split(/\s+/).length,md=new Date(TODAY+"T12:00:00Z").toLocaleDateString("en-US",{month:"short",day:"numeric",timeZone:"UTC"});
-  const beats=picks.map(r=>`${lastName(r.name)} ${r.po>=0.5?"o":"u"}${r.line} PRA ${SH.fmt(r.price)}${r.soft!=null&&r.soft>=1?" 💰":""}`);
+  const md=new Date(TODAY+"T12:00:00Z").toLocaleDateString("en-US",{month:"short",day:"numeric",timeZone:"UTC"});
+  const side=r=>r.po>=0.5?"o":"u",LN=r=>lastName(r.name).toUpperCase();
+  const beats=picks.map(r=>`${LN(r)} ${side(r).toUpperCase()}${r.line} PRA ${SH.fmt(r.price)}${r.soft!=null&&r.soft>=1?" 💰":""}`);
   const tags=["nba player props","nba props tonight","nba picks tonight","pra props","nba bets",...picks.slice(0,3).map(r=>r.name.toLowerCase()+" props")];
-  return [`YouTube title: NBA Player Props Tonight: 5 PRA Bets (${day} ${md})`,
-    `Hook: ${hook}`,`VOICEOVER (${words} words, ~${Math.round(words/150*60)} s; paste into the voice tool):`,vo,
-    `On-screen text: ${beats.join(" | ")}`,`Tags: ${tags.join(", ")}`,
-    `Description: Tonight's 5 PRA bets from the 48th State model, checked against the other books. Not a guarantee, 21+, bet responsibly. Newsletters: link in bio. #shorts #nba #nbapicks #playerprops #sportsbetting #nbabets`,
-    `Pinned comment: ${lastName(picks[0].name)} over or under tonight? Wrong answers only.`,
-    `Pronunciation: P-R-A = "P R A" (letters). Check any name the voice might butcher.`,
-    `One-liner from the rotating bank (swap it if you've used it): "${joke}"`].join("\n\n");
+  const hashtags=["#shorts","#nba","#nbapicks","#playerprops","#sportsbetting","#nbabets"];
+  return {date:TODAY,day,model:MODEL_VERSION,title:`NBA Player Props Tonight: 5 PRA Bets (${day} ${md})`,hook,voiceover,words:voiceover.split(/\s+/).length,
+    onscreen:beats,tags,description:`Tonight's 5 PRA bets from the 48th State model, checked against the other books. Not a guarantee. 21+, bet responsibly. Newsletters: link in bio. ${hashtags.join(" ")}`,
+    pinned:`${lastName(picks[0].name)} over or under tonight? Wrong answers only. 👇`,
+    tiktok:`5 PRA bets for tonight's NBA slate. ${lastName(picks[0].name)}: riding or fading? 👇 Newsletters: link in bio. #nba #nbapicks #playerprops #nbabets #sportsbetting`,
+    pronunciation:`P-R-A = "P R A" (letters). Check: ${picks.map(r=>r.name).join(", ")}`,oneLiner:joke,
+    picks:picks.map(r=>({name:r.name,team:r.team,opp:r.opp,side:side(r)==="o"?"over":"under",line:r.line,price:r.price,book:r.book,proj:+r.proj.toFixed(1),
+      chance:+r.prob.toFixed(3),market:r.mktP==null?null:+r.mktP.toFixed(3),softer:r.soft})),
+    // glitch "surveillance" = the Enemy of the State spy-feed scrambles (NBA picks Shorts only; KJ's other Shorts keep "cut");
+    // avatar = KJ in the NWA-style shades from his Oct 25 Jets rant (path relative to the OneDrive "48th State Shorts" folder)
+    build:{bg:"matrix",sport:"nba",glitch:"surveillance",avatar:"assets/kj_avatar_shades_frame.png",avatar_crop:[330,840,480],
+      palette:SHORT_PALETTES[doy%SHORT_PALETTES.length],first:SHORT_FIRST[doy%SHORT_FIRST.length],
+      tag:"NBA PROPS",headline:["5 PRA BETS",`${day.toUpperCase()} NIGHT`],
+      // real lines for the LED jumbotron and the CRT screen (never filler stats)
+      data:picks.flatMap(r=>[`${LN(r)} ${r.team} vs ${r.opp}  PRA ${side(r).toUpperCase()}${r.line}  ${SH.fmt(r.price)} ${r.book.toUpperCase()}`,
+        `${LN(r)}  PROJ ${r.proj.toFixed(1)}  CHANCE ${Math.round(r.prob*100)}%${r.mktP!=null?`  MKT ${Math.round(r.mktP*100)}%`:""}`]),
+      stats:[{title:"TONIGHT'S 5 PRA",items:picks.map(r=>[`${side(r).toUpperCase()}${r.line}`,LN(r)])}],
+      ticker:{week_label:`NBA ${day.toUpperCase()}`,badge_sub:"PRA PICKS",sport:"NBA",games:games.map(g=>({away:g.away.abbr,home:g.home.abbr,
+        line:g.homeSpread==null?"":`${g.home.abbr} ${g.homeSpread>0?"+":""}${g.homeSpread}`,total:g.total==null?"--":String(g.total)}))}}};
 }
+function shortText(d){
+  return [`YouTube title: ${d.title}`,`Hook: ${d.hook}`,`VOICEOVER (${d.words} words, ~${Math.round(d.words/150*60)} s; paste into the voice tool):`,d.voiceover,
+    `On-screen text: ${d.onscreen.join(" | ")}`,`Tags: ${d.tags.join(", ")}`,`Description: ${d.description}`,`Pinned comment: ${d.pinned}`,
+    `Pronunciation: ${d.pronunciation}`,`One-liner from the rotating bank (swap it if you've used it): "${d.oneLiner}"`,
+    `Look: Matrix meets sports, NBA, ${d.build.palette} palette, opens on ${d.build.first}, surveillance glitch, shades avatar. It lands in today's shorts.txt for make_audio.py.`].join("\n\n");
+}
+const OUT=path.join(__dirname,".out");
 async function board(games,D){
   const key=`board-${TODAY}.json`;if(cached(key,30)&&!DRY&&MODE!=="board")return;
   if(!ODDS_KEY){log("PRA board needs ODDS_API_KEY");return;}
@@ -737,7 +762,8 @@ async function board(games,D){
   if(PARLAY_DAYS.includes(etWeekday())||process.env.PARLAY_FORCE==="1")log(pl?`parlay: ${pl.n} legs, ${pl.american}, chance ${(pl.p*100).toFixed(1)}%`:`parlay: fewer than ${PARLAY_LEGS} games with a candidate leg`);
   await ntfy(`NBA PRA board ${TODAY} (${games.length} games)${pl?" + 🎯 parlay":""}`,msg+(pl?"\n\n"+parlayText(pl):""),top.length?4:2,["basketball","trophy"]);
   // the read-aloud Jackson 5 script is NFL-Sunday only now (Kamal, Oct 29); the NBA Short covers Mon/Wed/Fri
-  if(SHORT_DAYS.includes(etWeekday())||process.env.SHORT_FORCE==="1"){const one=new Set(),cands=rows.slice().sort((x,y)=>y.ev-x.ev).filter(r=>!one.has(r.key)&&one.add(r.key));const sc=shortScript(cands);   // every qualifying bet, not just the top 10, so it can reach names people know
+  if(SHORT_DAYS.includes(etWeekday())||process.env.SHORT_FORCE==="1"){const one=new Set(),cands=rows.slice().sort((x,y)=>y.ev-x.ev).filter(r=>!one.has(r.key)&&one.add(r.key));const d=shortData(cands,games),sc=d&&shortText(d);
+    if(d){fs.mkdirSync(OUT,{recursive:true});fs.writeFileSync(path.join(OUT,`short-${TODAY}.json`),JSON.stringify(d,null,1));}   // every qualifying bet, not just the top 10, so it can reach names people know
     if(sc)await ntfy(`🎬 NBA Short script: ${DAYS[etWeekday()]||etWeekday()}`,sc,3,["clapper"]);else log("Short script: fewer than 5 board picks");}
   logPicks("board",[["PRA board","prop",top]]);await publishBoard(top);
   // the parlay is logged as one pick (kind "parlay") with its legs; results/track.js grades it leg by leg

@@ -1,6 +1,7 @@
 # bot state lives in the Actions cache, never in git (the whole repo is published to Pages)
 launch-angle/.cache/
 nba-edges/.cache/
+nba-edges/.out/
 nfl-props/.cache/
 nfl-lines/.cache/
 cfb-lines/.cache/
