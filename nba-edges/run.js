@@ -666,6 +666,65 @@ function nbaLegSpeech(l){
   why.push(`We project him at ${PL.words(Math.round(l.proj))}.`);
   return {who:l.name,bet:`${over?"over":"under"} ${PL.spokenLine(l.line)} points, rebounds and assists`,why};
 }
+// ---------- NBA Short script (Mon/Wed/Fri, right after the board): 5 PRA picks in KJ's voice for the cloned-voice Short ----------
+// Format follows the 48th State Shorts scout (one-line VOICEOVER for TTS, ~110-140 words, numbers written out) and KJ's
+// voice rules (~/.claude/skills/picks-video-overlay/show-scripts/kj_voice.md): everyday NY, one or two touches ("let's be
+// real", "stop playing with me", "guy"), one dry one-liner, never "keep it a hundred", never a "lock" or a guarantee.
+const SHORT_DAYS=(process.env.SHORT_DAYS||"Mon,Wed,Fri").split(",").map(x=>x.trim());
+// fresh one-liners for the picks Shorts (not in kj_voice.md's used list); rotated by date, swap any you've used
+const SHORT_ONELINERS=[
+  "Five legs? Nah. Five separate bets. I've been hurt before.",
+  "My last parlay died on one assist. One. I still hear it at night.",
+  "I asked FanDuel for a soft line. They gave me one. Then I bet the other side.",
+  "Rebounds are the easy part. Getting paid is the hard part.",
+  "I told my bookie I'm on a heater. He said I live in Phoenix. Everybody's on a heater.",
+  "My overs hit so rarely, the under sends me a thank-you note.",
+  "I don't chase. I just jog behind it. Real slow.",
+  "Bankroll management? I manage it. Straight to zero. Very organized."];
+const lastName=n=>n.replace(/\s+(Jr\.?|Sr\.?|II|III|IV)$/i,"").split(" ").slice(-1)[0];
+function shortPicks(top){
+  // names people know first (22+ min or 18+ PRA a night), then the rest; 💰 and market-agrees picks first; max 2 a game
+  const known=r=>r.mpg>=22||r.avg>=18,pref=r=>(known(r)?4:0)+(r.soft!=null&&r.soft>=1?2:0)+(r.mktP!=null&&r.mktP>=0.5?1:0);
+  const out=[],perGame={};
+  for(const r of top.slice().sort((a,b)=>pref(b)-pref(a)||b.ev-a.ev)){if((perGame[r.gameId]||0)>=2)continue;perGame[r.gameId]=(perGame[r.gameId]||0)+1;out.push(r);if(out.length>=5)break;}
+  return out;
+}
+// a few wordings per reason, so five picks never repeat the same line
+const SHORT_WHY={
+  // "stop playing with me" only once a script: it's the punch
+  soft:[r=>`${r.book}'s ${PL.spokenLine(r.soft)} easier than everybody else. Stop playing with me.`,r=>`Every other book is ${PL.spokenLine(r.soft)} higher. Come on.`,
+    r=>`${r.book} is a step behind on this one.`,r=>`Softest number in town. We'll take it.`],
+  out:[(r,n)=>`${n} out. Somebody's eating. It's him.`,(r,n)=>`No ${n} tonight. More touches, more everything.`],
+  mins:[r=>`His minutes fell off a cliff.`,r=>`They cut his minutes, and the line didn't notice.`,r=>`He's barely playing lately. Easy.`],
+  hits:[r=>`He's cleared it in ${PL.words(r.hits)} of his last ${PL.words(r.games)}.`,r=>`${PL.words(r.hits)} of his last ${PL.words(r.games)}. You see the pattern.`],
+  proj:[r=>`We got him at ${PL.words(Math.round(r.proj))}.`,r=>`Our number says ${PL.words(Math.round(r.proj))}. Respectfully.`]};
+function shortLines(picks){
+  const used={};const take=(k,...a)=>{const i=used[k]||0;used[k]=i+1;return SHORT_WHY[k][i%SHORT_WHY[k].length](...a);};
+  return picks.map(r=>{
+    const over=r.po>=0.5,wo=r.tags.find(t=>t.startsWith("w/o "));
+    const why=r.soft!=null&&r.soft>=1?take("soft",r):wo&&over?take("out",r,wo.slice(4).split(", ").join(" and ")):
+      !over&&r.min3!=null&&r.mpg-r.min3>=4?take("mins",r):r.games>=4&&r.hits>=r.games-1?take("hits",r):take("proj",r);
+    return `${r.name}, ${over?"over":"under"} ${PL.spokenLine(r.line)}. ${why}`;
+  });
+}
+function shortScript(top){
+  const picks=shortPicks(top);if(picks.length<5)return null;
+  const day=DAYS[etWeekday()]||etWeekday(),soft=picks.some(r=>r.soft!=null&&r.soft>=1);
+  const hook=soft?`Five P-R-A bets tonight. Let's be real, the books left one wide open.`:`Five P-R-A bets tonight. Let's be real, this ${day} slate is loaded.`;
+  const doy=Math.floor((Date.parse(TODAY)-Date.parse(TODAY.slice(0,4)+"-01-01"))/864e5),joke=SHORT_ONELINERS[doy%SHORT_ONELINERS.length];
+  const vo=[hook,"Points, rebounds and assists, all combined.",...shortLines(picks),joke,`${lastName(picks[0].name)}: you riding or fading? Comments.`,
+    "Twenty-one and up, bet responsible. Newsletters, link's in the bio. We out."].join(" ");
+  const words=vo.split(/\s+/).length,md=new Date(TODAY+"T12:00:00Z").toLocaleDateString("en-US",{month:"short",day:"numeric",timeZone:"UTC"});
+  const beats=picks.map(r=>`${lastName(r.name)} ${r.po>=0.5?"o":"u"}${r.line} PRA ${SH.fmt(r.price)}${r.soft!=null&&r.soft>=1?" 💰":""}`);
+  const tags=["nba player props","nba props tonight","nba picks tonight","pra props","nba bets",...picks.slice(0,3).map(r=>r.name.toLowerCase()+" props")];
+  return [`YouTube title: NBA Player Props Tonight: 5 PRA Bets (${day} ${md})`,
+    `Hook: ${hook}`,`VOICEOVER (${words} words, ~${Math.round(words/150*60)} s; paste into the voice tool):`,vo,
+    `On-screen text: ${beats.join(" | ")}`,`Tags: ${tags.join(", ")}`,
+    `Description: Tonight's 5 PRA bets from the 48th State model, checked against the other books. Not a guarantee, 21+, bet responsibly. Newsletters: link in bio. #shorts #nba #nbapicks #playerprops #sportsbetting #nbabets`,
+    `Pinned comment: ${lastName(picks[0].name)} over or under tonight? Wrong answers only.`,
+    `Pronunciation: P-R-A = "P R A" (letters). Check any name the voice might butcher.`,
+    `One-liner from the rotating bank (swap it if you've used it): "${joke}"`].join("\n\n");
+}
 async function board(games,D){
   const key=`board-${TODAY}.json`;if(cached(key,30)&&!DRY&&MODE!=="board")return;
   if(!ODDS_KEY){log("PRA board needs ODDS_API_KEY");return;}
@@ -677,7 +736,9 @@ async function board(games,D){
   const pl=parlayOf(rows);
   if(PARLAY_DAYS.includes(etWeekday())||process.env.PARLAY_FORCE==="1")log(pl?`parlay: ${pl.n} legs, ${pl.american}, chance ${(pl.p*100).toFixed(1)}%`:`parlay: fewer than ${PARLAY_LEGS} games with a candidate leg`);
   await ntfy(`NBA PRA board ${TODAY} (${games.length} games)${pl?" + 🎯 parlay":""}`,msg+(pl?"\n\n"+parlayText(pl):""),top.length?4:2,["basketball","trophy"]);
-  if(pl){const d=etWeekday();await ntfy(`🎙 Jackson 5 script: NBA ${DAYS[d]||d}`,PL.script(pl,pl.legs.map(nbaLegSpeech),{title:`NBA ${DAYS[d]||d}`,book:pl.legs[0].book}),3,["microphone"]);}
+  // the read-aloud Jackson 5 script is NFL-Sunday only now (Kamal, Oct 29); the NBA Short covers Mon/Wed/Fri
+  if(SHORT_DAYS.includes(etWeekday())||process.env.SHORT_FORCE==="1"){const one=new Set(),cands=rows.slice().sort((x,y)=>y.ev-x.ev).filter(r=>!one.has(r.key)&&one.add(r.key));const sc=shortScript(cands);   // every qualifying bet, not just the top 10, so it can reach names people know
+    if(sc)await ntfy(`🎬 NBA Short script: ${DAYS[etWeekday()]||etWeekday()}`,sc,3,["clapper"]);else log("Short script: fewer than 5 board picks");}
   logPicks("board",[["PRA board","prop",top]]);await publishBoard(top);
   // the parlay is logged as one pick (kind "parlay") with its legs; results/track.js grades it leg by leg
   if(pl)logPicks("board",[["parlay","parlay",[{kind:"parlay",key:"parlay",gameId:"multi",stat:String(pl.n),name:`${pl.n}-leg PRA parlay`,
