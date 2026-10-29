@@ -172,6 +172,16 @@ College football spreads and totals. **`cfb-lines/README.md` is the full referen
 - **Weekly review:** every sent pick is logged with its context and graded on Mondays (CLV first) into `cfb/` on
   `bot-results`. **Read `cfb-lines/LEARNINGS.md` before changing the model,** and bump `MODEL_VERSION` when you do.
 
+## SEO (added 2026-10-29)
+
+`scripts/seo.js` runs in the deploy job before the Pages upload. It edits only the checked-out copy, never the repo:
+- post `<title>`s lead with the post's `<h1>` headline instead of the date
+- canonical URLs (`posts/latest.html` points at its dated post), Open Graph/Twitter tags, NewsArticle JSON-LD
+- writes `sitemap.xml` (not committed; it only exists on the live site)
+
+So the daily routine needs no SEO changes, and the newsletter trigger is unaffected. The homepage `<h1>` is `.sr-only` (hidden on screen).
+Known limits: robots.txt can't work on a github.io project site (it must sit at the domain root), and the 7-day post retention means old posts drop out of Google.
+
 ## Conventions and lessons (apply to every bot here)
 
 1. **Dry runs must never mark alerts as sent.** Only write the "sent" state when `!DRY_RUN && NTFY_TOPIC`.
