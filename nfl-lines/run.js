@@ -171,7 +171,7 @@ async function tick(){
   const nEdges=blocks.reduce((a,b)=>a+b.edges.length,0),nStale=blocks.reduce((a,b)=>a+b.stale,0),src=[...new Set(Object.values(L).map(x=>x.src))].join(", ");
   const title=`${etParts(new Date(kick)).wd} ${etClock(new Date(kick))} ET lines: ${nEdges} edge${nEdges===1?"":"s"}${OD?`, ${nStale} stale`:""} (${games.length} game${games.length>1?"s":""})`;
   const early=CFG.MODEL_EDGES&&week<CFG.MIN_WEEK?`Week ${week}: numbers only, no edges flagged until week ${CFG.MIN_WEEK}.\n\n`:"";
-  const msg=early+blocks.map(b=>b.text).join("\n\n")+`\n\nLines: ${src||"none"}. Model numbers are info only (no proven edge vs closing lines; ✅ off). 💰 = your book vs Pinnacle's fair price.`;
+  const msg=early+blocks.map(b=>b.text).join("\n\n")+`\n\nLines: ${src||"none"}. Model numbers are info only (no proven edge vs closing lines; ✅ off). 💰 = your book vs ${odds.provider==="sgo"?"the market no-vig price (SportsGameOdds consensus; no Pinnacle on its free tier)":"Pinnacle's fair price"}.`;
   summary(`## ${title}\n\n\`\`\`\n${msg}\n\`\`\`\n`);
   const ok=await ntfy(title,msg,nEdges||nStale?4:3,["football","moneybag"],RUN_URL);
   if(LIVE&&ok&&MODE==="auto"){sent[kick]=true;writeState(`sent-${S}.json`,sent);}

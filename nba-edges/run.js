@@ -189,11 +189,11 @@ async function injuries(g){
   return out;
 }
 // ---------- prop lines and prices (The Odds API, optional ODDS_API_KEY) ----------
-// The key is shared with the NFL bots and on the free tier (500 credits/month), so this bot keeps its own monthly
-// budget (NBA_ODDS_BUDGET) and stops while NBA_ODDS_RESERVE credits are still left on the key for the NFL bots.
+// The key is on the free tier (500 credits/month). Since 2026-10-29 the NFL bots use SportsGameOdds (NFL_ODDS=sgo), so
+// the key is this bot's; it still keeps a monthly budget (NBA_ODDS_BUDGET) and stops at NBA_ODDS_RESERVE left.
 // A call costs (markets x regions); asking for <= 10 named bookmakers counts as one region. By default only PRA is
 // pulled (Kamal's main bet, 1 credit a game); NBA_PROP_MARKETS=pra,pts,reb,ast,fg3m pulls everything (5 a game).
-const ODDS_BUDGET=+(process.env.NBA_ODDS_BUDGET||150),ODDS_RESERVE=+(process.env.NBA_ODDS_RESERVE||100);
+const ODDS_BUDGET=+(process.env.NBA_ODDS_BUDGET||450),ODDS_RESERVE=+(process.env.NBA_ODDS_RESERVE||25);
 const MKT_OF={pra:"player_points_rebounds_assists",pts:"player_points",reb:"player_rebounds",ast:"player_assists",fg3m:"player_threes"};
 const PROP_MARKETS=(process.env.NBA_PROP_MARKETS||"pra").split(",").map(s=>s.trim()).filter(s=>MKT_OF[s]);
 const MKT=Object.fromEntries(PROP_MARKETS.map(s=>[MKT_OF[s],s]));

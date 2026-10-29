@@ -105,7 +105,21 @@ Read the "right side" column carefully. It's measured against a naive recent ave
 already correct for most of that pull back toward the typical result, so the edge against real lines will be much smaller.
 That's why the optional Odds API mode exists.
 
-## Prop lines (optional): The Odds API
+## Prop and game lines: SportsGameOdds (default since 2026-10-29)
+
+With the repo Variable `NFL_ODDS=sgo` and the secret `SPORTSGAMEODDS_KEY`, both NFL bots take every line and price from
+SportsGameOdds (`odds-sgo.js`, same exports as `odds.js`), and the Odds API key is left to nba-edges.
+- **Free "Amateur" tier:** 2,500 entities a month; one entity per game returned. One fetch of the week's slate (~15 games)
+  costs ~15, and each run reuses it for `SGO_TTL_MIN` (30) minutes. The bot stops at `SGO_RESERVE` (100) left, read from
+  `/account/usage` (logged each run as "SportsGameOdds entities").
+- **Books:** FanDuel, DraftKings, BetMGM, Caesars, ESPN BET, Bovada, Unibet, PointsBet, William Hill. **No Pinnacle** on
+  the free tier, so the 💰 stale-price check falls back to SGO's own no-vig consensus (book `consensus`, "Market no-vig
+  (SGO)"), which `sharp.js` adds only when `NFL_ODDS=sgo`. It's weaker than a sharp book: it catches your book lagging
+  the market, not the market being wrong.
+- **Probe:** run the workflow with `mode=oddsprobe` to see usage, books and a sample prop from the key.
+- `NFL_ODDS` unset (or anything but `sgo`) goes back to The Odds API below.
+
+## Prop lines (alternative): The Odds API
 
 1. Get a free key at the-odds-api.com. The free tier is 500 credits a month.
 2. Add it as the repo secret `ODDS_API_KEY`.

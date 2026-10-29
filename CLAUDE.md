@@ -118,7 +118,9 @@ It's served by GitHub Pages from `main`.
 
 **`nfl-props/README.md` is the full reference.** In short:
 - **Data:** nflverse (play-by-play, snaps, FTN, participation, rosters, depth charts, injuries, schedule with lines),
-  Sleeper injury status, Open-Meteo, and optionally The Odds API (`ODDS_API_KEY`, with a monthly credit budget).
+  Sleeper injury status, Open-Meteo, and sportsbook lines from SportsGameOdds (`NFL_ODDS=sgo` + `SPORTSGAMEODDS_KEY`,
+  free 2,500 entities/month, no Pinnacle; `nfl-props/odds-sgo.js`, used by both NFL bots). The Odds API (`ODDS_API_KEY`,
+  free 500 credits/month) is now nba-edges' alone.
 - **Model:** opportunity (snap share × share per snap, plus redistribution when a teammate is out) × matchup
   (defense by position, man/zone, pressure vs. the offensive line, blitz, stacked box) × environment (implied total,
   game script, wind/rain).
