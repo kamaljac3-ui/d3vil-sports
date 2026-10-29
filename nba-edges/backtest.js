@@ -102,13 +102,18 @@ async function replay(season){
       const espnAbbr=g[side],box=g.b.box[espnAbbr]||[],played=new Map(box.filter(x=>!x.dnp&&x.min>0).map(x=>[R.nk(x.name),x]));
       // roster: everyone in the box + everyone who has appeared for this team; one of them who didn't play is "out"
       // (model.outBoost then counts only regulars). Stat averages stay the snapshot's.
-      const T=teams[espnAbbr]||(teams[espnAbbr]={apps:{}});
+      const T=teams[espnAbbr]||(teams[espnAbbr]={apps:{},mins:{},lastIdx:{},n:0});
       const keys=new Set([...box.map(x=>R.nk(x.name)),...Object.keys(T.apps)]);
-      const team=[...keys].filter(k=>D.players[k]).map(k=>({...D.players[k],team:G[side].abbr,gpCur:T.apps[k]||0}));
+      let team=[...keys].filter(k=>D.players[k]).map(k=>({...D.players[k],team:G[side].abbr,gpCur:T.apps[k]||0}));
       const cd=new Set(box.filter(x=>x.dnp&&/coach/i.test(x.reason)).map(x=>R.nk(x.name)));
       const out=new Set(team.filter(p=>!played.has(p.key)&&!cd.has(p.key)).map(p=>p.key));
+      // last-3 minutes, first game back, returning star (model.recentInputs), from this team's earlier box scores
+      const hist={};for(const p of team)hist[p.key]={mins:T.mins[p.key]||[],missed:T.lastIdx[p.key]!=null?T.n-1-T.lastIdx[p.key]:0,gp:T.apps[p.key]||0};
+      team=M.recentInputs(team,hist,out);
       sides.push({season,date:g.date,G,side,D,team,out,played,hasLine:G.total!=null});
-      for(const k of played.keys()){if(lastTeam[k]&&lastTeam[k]!==espnAbbr)delete teams[lastTeam[k]].apps[k];lastTeam[k]=espnAbbr;T.apps[k]=(T.apps[k]||0)+1;}
+      for(const [k,x] of played){if(lastTeam[k]&&lastTeam[k]!==espnAbbr){const o=teams[lastTeam[k]];delete o.apps[k];delete o.mins[k];delete o.lastIdx[k];}
+        lastTeam[k]=espnAbbr;T.apps[k]=(T.apps[k]||0)+1;(T.mins[k]=T.mins[k]||[]).push(x.min);T.lastIdx[k]=T.n;}
+      T.n++;
     }
   }
   log(`${season}: ${sides.length} team-games collected`);
@@ -123,7 +128,7 @@ function score(sides,outOpts,minProj=20){
       const a=x.played.get(p.key)||null;   // null = coach's-decision DNP (a bet on him would be void)
       const f=flags.filter(r=>r.key===p.key);
       recs.push({season:x.season,date:x.date,name:p.name,team:S.me,opp:S.opp,hasLine:x.hasLine,outCount:S.tags.some(t=>t.startsWith("w/o")),
-        p:{MIN:p.MIN,MIN10:p.MIN10,PTS:p.PTS,REB:p.REB,AST:p.AST,PRA:p.PRA,FG3M:p.FG3M,FTM:p.FTM,gpCur:p.gpCur},
+        p:{MIN:p.MIN,MIN10:p.MIN10,MIN3:p.MIN3,back:p.back,starBack:p.starBack,PTS:p.PTS,REB:p.REB,AST:p.AST,PRA:p.PRA,FG3M:p.FG3M,FTM:p.FTM,gpCur:p.gpCur},
         zone:zone&&{ptsFactor:zone.ptsFactor,threesFactor:zone.threesFactor,delta:zone.delta},ctx:S.ctx,boost,pr,prc:Object.fromEntries(STATS.map(s=>[s,M.calibrate(s,pr[s],p[AVG[s]],p.MIN)])),
         act:a&&{min:a.min,pts:a.pts,reb:a.reb,ast:a.ast,pra:a.pts+a.reb+a.ast,fg3m:a.fg3m},
         zoneFlag:f.some(r=>r.kind==="zone"),boostFlags:f.filter(r=>r.kind==="boost").map(r=>r.stat)});
@@ -174,6 +179,8 @@ const VARIANTS={
   "calibrated (what alerts use)":r=>r.prc,
   "without shot zones":r=>M.project(r.p,{...r.ctx,boost:r.boost,zone:null}),
   "without last-10 minutes":r=>M.project({...r.p,MIN10:undefined},{...r.ctx,boost:r.boost,zone:r.zone}),
+  "without last-3 minutes":r=>M.project({...r.p,MIN3:null},{...r.ctx,boost:r.boost,zone:r.zone}),
+  "without return factors (back / star back)":r=>M.project({...r.p,back:0,starBack:false},{...r.ctx,boost:r.boost,zone:r.zone}),
   "without game total / pace":r=>M.project(r.p,{...r.ctx,boost:r.boost,zone:r.zone,env:1}),
   "without opponent REB/AST allowed":r=>M.project(r.p,{...r.ctx,boost:r.boost,zone:r.zone,oppReb:1,oppAst:1}),
   "without blowout minutes":r=>M.project(r.p,{...r.ctx,boost:r.boost,zone:r.zone,spread:null,blowout:false}),

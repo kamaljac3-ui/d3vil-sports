@@ -54,12 +54,34 @@ function blowoutFactor(pl,ctx){
   if(s>=BLOW.dogSpread)return pl.MIN>=20?BLOW.dogRotation:BLOW.dogBench;
   return 1;
 }
+// Minutes and returns, fit 2026-10-29 on the 2024-26 box scores (fit 2024-25, checked 2025-26):
+//  - projected minutes = 0.26 season + 0.15 last-10 + 0.60 last-3 games played (MINW). The old 50/50 season/last-10 blend
+//    missed recent role changes: players 4+ min up over their last 3 came in +2.4/+3.0 PRA vs the projection, 4+ down
+//    -2.5/-2.9; with the new weights +0.5/-0.25. PRA error out of sample 8.18 -> 7.93 (the plain average is 8.39).
+//  - first game back after missing 3+ straight: x0.894 (0.916 / 0.873; unders 66% in 2025-26). Games 2-3 back need
+//    nothing once last-3 minutes are in.
+//  - teammates of a 30+ PRA regular returning from 2+ missed games: x0.922 (0.909 / 0.933; unders 57%), because their
+//    recent numbers were built while he sat.
+const MINW={season:+(process.env.MINW_SEASON||0.262),l10:+(process.env.MINW_L10||0.151),l3:+(process.env.MINW_L3||0.595)};
+const RET={backAfter:+(process.env.RET_BACK_AFTER||3),back1:+(process.env.RET_BACK1||0.894),
+  starPRA:+(process.env.RET_STAR_PRA||30),starAfter:+(process.env.RET_STAR_AFTER||2),starBack:+(process.env.RET_STAR_BACK||0.922)};
+// team: player objects; hist[key] = {mins: minutes in his games for this team (oldest first), missed: team games missed
+// in a row right before tonight, gp: games for this team}; out: Set of keys ruled out tonight. Returns copies with
+// MIN3 (avg of his last 3 games, 2+ needed), back (1 = first game back) and starBack (a returning star teammate).
+function recentInputs(team,hist,out=new Set()){
+  const h=k=>hist[k]||null,mean=a=>a.reduce((s,x)=>s+x,0)/a.length;
+  const stars=team.filter(p=>{const x=h(p.key);return x&&!out.has(p.key)&&x.gp>=3&&x.missed>=RET.starAfter&&p.MIN>=20&&(p.PRA||0)>=RET.starPRA;}).map(p=>p.key);
+  return team.map(p=>{const x=h(p.key),m=x?x.mins.slice(-3):[];
+    return {...p,MIN3:m.length>=2?mean(m):null,back:x&&x.gp>=3&&x.missed>=RET.backAfter?1:0,starBack:stars.some(k=>k!==p.key)};});
+}
 function project(pl,ctx){
-  const min=pl.MIN10?0.5*pl.MIN+0.5*pl.MIN10:pl.MIN;
-  const minF=(pl.MIN?min/pl.MIN:1)*blowoutFactor(pl,ctx);
+  // last-3 minutes when known (recentInputs), else the old season/last-10 blend
+  const min=pl.MIN3!=null?MINW.season*pl.MIN+MINW.l10*(pl.MIN10||pl.MIN)+MINW.l3*pl.MIN3:pl.MIN10?0.5*pl.MIN+0.5*pl.MIN10:pl.MIN;
+  const ret=(pl.back?RET.back1:1)*(pl.starBack&&!pl.back?RET.starBack:1);
+  const minF=(pl.MIN?min/pl.MIN:1)*blowoutFactor(pl,ctx)*ret;
   const z=ctx.zone||{ptsFactor:1,threesFactor:1},e=ctx.env||1,b=ctx.boost||{pts:1,reb:1,ast:1};
   const pts=((pl.PTS-pl.FTM)*z.ptsFactor+pl.FTM)*minF*e*b.pts,reb=pl.REB*minF*(ctx.oppReb||1)*b.reb,ast=pl.AST*minF*(ctx.oppAst||1)*e*b.ast;
-  return {min:min*blowoutFactor(pl,ctx),pts,reb,ast,fg3m:pl.FG3M*z.threesFactor*minF*e*b.pts,pra:pts+reb+ast};
+  return {min:min*blowoutFactor(pl,ctx)*ret,pts,reb,ast,fg3m:pl.FG3M*z.threesFactor*minF*e*b.pts,pra:pts+reb+ast};
 }
 // Calibration, fit by backtest.js on 2024-26 (rerun it and paste its "CAL" line here after a model change):
 //  k     - starters (20+ MPG) get only k of the projection's gap from their average (the gap showed up at 0.6-0.8x;
@@ -68,9 +90,9 @@ function project(pl,ctx){
 //  a,b   - real spread of the stat around that projection: sd = a + b*sqrt(proj). The old fixed spreads were ~2/3 of
 //          the real one in the 8-20 pt range, which made 60% spots look like 85-90%.
 const CAL=process.env.NBA_CAL?JSON.parse(process.env.NBA_CAL):{
-  pra:{k:0.689,m:10.618,beta:0.95,a:3.563,b:1.065},pts:{k:0.672,m:8.482,beta:0.938,a:1.504,b:1.406},
-  reb:{k:0.541,m:2.079,beta:0.939,a:-0.046,b:1.243},ast:{k:0.566,m:2.156,beta:0.938,a:-0.04,b:1.174},
-  fg3m:{k:0.548,m:1.12,beta:0.907,a:-0.081,b:1.164}};
+  pra:{k:0.767,m:7.234,beta:0.964,a:2.928,b:1.167},pts:{k:0.744,m:7.705,beta:0.951,a:1.26,b:1.45},
+  reb:{k:0.673,m:1.683,beta:0.942,a:-0.046,b:1.227},ast:{k:0.725,m:1.978,beta:0.944,a:-0.045,b:1.166},
+  fg3m:{k:0.645,m:1.089,beta:0.909,a:-0.08,b:1.159}};
 function calibrate(stat,proj,avg,mpg,cal=CAL){
   const c=cal[stat];if(!c||!(avg>=0))return proj;
   const p=mpg>=20?avg+c.k*(proj-avg):proj;
@@ -87,11 +109,11 @@ const pOver=(proj,line,stat,cal=CAL)=>1-Phi((line-proj)/sdOf(stat,proj,cal));
 //  mode "minutes" (default): the out players' minutes go to the rest of the rotation weighted by MIN x (MAX_MIN - MIN),
 //    so bench/rotation players with room absorb most of it and 36-minute starters little; each player's minutes
 //    factor is scaled by minScale. On top of that, per-minute production rises by usage x (share of that stat the
-//    team lost). Both fit by backtest.js on 2024-25: minScale 0.25, usage 0.15 (with box-score rosters; usage 0 was a
-//    hair better on 2025-26, 0.9930 vs 0.9937, so the usage bump is marginal). 0.5+ minutes or 0.3+ usage overshoot.
+//    team lost). Both fit by backtest.js on 2024-25: minScale 0.25, usage 0 (2026-10-29, with last-3 minutes in the
+//    projection; before that usage 0.15 won by a hair). 0.5+ minutes or 0.3+ usage overshoot.
 //  mode "uniform": the original rule (everyone +70% x lost/remaining, capped at +25%); the 2024-26 backtest showed
 //    it overshoots ~5x, kept only so the backtest can compare.
-const OUT_OPTS={mode:process.env.NBA_OUT_MODE||"minutes",minScale:+(process.env.NBA_OUT_MIN_SCALE||0.25),usage:+(process.env.NBA_OUT_USAGE||0.15),maxMin:36,
+const OUT_OPTS={mode:process.env.NBA_OUT_MODE||"minutes",minScale:+(process.env.NBA_OUT_MIN_SCALE||0.25),usage:+(process.env.NBA_OUT_USAGE||0),maxMin:36,
   // bench (under 20 MPG) share of a missing teammate's minutes: 0.25 picked on 2024-25 (0.5 tied there and was better on 2025-26)
   benchScale:+(process.env.NBA_OUT_BENCH_SCALE||0.25)};
 function outBoost(team,outKeys,teamGP,opts={}){
@@ -117,4 +139,4 @@ function outBoost(team,outKeys,teamGP,opts={}){
   }};
 }
 
-module.exports={ZONES,zonesFromRow,leagueZones,zoneMatchup,project,BLOW,blowoutFactor,calibrate,sdOf,pOver,outBoost,clamp,CAL};
+module.exports={ZONES,zonesFromRow,leagueZones,zoneMatchup,project,MINW,RET,recentInputs,BLOW,blowoutFactor,calibrate,sdOf,pOver,outBoost,clamp,CAL};

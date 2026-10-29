@@ -6,7 +6,7 @@ NBA matchup alerts sent to ntfy: per-game stat projections (projection boosts, a
 
 - **Shot-zone matchups:** the player's per-game FGA and FG% by zone (rim, paint, mid-range, left/right corner 3, above-the-break 3), with FG% shrunk by 30 league-average attempts. Each zone is weighted by how well the opponent defends it (opponent-allowed FG% ÷ league) and how often they allow it (√ of zone-share ÷ league). Both factors are clamped to 0.85–1.15. The output is points gained or lost from the shot mix.
 - **Projections** for PTS, REB, AST and 3PM start from the season average and apply:
-  - minutes: 50/50 season and last-10
+  - minutes (2026-10-29): 0.26 season + 0.15 last-10 + 0.60 last-3 games played (`MINW_*`, from this team's box scores via `teamFor`/`model.recentInputs`); the old 50/50 season/last-10 blend when there aren't 2 recent games. First game back after missing 3+ straight ×0.894, and teammates of a returning 30+ PRA regular (missed 2+) ×0.922 (`RET_*`). Out of sample this took PRA error vs the plain average from −3.0% to −6.5%
   - the zone factor
   - scoring environment: implied team total from the ESPN total/spread ÷ team PPG, or opponent pace
   - opponent rebounds and assists allowed ÷ league

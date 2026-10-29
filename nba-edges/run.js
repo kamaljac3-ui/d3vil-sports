@@ -25,7 +25,7 @@ const P_MIN=+(process.env.P_MIN||0.58);           // model over/under probabilit
 const PREGAME_MIN=+(process.env.PREGAME_MIN||90);
 const CLOSE_LINES=process.env.CLOSE_LINES!=="0",CLOSE_WINDOW=+(process.env.CLOSE_WINDOW||45);  // closing-line capture, see captureCloses
 // tagged on every logged pick so results/track.js can grade each model version separately; bump it on any model change
-const MODEL_VERSION=process.env.MODEL_VERSION||"2026-10-29-board";
+const MODEL_VERSION=process.env.MODEL_VERSION||"2026-10-29-minutes";
 const ABS_MIN={pra:3,pts:2,reb:1,ast:1,fg3m:0.5};
 // PRA (points + rebounds + assists) first: it's Kamal's main bet. Its average is the PRA field (withPRA below).
 const STATS=["pra","pts","reb","ast","fg3m"],AVG={pra:"PRA",pts:"PTS",reb:"REB",ast:"AST",fg3m:"FG3M"},LABEL={pra:"PRA",pts:"PTS",reb:"REB",ast:"AST",fg3m:"3PM"};
@@ -419,8 +419,29 @@ async function h2hOf(g,D,key){
   if(!p||v.length<2)return null;
   return {n:v.length,diff:Math.round((v.reduce((a,x)=>a+x,0)/v.length-p.PRA)*10)/10};
 }
-async function sideRows(g,side,D,outKeys,lines){
+// This team's earlier games this season -> {key: {mins, missed, gp}} for model.recentInputs (last-3 minutes, first game
+// back, returning star). Built from the cached box scores (boxScore), the same way backtest.js does it.
+const HIST={};
+async function teamHist(espnAbbr,before){
+  const id=espnAbbr+"|"+String(before).slice(0,10);if(HIST[id])return HIST[id];
+  const {games}=await ratings(),list=games.filter(x=>(x.home===espnAbbr||x.away===espnAbbr)&&x.date<before&&x.id);
+  const h={};let n=0;
+  for(const m of list){
+    const b=await boxScore(m.id),mine=b&&b[espnAbbr];if(!mine)continue;
+    for(const p of mine){if(!(p.min>0))continue;const k=nk(p.name),x=h[k]||(h[k]={mins:[],last:-1,gp:0});x.mins.push(p.min);x.last=n;x.gp++;}
+    n++;
+  }
+  for(const k in h)h[k].missed=n-1-h[k].last;
+  return HIST[id]=h;
+}
+// one side's roster as model inputs (exported: nba-news projects with it too, so its numbers match the board's)
+async function teamFor(g,side,D,outKeys=new Set()){
   const team=(await roster(g[side].espnId)).map(n=>D.players[nk(n)]).filter(Boolean);
+  let h={};try{h=await teamHist(g[side].espnAbbr,g.date);}catch(e){log("recent minutes skipped:",e.message);}
+  return M.recentInputs(team,h,outKeys);
+}
+async function sideRows(g,side,D,outKeys,lines){
+  const team=await teamFor(g,side,D,outKeys);
   const S=projectSide(team,g,side,D,outKeys),rows=flagRows(S,lines),rest=await restOf(g,side);
   // every projected player's calibrated numbers, for the model column next to a 💰 price
   rows.proj=Object.fromEntries(S.players.map(x=>[x.p.key,Object.fromEntries(STATS.map(st=>[st,M.calibrate(st,x.pr[st],x.p[AVG[st]],x.p.MIN)]))]));
@@ -627,7 +648,7 @@ async function probe(){
     catch(e){log(`FAIL ${n}: ${e.message}`);}}
 }
 // require()d by backtest.js for the stats fetch and the scoring; only runs the bot when started directly
-module.exports={nba,nbaSeason,blend,projectSide,flagRows,evRows,evMessage,nk,ESPN_TO_NBA,loadData,slate,roster,TODAY,SETTINGS:{ZONE_MIN,BOOST_MIN,ABS_MIN,P_MIN,STATS,AVG}};
+module.exports={nba,nbaSeason,blend,projectSide,flagRows,teamFor,evRows,evMessage,nk,ESPN_TO_NBA,loadData,slate,roster,TODAY,SETTINGS:{ZONE_MIN,BOOST_MIN,ABS_MIN,P_MIN,STATS,AVG}};
 if(require.main===module)(async()=>{
   if(MODE==="probe")return probe();
   if(MODE==="snapshot")return snapshot();

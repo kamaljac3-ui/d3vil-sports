@@ -8,28 +8,28 @@ Generated 2026-10-29 by `node nba-edges/backtest.js`. The bot's own scoring code
 
 ## Teammate-out settings
 
-Squared error relative to the plain season average, averaged over PTS/REB/AST (**below 1.000 = the projection beats the average**; squared error because box scores are right-skewed and average-miss rewards the median). "Slope" is got ÷ said for points in games where someone was out (1 = right size). "Games with someone out" is the subset where the rule actually does anything. Picked on 2024-25: **minutes 0.25, usage 0.15**.
+Squared error relative to the plain season average, averaged over PTS/REB/AST (**below 1.000 = the projection beats the average**; squared error because box scores are right-skewed and average-miss rewards the median). "Slope" is got ÷ said for points in games where someone was out (1 = right size). "Games with someone out" is the subset where the rule actually does anything. Picked on 2024-25: **minutes 0.25, usage 0**.
 
 | Setting | 2024-25 all | 2024-25 someone out | 2024-25 slope | 2025-26 all | 2025-26 someone out | 2025-26 slope |
 |---|---:|---:|---:|---:|---:|---:|
-| old rule (everyone +70% × lost/remaining) | 1.0221 | 1.0326 | 0.42 | 1.0282 | 1.0413 | 0.33 |
-| none | 0.9993 | 0.9981 | 0.43 | 0.9967 | 0.9942 | 0.60 |
-| minutes 0.25, usage 0 | 0.9940 | 0.9901 | 0.76 | 0.9946 | 0.9910 | 0.78 |
-| **minutes 0.25, usage 0.15** | 0.9928 | 0.9884 | 0.78 | 0.9959 | 0.9931 | 0.71 |
-| minutes 0.25, usage 0.3 | 0.9959 | 0.9931 | 0.68 | 1.0014 | 1.0012 | 0.58 |
-| minutes 0.25, usage 0.5 | 1.0066 | 1.0094 | 0.54 | 1.0149 | 1.0214 | 0.44 |
-| minutes 0.5, usage 0 | 0.9963 | 0.9936 | 0.69 | 0.9999 | 0.9990 | 0.63 |
-| minutes 0.5, usage 0.15 | 0.9999 | 0.9991 | 0.63 | 1.0062 | 1.0084 | 0.54 |
-| minutes 0.5, usage 0.3 | 1.0082 | 1.0117 | 0.55 | 1.0170 | 1.0246 | 0.44 |
-| minutes 0.5, usage 0.5 | 1.0266 | 1.0395 | 0.45 | 1.0384 | 1.0564 | 0.34 |
-| minutes 0.75, usage 0 | 1.0062 | 1.0087 | 0.56 | 1.0126 | 1.0180 | 0.48 |
-| minutes 0.75, usage 0.15 | 1.0153 | 1.0224 | 0.50 | 1.0245 | 1.0358 | 0.41 |
-| minutes 0.75, usage 0.3 | 1.0295 | 1.0439 | 0.44 | 1.0414 | 1.0610 | 0.34 |
-| minutes 0.75, usage 0.5 | 1.0564 | 1.0846 | 0.37 | 1.0715 | 1.1059 | 0.28 |
-| minutes 1, usage 0 | 1.0237 | 1.0352 | 0.46 | 1.0328 | 1.0481 | 0.38 |
-| minutes 1, usage 0.15 | 1.0389 | 1.0582 | 0.41 | 1.0509 | 1.0752 | 0.32 |
-| minutes 1, usage 0.3 | 1.0598 | 1.0896 | 0.37 | 1.0745 | 1.1104 | 0.28 |
-| minutes 1, usage 0.5 | 1.0963 | 1.1446 | 0.31 | 1.1142 | 1.1697 | 0.23 |
+| old rule (everyone +70% × lost/remaining) | 1.0171 | 1.0314 | 0.45 | 1.0100 | 1.0269 | 0.44 |
+| none | 0.9826 | 0.9793 | 0.69 | 0.9715 | 0.9694 | 0.83 |
+| **minutes 0.25, usage 0** | 0.9805 | 0.9761 | 0.73 | 0.9713 | 0.9691 | 0.82 |
+| minutes 0.25, usage 0.15 | 0.9816 | 0.9778 | 0.70 | 0.9741 | 0.9733 | 0.75 |
+| minutes 0.25, usage 0.3 | 0.9872 | 0.9863 | 0.63 | 0.9810 | 0.9837 | 0.65 |
+| minutes 0.25, usage 0.5 | 1.0016 | 1.0082 | 0.53 | 0.9969 | 1.0074 | 0.52 |
+| minutes 0.5, usage 0 | 0.9867 | 0.9856 | 0.64 | 0.9790 | 0.9807 | 0.69 |
+| minutes 0.5, usage 0.15 | 0.9932 | 0.9954 | 0.59 | 0.9872 | 0.9929 | 0.61 |
+| minutes 0.5, usage 0.3 | 1.0046 | 1.0127 | 0.53 | 1.0000 | 1.0119 | 0.52 |
+| minutes 0.5, usage 0.5 | 1.0275 | 1.0473 | 0.44 | 1.0242 | 1.0482 | 0.42 |
+| minutes 0.75, usage 0 | 1.0012 | 1.0076 | 0.54 | 0.9947 | 1.0041 | 0.56 |
+| minutes 0.75, usage 0.15 | 1.0139 | 1.0267 | 0.49 | 1.0089 | 1.0253 | 0.49 |
+| minutes 0.75, usage 0.3 | 1.0319 | 1.0539 | 0.44 | 1.0282 | 1.0542 | 0.42 |
+| minutes 0.75, usage 0.5 | 1.0644 | 1.1030 | 0.38 | 1.0620 | 1.1045 | 0.35 |
+| minutes 1, usage 0 | 1.0242 | 1.0423 | 0.46 | 1.0183 | 1.0394 | 0.46 |
+| minutes 1, usage 0.15 | 1.0436 | 1.0717 | 0.41 | 1.0393 | 1.0707 | 0.40 |
+| minutes 1, usage 0.3 | 1.0691 | 1.1100 | 0.37 | 1.0659 | 1.1104 | 0.35 |
+| minutes 1, usage 0.5 | 1.1123 | 1.1752 | 0.32 | 1.1101 | 1.1764 | 0.29 |
 
 The sections below use the picked setting.
 
@@ -41,11 +41,11 @@ The sections below use the picked setting.
 
 | Flag | Picks | Beat their average | Model said (avg gain) | Actually got | Got ÷ said |
 |---|---:|---:|---:|---:|---:|
-| Projection boost: PRA | 191 | 74.3% | +3.93 | **+6.25** | 1.59 |
-| Projection boost: PTS | 235 | 66.8% | +2.60 | **+3.53** | 1.36 |
-| Projection boost: REB | 24 | 75.0% | +1.23 | **+3.06** | 2.48 |
-| Projection boost: AST | 9 | 66.7% | +1.11 | **+1.99** | 1.79 |
-| Projection boost: 3PM | 1 | 100.0% | +0.65 | **+0.10** | 0.15 |
+| Projection boost: PRA | 702 | 68.9% | +4.11 | **+4.79** | 1.16 |
+| Projection boost: PTS | 527 | 65.3% | +2.70 | **+3.51** | 1.30 |
+| Projection boost: REB | 148 | 62.8% | +1.38 | **+1.96** | 1.42 |
+| Projection boost: AST | 81 | 64.2% | +1.23 | **+1.36** | 1.11 |
+| Projection boost: 3PM | 24 | 62.5% | +0.58 | **+1.06** | 1.82 |
 | *(no flag) everyone in this group, PRA* | 15,317 | 48.7% | – | +0.19 | – |
 | *(no flag) everyone in this group, PTS* | 15,317 | 47.8% | – | +0.16 | – |
 | *(no flag) everyone in this group, REB* | 15,317 | 45.0% | – | -0.02 | – |
@@ -56,61 +56,71 @@ The sections below use the picked setting.
 
 | Model | Stat | Player-games | Avg miss, plain average | Avg miss, projection | Squared error vs plain average | Slope (1 = right size, 0 = noise) |
 |---|---|---:|---:|---:|---:|---:|
-| full model | PRA | 15,317 | 6.834 | 6.799 | -1.9% | 0.72 ± 0.04 |
-| full model | PTS | 15,317 | 5.377 | 5.374 | -1.2% | 0.71 ± 0.05 |
-| full model | REB | 15,317 | 2.066 | 2.078 | -0.2% | 0.54 ± 0.05 |
-| full model | AST | 15,317 | 1.585 | 1.589 | -0.8% | 0.60 ± 0.04 |
-| full model | 3PM | 15,317 | 1.062 | 1.068 | -0.3% | 0.61 ± 0.07 |
-| calibrated (what alerts use) | PRA | 15,317 | 6.834 | 6.757 | -2.6% | 1.10 ± 0.05 |
-| calibrated (what alerts use) | PTS | 15,317 | 5.377 | 5.345 | -1.8% | 0.99 ± 0.06 |
-| calibrated (what alerts use) | REB | 15,317 | 2.066 | 2.052 | -1.2% | 1.17 ± 0.09 |
-| calibrated (what alerts use) | AST | 15,317 | 1.585 | 1.575 | -1.9% | 1.12 ± 0.06 |
-| calibrated (what alerts use) | 3PM | 15,317 | 1.062 | 1.065 | -1.0% | 1.24 ± 0.10 |
-| without shot zones | PRA | 15,317 | 6.834 | 6.803 | -2.0% | 0.77 ± 0.04 |
-| without shot zones | PTS | 15,317 | 5.377 | 5.374 | -1.3% | 0.79 ± 0.05 |
-| without shot zones | REB | 15,317 | 2.066 | 2.078 | -0.2% | 0.54 ± 0.05 |
-| without shot zones | AST | 15,317 | 1.585 | 1.589 | -0.8% | 0.60 ± 0.04 |
-| without shot zones | 3PM | 15,317 | 1.062 | 1.067 | -0.5% | 0.79 ± 0.08 |
-| without last-10 minutes | PRA | 15,317 | 6.834 | 6.803 | -1.7% | 0.72 ± 0.04 |
-| without last-10 minutes | PTS | 15,317 | 5.377 | 5.376 | -1.1% | 0.70 ± 0.05 |
-| without last-10 minutes | REB | 15,317 | 2.066 | 2.080 | 0.0% | 0.49 ± 0.05 |
-| without last-10 minutes | AST | 15,317 | 1.585 | 1.590 | -0.6% | 0.58 ± 0.04 |
-| without last-10 minutes | 3PM | 15,317 | 1.062 | 1.068 | -0.3% | 0.59 ± 0.07 |
-| without game total / pace | PRA | 15,317 | 6.834 | 6.764 | -2.8% | 1.00 ± 0.05 |
-| without game total / pace | PTS | 15,317 | 5.377 | 5.346 | -2.0% | 1.07 ± 0.06 |
-| without game total / pace | REB | 15,317 | 2.066 | 2.078 | -0.2% | 0.54 ± 0.05 |
-| without game total / pace | AST | 15,317 | 1.585 | 1.582 | -1.7% | 0.87 ± 0.05 |
-| without game total / pace | 3PM | 15,317 | 1.062 | 1.066 | -0.5% | 0.76 ± 0.08 |
-| without opponent REB/AST allowed | PRA | 15,317 | 6.834 | 6.794 | -2.0% | 0.78 ± 0.04 |
-| without opponent REB/AST allowed | PTS | 15,317 | 5.377 | 5.374 | -1.2% | 0.71 ± 0.05 |
-| without opponent REB/AST allowed | REB | 15,317 | 2.066 | 2.078 | -0.2% | 0.54 ± 0.06 |
-| without opponent REB/AST allowed | AST | 15,317 | 1.585 | 1.587 | -1.0% | 0.83 ± 0.06 |
-| without opponent REB/AST allowed | 3PM | 15,317 | 1.062 | 1.068 | -0.3% | 0.61 ± 0.07 |
-| without blowout minutes | PRA | 15,317 | 6.834 | 6.808 | -1.6% | 0.69 ± 0.04 |
-| without blowout minutes | PTS | 15,317 | 5.377 | 5.381 | -0.9% | 0.66 ± 0.05 |
-| without blowout minutes | REB | 15,317 | 2.066 | 2.076 | -0.3% | 0.56 ± 0.05 |
-| without blowout minutes | AST | 15,317 | 1.585 | 1.589 | -0.7% | 0.59 ± 0.04 |
-| without blowout minutes | 3PM | 15,317 | 1.062 | 1.069 | -0.2% | 0.56 ± 0.07 |
-| without teammate-out boost | PRA | 15,317 | 6.834 | 6.835 | -0.0% | 0.51 ± 0.05 |
-| without teammate-out boost | PTS | 15,317 | 5.377 | 5.389 | 0.3% | 0.41 ± 0.06 |
-| without teammate-out boost | REB | 15,317 | 2.066 | 2.065 | -0.3% | 0.64 ± 0.08 |
-| without teammate-out boost | AST | 15,317 | 1.585 | 1.584 | -0.2% | 0.54 ± 0.05 |
-| without teammate-out boost | 3PM | 15,317 | 1.062 | 1.064 | 0.0% | 0.48 ± 0.09 |
+| full model | PRA | 15,317 | 6.834 | 6.704 | -3.7% | 0.72 ± 0.03 |
+| full model | PTS | 15,317 | 5.377 | 5.329 | -2.1% | 0.69 ± 0.03 |
+| full model | REB | 15,317 | 2.066 | 2.059 | -1.8% | 0.66 ± 0.03 |
+| full model | AST | 15,317 | 1.585 | 1.576 | -2.0% | 0.68 ± 0.03 |
+| full model | 3PM | 15,317 | 1.062 | 1.065 | -0.6% | 0.61 ± 0.05 |
+| calibrated (what alerts use) | PRA | 15,317 | 6.834 | 6.665 | -4.5% | 1.00 ± 0.04 |
+| calibrated (what alerts use) | PTS | 15,317 | 5.377 | 5.298 | -2.8% | 0.99 ± 0.05 |
+| calibrated (what alerts use) | REB | 15,317 | 2.066 | 2.033 | -2.7% | 1.04 ± 0.05 |
+| calibrated (what alerts use) | AST | 15,317 | 1.585 | 1.563 | -2.9% | 1.05 ± 0.05 |
+| calibrated (what alerts use) | 3PM | 15,317 | 1.062 | 1.061 | -1.3% | 1.06 ± 0.07 |
+| without shot zones | PRA | 15,317 | 6.834 | 6.704 | -3.8% | 0.74 ± 0.03 |
+| without shot zones | PTS | 15,317 | 5.377 | 5.328 | -2.2% | 0.73 ± 0.04 |
+| without shot zones | REB | 15,317 | 2.066 | 2.059 | -1.8% | 0.66 ± 0.03 |
+| without shot zones | AST | 15,317 | 1.585 | 1.576 | -2.0% | 0.68 ± 0.03 |
+| without shot zones | 3PM | 15,317 | 1.062 | 1.063 | -0.8% | 0.69 ± 0.06 |
+| without last-10 minutes | PRA | 15,317 | 6.834 | 6.703 | -3.7% | 0.73 ± 0.03 |
+| without last-10 minutes | PTS | 15,317 | 5.377 | 5.329 | -2.1% | 0.70 ± 0.03 |
+| without last-10 minutes | REB | 15,317 | 2.066 | 2.058 | -1.8% | 0.67 ± 0.03 |
+| without last-10 minutes | AST | 15,317 | 1.585 | 1.577 | -1.9% | 0.68 ± 0.03 |
+| without last-10 minutes | 3PM | 15,317 | 1.062 | 1.064 | -0.6% | 0.61 ± 0.05 |
+| without last-3 minutes | PRA | 15,317 | 6.834 | 6.789 | -1.7% | 0.77 ± 0.05 |
+| without last-3 minutes | PTS | 15,317 | 5.377 | 5.369 | -0.9% | 0.71 ± 0.05 |
+| without last-3 minutes | REB | 15,317 | 2.066 | 2.067 | -0.6% | 0.68 ± 0.06 |
+| without last-3 minutes | AST | 15,317 | 1.585 | 1.584 | -0.8% | 0.63 ± 0.04 |
+| without last-3 minutes | 3PM | 15,317 | 1.062 | 1.064 | -0.5% | 0.71 ± 0.08 |
+| without return factors (back / star back) | PRA | 15,317 | 6.834 | 6.718 | -3.4% | 0.70 ± 0.03 |
+| without return factors (back / star back) | PTS | 15,317 | 5.377 | 5.339 | -1.8% | 0.67 ± 0.03 |
+| without return factors (back / star back) | REB | 15,317 | 2.066 | 2.063 | -1.6% | 0.65 ± 0.03 |
+| without return factors (back / star back) | AST | 15,317 | 1.585 | 1.579 | -1.7% | 0.66 ± 0.03 |
+| without return factors (back / star back) | 3PM | 15,317 | 1.062 | 1.066 | -0.4% | 0.57 ± 0.05 |
+| without game total / pace | PRA | 15,317 | 6.834 | 6.676 | -4.5% | 0.82 ± 0.03 |
+| without game total / pace | PTS | 15,317 | 5.377 | 5.303 | -2.8% | 0.82 ± 0.04 |
+| without game total / pace | REB | 15,317 | 2.066 | 2.059 | -1.8% | 0.66 ± 0.03 |
+| without game total / pace | AST | 15,317 | 1.585 | 1.570 | -2.7% | 0.85 ± 0.04 |
+| without game total / pace | 3PM | 15,317 | 1.062 | 1.063 | -0.7% | 0.67 ± 0.05 |
+| without opponent REB/AST allowed | PRA | 15,317 | 6.834 | 6.699 | -3.8% | 0.75 ± 0.03 |
+| without opponent REB/AST allowed | PTS | 15,317 | 5.377 | 5.329 | -2.1% | 0.69 ± 0.03 |
+| without opponent REB/AST allowed | REB | 15,317 | 2.066 | 2.057 | -1.8% | 0.68 ± 0.04 |
+| without opponent REB/AST allowed | AST | 15,317 | 1.585 | 1.574 | -2.1% | 0.83 ± 0.04 |
+| without opponent REB/AST allowed | 3PM | 15,317 | 1.062 | 1.065 | -0.6% | 0.61 ± 0.05 |
+| without blowout minutes | PRA | 15,317 | 6.834 | 6.712 | -3.5% | 0.71 ± 0.03 |
+| without blowout minutes | PTS | 15,317 | 5.377 | 5.336 | -1.8% | 0.67 ± 0.03 |
+| without blowout minutes | REB | 15,317 | 2.066 | 2.057 | -1.9% | 0.68 ± 0.03 |
+| without blowout minutes | AST | 15,317 | 1.585 | 1.577 | -1.9% | 0.68 ± 0.03 |
+| without blowout minutes | 3PM | 15,317 | 1.062 | 1.065 | -0.4% | 0.58 ± 0.05 |
+| without teammate-out boost | PRA | 15,317 | 6.834 | 6.718 | -2.9% | 0.71 ± 0.03 |
+| without teammate-out boost | PTS | 15,317 | 5.377 | 5.331 | -1.5% | 0.66 ± 0.04 |
+| without teammate-out boost | REB | 15,317 | 2.066 | 2.051 | -2.0% | 0.74 ± 0.04 |
+| without teammate-out boost | AST | 15,317 | 1.585 | 1.573 | -1.8% | 0.69 ± 0.04 |
+| without teammate-out boost | 3PM | 15,317 | 1.062 | 1.062 | -0.4% | 0.60 ± 0.06 |
 
 ### Games with a posted total/spread only (15,463 player-games)
 
 | Model | Stat | Player-games | Avg miss, plain average | Avg miss, projection | Squared error vs plain average | Slope (1 = right size, 0 = noise) |
 |---|---|---:|---:|---:|---:|---:|
-| full model | PRA | 15,275 | 6.780 | 6.745 | -2.0% | 0.73 ± 0.04 |
-| full model | PTS | 15,275 | 5.343 | 5.340 | -1.3% | 0.72 ± 0.05 |
-| full model | REB | 15,275 | 2.059 | 2.071 | -0.2% | 0.54 ± 0.05 |
-| full model | AST | 15,275 | 1.578 | 1.582 | -0.8% | 0.61 ± 0.04 |
-| full model | 3PM | 15,275 | 1.060 | 1.066 | -0.3% | 0.62 ± 0.07 |
-| without game total / pace | PRA | 15,275 | 6.780 | 6.710 | -3.0% | 1.01 ± 0.05 |
-| without game total / pace | PTS | 15,275 | 5.343 | 5.312 | -2.1% | 1.08 ± 0.06 |
-| without game total / pace | REB | 15,275 | 2.059 | 2.071 | -0.2% | 0.54 ± 0.05 |
-| without game total / pace | AST | 15,275 | 1.578 | 1.575 | -1.7% | 0.88 ± 0.05 |
-| without game total / pace | 3PM | 15,275 | 1.060 | 1.064 | -0.5% | 0.77 ± 0.08 |
+| full model | PRA | 15,275 | 6.780 | 6.650 | -3.9% | 0.72 ± 0.03 |
+| full model | PTS | 15,275 | 5.343 | 5.295 | -2.2% | 0.69 ± 0.03 |
+| full model | REB | 15,275 | 2.059 | 2.052 | -1.8% | 0.66 ± 0.03 |
+| full model | AST | 15,275 | 1.578 | 1.570 | -2.0% | 0.68 ± 0.03 |
+| full model | 3PM | 15,275 | 1.060 | 1.063 | -0.6% | 0.61 ± 0.05 |
+| without game total / pace | PRA | 15,275 | 6.780 | 6.622 | -4.7% | 0.82 ± 0.03 |
+| without game total / pace | PTS | 15,275 | 5.343 | 5.269 | -2.9% | 0.82 ± 0.04 |
+| without game total / pace | REB | 15,275 | 2.059 | 2.052 | -1.8% | 0.66 ± 0.03 |
+| without game total / pace | AST | 15,275 | 1.578 | 1.563 | -2.8% | 0.85 ± 0.04 |
+| without game total / pace | 3PM | 15,275 | 1.060 | 1.061 | -0.8% | 0.68 ± 0.05 |
 
 ## 2025-26 (out of sample)
 
@@ -120,11 +130,11 @@ The sections below use the picked setting.
 
 | Flag | Picks | Beat their average | Model said (avg gain) | Actually got | Got ÷ said |
 |---|---:|---:|---:|---:|---:|
-| Projection boost: PRA | 175 | 70.3% | +3.98 | **+5.50** | 1.38 |
-| Projection boost: PTS | 249 | 64.7% | +2.66 | **+3.17** | 1.19 |
-| Projection boost: REB | 8 | 62.5% | +1.12 | **+0.92** | 0.82 |
-| Projection boost: AST | 13 | 46.2% | +1.23 | **+0.30** | 0.24 |
-| Projection boost: 3PM | 1 | 100.0% | +0.52 | **+1.10** | 2.11 |
+| Projection boost: PRA | 654 | 71.4% | +4.03 | **+5.14** | 1.28 |
+| Projection boost: PTS | 510 | 66.7% | +2.65 | **+3.48** | 1.32 |
+| Projection boost: REB | 142 | 70.4% | +1.29 | **+1.62** | 1.25 |
+| Projection boost: AST | 63 | 69.8% | +1.24 | **+1.57** | 1.27 |
+| Projection boost: 3PM | 22 | 63.6% | +0.60 | **+0.44** | 0.73 |
 | *(no flag) everyone in this group, PRA* | 15,530 | 47.1% | – | -0.25 | – |
 | *(no flag) everyone in this group, PTS* | 15,530 | 46.3% | – | -0.15 | – |
 | *(no flag) everyone in this group, REB* | 15,530 | 44.4% | – | -0.10 | – |
@@ -135,61 +145,71 @@ The sections below use the picked setting.
 
 | Model | Stat | Player-games | Avg miss, plain average | Avg miss, projection | Squared error vs plain average | Slope (1 = right size, 0 = noise) |
 |---|---|---:|---:|---:|---:|---:|
-| full model | PRA | 15,530 | 6.829 | 6.814 | -1.3% | 0.65 ± 0.04 |
-| full model | PTS | 15,530 | 5.367 | 5.364 | -0.8% | 0.64 ± 0.05 |
-| full model | REB | 15,530 | 2.036 | 2.045 | -0.2% | 0.55 ± 0.05 |
-| full model | AST | 15,530 | 1.583 | 1.589 | -0.2% | 0.52 ± 0.04 |
-| full model | 3PM | 15,530 | 1.049 | 1.055 | 0.1% | 0.48 ± 0.07 |
-| calibrated (what alerts use) | PRA | 15,530 | 6.829 | 6.744 | -3.0% | 1.16 ± 0.05 |
-| calibrated (what alerts use) | PTS | 15,530 | 5.367 | 5.321 | -2.1% | 1.04 ± 0.06 |
-| calibrated (what alerts use) | REB | 15,530 | 2.036 | 2.021 | -1.7% | 1.41 ± 0.08 |
-| calibrated (what alerts use) | AST | 15,530 | 1.583 | 1.576 | -1.4% | 0.98 ± 0.07 |
-| calibrated (what alerts use) | 3PM | 15,530 | 1.049 | 1.053 | -0.9% | 1.16 ± 0.10 |
-| without shot zones | PRA | 15,530 | 6.829 | 6.808 | -1.4% | 0.70 ± 0.04 |
-| without shot zones | PTS | 15,530 | 5.367 | 5.364 | -0.9% | 0.72 ± 0.05 |
-| without shot zones | REB | 15,530 | 2.036 | 2.045 | -0.2% | 0.55 ± 0.05 |
-| without shot zones | AST | 15,530 | 1.583 | 1.589 | -0.2% | 0.52 ± 0.04 |
-| without shot zones | 3PM | 15,530 | 1.049 | 1.055 | -0.1% | 0.54 ± 0.09 |
-| without last-10 minutes | PRA | 15,530 | 6.829 | 6.823 | -1.0% | 0.64 ± 0.04 |
-| without last-10 minutes | PTS | 15,530 | 5.367 | 5.367 | -0.6% | 0.62 ± 0.05 |
-| without last-10 minutes | REB | 15,530 | 2.036 | 2.046 | -0.1% | 0.53 ± 0.05 |
-| without last-10 minutes | AST | 15,530 | 1.583 | 1.591 | -0.0% | 0.51 ± 0.04 |
-| without last-10 minutes | 3PM | 15,530 | 1.049 | 1.055 | 0.1% | 0.45 ± 0.07 |
-| without game total / pace | PRA | 15,530 | 6.829 | 6.792 | -1.8% | 0.80 ± 0.05 |
-| without game total / pace | PTS | 15,530 | 5.367 | 5.357 | -1.2% | 0.82 ± 0.06 |
-| without game total / pace | REB | 15,530 | 2.036 | 2.045 | -0.2% | 0.55 ± 0.05 |
-| without game total / pace | AST | 15,530 | 1.583 | 1.586 | -0.7% | 0.67 ± 0.06 |
-| without game total / pace | 3PM | 15,530 | 1.049 | 1.056 | 0.2% | 0.41 ± 0.07 |
-| without opponent REB/AST allowed | PRA | 15,530 | 6.829 | 6.811 | -1.4% | 0.71 ± 0.04 |
-| without opponent REB/AST allowed | PTS | 15,530 | 5.367 | 5.364 | -0.8% | 0.64 ± 0.05 |
-| without opponent REB/AST allowed | REB | 15,530 | 2.036 | 2.053 | 0.3% | 0.39 ± 0.06 |
-| without opponent REB/AST allowed | AST | 15,530 | 1.583 | 1.588 | -0.6% | 0.70 ± 0.07 |
-| without opponent REB/AST allowed | 3PM | 15,530 | 1.049 | 1.055 | 0.1% | 0.48 ± 0.07 |
-| without blowout minutes | PRA | 15,530 | 6.829 | 6.833 | -0.8% | 0.59 ± 0.04 |
-| without blowout minutes | PTS | 15,530 | 5.367 | 5.373 | -0.4% | 0.56 ± 0.05 |
-| without blowout minutes | REB | 15,530 | 2.036 | 2.044 | -0.2% | 0.55 ± 0.05 |
-| without blowout minutes | AST | 15,530 | 1.583 | 1.589 | -0.0% | 0.50 ± 0.04 |
-| without blowout minutes | 3PM | 15,530 | 1.049 | 1.055 | 0.2% | 0.44 ± 0.07 |
-| without teammate-out boost | PRA | 15,530 | 6.829 | 6.817 | -0.6% | 0.62 ± 0.05 |
-| without teammate-out boost | PTS | 15,530 | 5.367 | 5.361 | -0.1% | 0.52 ± 0.06 |
-| without teammate-out boost | REB | 15,530 | 2.036 | 2.027 | -0.8% | 0.80 ± 0.07 |
-| without teammate-out boost | AST | 15,530 | 1.583 | 1.580 | -0.1% | 0.53 ± 0.05 |
-| without teammate-out boost | 3PM | 15,530 | 1.049 | 1.048 | -0.1% | 0.53 ± 0.08 |
+| full model | PRA | 15,530 | 6.829 | 6.651 | -5.6% | 0.81 ± 0.03 |
+| full model | PTS | 15,530 | 5.367 | 5.279 | -3.5% | 0.79 ± 0.03 |
+| full model | REB | 15,530 | 2.036 | 2.019 | -2.1% | 0.68 ± 0.03 |
+| full model | AST | 15,530 | 1.583 | 1.566 | -2.9% | 0.77 ± 0.03 |
+| full model | 3PM | 15,530 | 1.049 | 1.046 | -0.9% | 0.68 ± 0.05 |
+| calibrated (what alerts use) | PRA | 15,530 | 6.829 | 6.604 | -6.5% | 1.13 ± 0.03 |
+| calibrated (what alerts use) | PTS | 15,530 | 5.367 | 5.249 | -4.3% | 1.14 ± 0.04 |
+| calibrated (what alerts use) | REB | 15,530 | 2.036 | 1.996 | -3.4% | 1.11 ± 0.05 |
+| calibrated (what alerts use) | AST | 15,530 | 1.583 | 1.557 | -3.5% | 1.11 ± 0.05 |
+| calibrated (what alerts use) | 3PM | 15,530 | 1.049 | 1.045 | -1.7% | 1.16 ± 0.07 |
+| without shot zones | PRA | 15,530 | 6.829 | 6.643 | -5.7% | 0.84 ± 0.03 |
+| without shot zones | PTS | 15,530 | 5.367 | 5.279 | -3.7% | 0.85 ± 0.03 |
+| without shot zones | REB | 15,530 | 2.036 | 2.019 | -2.1% | 0.68 ± 0.03 |
+| without shot zones | AST | 15,530 | 1.583 | 1.566 | -2.9% | 0.77 ± 0.03 |
+| without shot zones | 3PM | 15,530 | 1.049 | 1.046 | -1.1% | 0.77 ± 0.06 |
+| without last-10 minutes | PRA | 15,530 | 6.829 | 6.650 | -5.6% | 0.82 ± 0.03 |
+| without last-10 minutes | PTS | 15,530 | 5.367 | 5.278 | -3.6% | 0.80 ± 0.03 |
+| without last-10 minutes | REB | 15,530 | 2.036 | 2.019 | -2.1% | 0.69 ± 0.03 |
+| without last-10 minutes | AST | 15,530 | 1.583 | 1.566 | -3.0% | 0.77 ± 0.03 |
+| without last-10 minutes | 3PM | 15,530 | 1.049 | 1.046 | -1.0% | 0.69 ± 0.05 |
+| without last-3 minutes | PRA | 15,530 | 6.829 | 6.776 | -1.9% | 0.79 ± 0.04 |
+| without last-3 minutes | PTS | 15,530 | 5.367 | 5.344 | -1.1% | 0.73 ± 0.05 |
+| without last-3 minutes | REB | 15,530 | 2.036 | 2.030 | -1.0% | 0.76 ± 0.06 |
+| without last-3 minutes | AST | 15,530 | 1.583 | 1.583 | -0.4% | 0.57 ± 0.05 |
+| without last-3 minutes | 3PM | 15,530 | 1.049 | 1.050 | -0.3% | 0.63 ± 0.08 |
+| without return factors (back / star back) | PRA | 15,530 | 6.829 | 6.673 | -5.1% | 0.79 ± 0.03 |
+| without return factors (back / star back) | PTS | 15,530 | 5.367 | 5.291 | -3.2% | 0.77 ± 0.03 |
+| without return factors (back / star back) | REB | 15,530 | 2.036 | 2.024 | -1.8% | 0.66 ± 0.03 |
+| without return factors (back / star back) | AST | 15,530 | 1.583 | 1.568 | -2.8% | 0.76 ± 0.03 |
+| without return factors (back / star back) | 3PM | 15,530 | 1.049 | 1.047 | -0.8% | 0.66 ± 0.05 |
+| without game total / pace | PRA | 15,530 | 6.829 | 6.631 | -6.1% | 0.89 ± 0.03 |
+| without game total / pace | PTS | 15,530 | 5.367 | 5.269 | -4.0% | 0.88 ± 0.03 |
+| without game total / pace | REB | 15,530 | 2.036 | 2.019 | -2.1% | 0.68 ± 0.03 |
+| without game total / pace | AST | 15,530 | 1.583 | 1.563 | -3.5% | 0.92 ± 0.04 |
+| without game total / pace | 3PM | 15,530 | 1.049 | 1.047 | -0.8% | 0.66 ± 0.05 |
+| without opponent REB/AST allowed | PRA | 15,530 | 6.829 | 6.647 | -5.7% | 0.84 ± 0.03 |
+| without opponent REB/AST allowed | PTS | 15,530 | 5.367 | 5.279 | -3.5% | 0.79 ± 0.03 |
+| without opponent REB/AST allowed | REB | 15,530 | 2.036 | 2.028 | -1.4% | 0.64 ± 0.04 |
+| without opponent REB/AST allowed | AST | 15,530 | 1.583 | 1.564 | -3.4% | 0.98 ± 0.04 |
+| without opponent REB/AST allowed | 3PM | 15,530 | 1.049 | 1.046 | -0.9% | 0.68 ± 0.05 |
+| without blowout minutes | PRA | 15,530 | 6.829 | 6.667 | -5.2% | 0.79 ± 0.03 |
+| without blowout minutes | PTS | 15,530 | 5.367 | 5.288 | -3.2% | 0.76 ± 0.03 |
+| without blowout minutes | REB | 15,530 | 2.036 | 2.018 | -2.2% | 0.70 ± 0.03 |
+| without blowout minutes | AST | 15,530 | 1.583 | 1.565 | -2.8% | 0.76 ± 0.03 |
+| without blowout minutes | 3PM | 15,530 | 1.049 | 1.046 | -0.9% | 0.67 ± 0.05 |
+| without teammate-out boost | PRA | 15,530 | 6.829 | 6.650 | -5.1% | 0.83 ± 0.03 |
+| without teammate-out boost | PTS | 15,530 | 5.367 | 5.276 | -3.1% | 0.79 ± 0.03 |
+| without teammate-out boost | REB | 15,530 | 2.036 | 2.008 | -2.5% | 0.76 ± 0.04 |
+| without teammate-out boost | AST | 15,530 | 1.583 | 1.560 | -3.0% | 0.81 ± 0.04 |
+| without teammate-out boost | 3PM | 15,530 | 1.049 | 1.042 | -1.0% | 0.72 ± 0.05 |
 
 ### Games with a posted total/spread only (15,741 player-games)
 
 | Model | Stat | Player-games | Avg miss, plain average | Avg miss, projection | Squared error vs plain average | Slope (1 = right size, 0 = noise) |
 |---|---|---:|---:|---:|---:|---:|
-| full model | PRA | 15,456 | 6.742 | 6.721 | -1.8% | 0.70 ± 0.04 |
-| full model | PTS | 15,456 | 5.310 | 5.303 | -1.1% | 0.69 ± 0.05 |
-| full model | REB | 15,456 | 2.025 | 2.033 | -0.4% | 0.58 ± 0.05 |
-| full model | AST | 15,456 | 1.573 | 1.578 | -0.3% | 0.55 ± 0.04 |
-| full model | 3PM | 15,456 | 1.047 | 1.052 | 0.0% | 0.50 ± 0.07 |
-| without game total / pace | PRA | 15,456 | 6.742 | 6.699 | -2.3% | 0.87 ± 0.05 |
-| without game total / pace | PTS | 15,456 | 5.310 | 5.296 | -1.6% | 0.90 ± 0.06 |
-| without game total / pace | REB | 15,456 | 2.025 | 2.033 | -0.4% | 0.58 ± 0.05 |
-| without game total / pace | AST | 15,456 | 1.573 | 1.575 | -0.8% | 0.70 ± 0.06 |
-| without game total / pace | 3PM | 15,456 | 1.047 | 1.054 | 0.2% | 0.43 ± 0.07 |
+| full model | PRA | 15,456 | 6.742 | 6.575 | -5.2% | 0.78 ± 0.03 |
+| full model | PTS | 15,456 | 5.310 | 5.230 | -3.1% | 0.76 ± 0.03 |
+| full model | REB | 15,456 | 2.025 | 2.010 | -2.0% | 0.68 ± 0.03 |
+| full model | AST | 15,456 | 1.573 | 1.557 | -2.7% | 0.74 ± 0.03 |
+| full model | 3PM | 15,456 | 1.047 | 1.044 | -0.9% | 0.67 ± 0.05 |
+| without game total / pace | PRA | 15,456 | 6.742 | 6.556 | -5.7% | 0.86 ± 0.03 |
+| without game total / pace | PTS | 15,456 | 5.310 | 5.220 | -3.6% | 0.85 ± 0.04 |
+| without game total / pace | REB | 15,456 | 2.025 | 2.010 | -2.0% | 0.68 ± 0.03 |
+| without game total / pace | AST | 15,456 | 1.573 | 1.554 | -3.2% | 0.89 ± 0.04 |
+| without game total / pace | 3PM | 15,456 | 1.047 | 1.046 | -0.7% | 0.65 ± 0.05 |
 
 ## Shrinking the projection to its real size
 
@@ -197,16 +217,16 @@ Fit on 2024-25: projection' = average + k × (projection − average), with k = 
 
 | Season | Stat | k (from fit season) | Error of plain average | Avg miss, raw projection | Avg miss, shrunk projection |
 |---|---|---:|---:|---:|---:|
-| 2024-25 | PRA | 0.72 | 6.834 | 6.799 | 6.781 |
-| 2024-25 | PTS | 0.71 | 5.377 | 5.374 | 5.359 |
-| 2024-25 | REB | 0.54 | 2.066 | 2.078 | 2.067 |
-| 2024-25 | AST | 0.60 | 1.585 | 1.589 | 1.581 |
-| 2024-25 | 3PM | 0.61 | 1.062 | 1.068 | 1.064 |
-| 2025-26 | PRA | 0.72 | 6.829 | 6.814 | 6.789 |
-| 2025-26 | PTS | 0.71 | 5.367 | 5.364 | 5.348 |
-| 2025-26 | REB | 0.54 | 2.036 | 2.045 | 2.035 |
-| 2025-26 | AST | 0.60 | 1.583 | 1.589 | 1.581 |
-| 2025-26 | 3PM | 0.61 | 1.049 | 1.055 | 1.051 |
+| 2024-25 | PRA | 0.72 | 6.834 | 6.704 | 6.683 |
+| 2024-25 | PTS | 0.69 | 5.377 | 5.329 | 5.313 |
+| 2024-25 | REB | 0.66 | 2.066 | 2.059 | 2.049 |
+| 2024-25 | AST | 0.68 | 1.585 | 1.576 | 1.571 |
+| 2024-25 | 3PM | 0.61 | 1.062 | 1.065 | 1.060 |
+| 2025-26 | PRA | 0.72 | 6.829 | 6.651 | 6.639 |
+| 2025-26 | PTS | 0.69 | 5.367 | 5.279 | 5.273 |
+| 2025-26 | REB | 0.66 | 2.036 | 2.019 | 2.013 |
+| 2025-26 | AST | 0.68 | 1.583 | 1.566 | 1.564 |
+| 2025-26 | 3PM | 0.61 | 1.049 | 1.046 | 1.044 |
 
 ## Prop probabilities (calibration)
 
@@ -214,17 +234,17 @@ The prop alert needs an honest probability, not just a projection. `model.calibr
 
 | Season | Probabilities | Said 55-60% → hit | Said 60-65% → hit | Said 65-75% → hit | Said 75%+ → hit | Picks | Pick hit rate | Log loss |
 |---|---|---:|---:|---:|---:|---:|---:|---:|
-| 2024-25 (fit) | old fixed spreads, raw projection (PTS/REB/AST/3PM) | 57.4% → 53.9% | 62.3% → 57.1% | 68.6% → 60.2% | 80.5% → 72.5% | 7,152 | 62.5% | 0.6897 |
-| 2024-25 (fit) | calibrated (fit on 2024-25) (PTS/REB/AST/3PM) | 57.2% → 56.7% | 62.1% → 59.9% | 67.9% → 65.0% | 79.2% → 78.6% | 4,475 | 68.2% | 0.6829 |
-| 2024-25 (fit) | calibrated (fit on 2024-25) **PRA** | 57.1% → 55.6% | 62.1% → 60.2% | 68.6% → 72.4% | 81.1% → 85.6% | 1,199 | 73.1% | 0.6820 |
-| 2025-26 | old fixed spreads, raw projection (PTS/REB/AST/3PM) | 57.4% → 54.2% | 62.3% → 56.7% | 68.5% → 61.3% | 80.3% → 72.8% | 6,808 | 62.9% | 0.6881 |
-| 2025-26 | calibrated (fit on 2024-25) (PTS/REB/AST/3PM) | 57.3% → 56.6% | 62.1% → 61.1% | 67.7% → 64.4% | 79.2% → 85.2% | 4,113 | 68.3% | 0.6820 |
-| 2025-26 | calibrated (fit on 2024-25) **PRA** | 57.1% → 56.8% | 61.9% → 60.2% | 68.4% → 75.7% | 81.1% → 89.2% | 1,042 | 75.1% | 0.6814 |
+| 2024-25 (fit) | old fixed spreads, raw projection (PTS/REB/AST/3PM) | 57.4% → 54.4% | 62.3% → 57.5% | 69.0% → 62.1% | 81.7% → 69.3% | 14,242 | 64.6% | 0.6856 |
+| 2024-25 (fit) | calibrated (fit on 2024-25) (PTS/REB/AST/3PM) | 57.3% → 56.9% | 62.2% → 61.0% | 68.6% → 66.5% | 80.0% → 76.1% | 9,693 | 67.2% | 0.6754 |
+| 2024-25 (fit) | calibrated (fit on 2024-25) **PRA** | 57.3% → 56.8% | 62.2% → 61.3% | 69.0% → 67.9% | 81.8% → 78.6% | 3,612 | 70.5% | 0.6689 |
+| 2025-26 | old fixed spreads, raw projection (PTS/REB/AST/3PM) | 57.4% → 54.9% | 62.4% → 58.4% | 69.1% → 62.8% | 81.4% → 72.5% | 15,070 | 66.2% | 0.6787 |
+| 2025-26 | calibrated (fit on 2024-25) (PTS/REB/AST/3PM) | 57.3% → 57.2% | 62.2% → 61.8% | 68.6% → 67.6% | 79.6% → 79.9% | 10,365 | 69.8% | 0.6714 |
+| 2025-26 | calibrated (fit on 2024-25) **PRA** | 57.3% → 56.8% | 62.3% → 62.4% | 69.0% → 71.3% | 81.0% → 83.2% | 3,907 | 73.8% | 0.6616 |
 
 Fit on all seasons (this goes in `model.js` CAL, or set `NBA_CAL`):
 
 ```
-{"pra":{"k":0.689,"m":10.618,"beta":0.95,"a":3.563,"b":1.065},"pts":{"k":0.672,"m":8.482,"beta":0.938,"a":1.504,"b":1.406},"reb":{"k":0.541,"m":2.079,"beta":0.939,"a":-0.046,"b":1.243},"ast":{"k":0.566,"m":2.156,"beta":0.938,"a":-0.04,"b":1.174},"fg3m":{"k":0.548,"m":1.12,"beta":0.907,"a":-0.081,"b":1.164}}
+{"pra":{"k":0.767,"m":7.234,"beta":0.964,"a":2.928,"b":1.167},"pts":{"k":0.744,"m":7.705,"beta":0.951,"a":1.26,"b":1.45},"reb":{"k":0.673,"m":1.683,"beta":0.942,"a":-0.046,"b":1.227},"ast":{"k":0.725,"m":1.978,"beta":0.944,"a":-0.045,"b":1.166},"fg3m":{"k":0.645,"m":1.089,"beta":0.909,"a":-0.08,"b":1.159}}
 ```
 
 ## Bench players (10–20 MPG)
@@ -233,24 +253,24 @@ Same replay with players averaging 10–20 minutes also projected. Starters keep
 
 | Bench scale | 2024-25 all | 2024-25 someone out | 2024-25 slope | 2025-26 all | 2025-26 someone out | 2025-26 slope |
 |---|---:|---:|---:|---:|---:|---:|
-| 0 | 0.9681 | 0.9613 | 1.57 | 0.9662 | 0.9570 | 1.94 |
-| **0.25** | 0.9403 | 0.9271 | 1.14 | 0.9358 | 0.9191 | 1.43 |
-| 0.5 | 0.9515 | 0.9412 | 0.77 | 0.9334 | 0.9163 | 0.97 |
-| 0.75 | 1.0017 | 1.0036 | 0.58 | 0.9590 | 0.9487 | 0.72 |
-| 1 | 1.0910 | 1.1141 | 0.46 | 1.0124 | 1.0163 | 0.57 |
-| 1.25 | 1.2193 | 1.2728 | 0.38 | 1.0938 | 1.1191 | 0.47 |
+| 0 | 0.9197 | 0.9143 | 1.06 | 0.9029 | 0.8953 | 1.24 |
+| **0.25** | 0.9080 | 0.9001 | 0.86 | 0.8822 | 0.8694 | 1.06 |
+| 0.5 | 0.9436 | 0.9442 | 0.65 | 0.8940 | 0.8846 | 0.83 |
+| 0.75 | 1.0264 | 1.0467 | 0.51 | 0.9383 | 0.9407 | 0.67 |
+| 1 | 1.1565 | 1.2075 | 0.42 | 1.0153 | 1.0378 | 0.55 |
+| 1.25 | 1.3339 | 1.4267 | 0.35 | 1.1247 | 1.1760 | 0.46 |
 
-### Bench, 2024-25: 7,715 player-games; 1253 flagged, 7.3% of those didn't play (coach's decision)
+### Bench, 2024-25: 7,715 player-games; 2237 flagged, 5.6% of those didn't play (coach's decision)
 
 All bench games:
 
 | Flag | Picks | Beat their average | Model said (avg gain) | Actually got | Got ÷ said |
 |---|---:|---:|---:|---:|---:|
-| Projection boost: PRA | 980 | 73.0% | +4.64 | **+5.91** | 1.27 |
-| Projection boost: PTS | 794 | 71.8% | +3.03 | **+3.88** | 1.28 |
-| Projection boost: REB | 699 | 66.8% | +1.55 | **+1.57** | 1.01 |
-| Projection boost: AST | 140 | 80.7% | +1.48 | **+2.13** | 1.44 |
-| Projection boost: 3PM | 169 | 66.3% | +0.71 | **+0.76** | 1.06 |
+| Projection boost: PRA | 1,932 | 70.1% | +5.62 | **+5.09** | 0.91 |
+| Projection boost: PTS | 1,728 | 66.1% | +3.57 | **+3.22** | 0.90 |
+| Projection boost: REB | 1,429 | 65.7% | +1.81 | **+1.51** | 0.83 |
+| Projection boost: AST | 454 | 70.9% | +1.62 | **+1.41** | 0.87 |
+| Projection boost: 3PM | 592 | 62.8% | +0.75 | **+0.63** | 0.83 |
 | *(no flag) everyone in this group, PRA* | 7,715 | 49.7% | – | +1.12 | – |
 | *(no flag) everyone in this group, PTS* | 7,715 | 47.9% | – | +0.72 | – |
 | *(no flag) everyone in this group, REB* | 7,715 | 46.0% | – | +0.25 | – |
@@ -261,28 +281,28 @@ Only games where a teammate was out:
 
 | Flag | Picks | Beat their average | Model said (avg gain) | Actually got | Got ÷ said |
 |---|---:|---:|---:|---:|---:|
-| Projection boost: PRA | 964 | 72.7% | +4.65 | **+5.92** | 1.27 |
-| Projection boost: PTS | 782 | 71.7% | +3.04 | **+3.90** | 1.29 |
-| Projection boost: REB | 693 | 66.7% | +1.56 | **+1.57** | 1.01 |
-| Projection boost: AST | 137 | 81.8% | +1.49 | **+2.18** | 1.47 |
-| Projection boost: 3PM | 168 | 66.1% | +0.71 | **+0.75** | 1.06 |
+| Projection boost: PRA | 1,791 | 70.5% | +5.70 | **+5.23** | 0.92 |
+| Projection boost: PTS | 1,608 | 66.5% | +3.61 | **+3.33** | 0.92 |
+| Projection boost: REB | 1,325 | 65.9% | +1.84 | **+1.53** | 0.83 |
+| Projection boost: AST | 433 | 71.8% | +1.62 | **+1.43** | 0.88 |
+| Projection boost: 3PM | 562 | 62.3% | +0.76 | **+0.63** | 0.84 |
 | *(no flag) everyone in this group, PRA* | 5,756 | 53.9% | – | +1.92 | – |
 | *(no flag) everyone in this group, PTS* | 5,756 | 51.4% | – | +1.20 | – |
 | *(no flag) everyone in this group, REB* | 5,756 | 49.6% | – | +0.45 | – |
 | *(no flag) everyone in this group, AST* | 5,756 | 48.1% | – | +0.27 | – |
 | *(no flag) everyone in this group, 3PM* | 5,756 | 38.7% | – | +0.16 | – |
 
-### Bench, 2025-26: 8,218 player-games; 930 flagged, 8.5% of those didn't play (coach's decision)
+### Bench, 2025-26: 8,218 player-games; 2314 flagged, 4.1% of those didn't play (coach's decision)
 
 All bench games:
 
 | Flag | Picks | Beat their average | Model said (avg gain) | Actually got | Got ÷ said |
 |---|---:|---:|---:|---:|---:|
-| Projection boost: PRA | 731 | 78.5% | +4.57 | **+7.24** | 1.58 |
-| Projection boost: PTS | 584 | 76.4% | +2.98 | **+5.05** | 1.69 |
-| Projection boost: REB | 493 | 69.2% | +1.57 | **+1.86** | 1.18 |
-| Projection boost: AST | 120 | 72.5% | +1.30 | **+2.16** | 1.66 |
-| Projection boost: 3PM | 120 | 57.5% | +0.74 | **+0.74** | 1.00 |
+| Projection boost: PRA | 1,997 | 74.1% | +5.30 | **+5.75** | 1.09 |
+| Projection boost: PTS | 1,750 | 70.7% | +3.36 | **+3.87** | 1.15 |
+| Projection boost: REB | 1,488 | 67.1% | +1.72 | **+1.57** | 0.92 |
+| Projection boost: AST | 473 | 69.8% | +1.44 | **+1.65** | 1.14 |
+| Projection boost: 3PM | 528 | 59.8% | +0.74 | **+0.60** | 0.81 |
 | *(no flag) everyone in this group, PRA* | 8,218 | 50.4% | – | +1.25 | – |
 | *(no flag) everyone in this group, PTS* | 8,218 | 48.5% | – | +0.80 | – |
 | *(no flag) everyone in this group, REB* | 8,218 | 46.9% | – | +0.26 | – |
@@ -293,11 +313,11 @@ Only games where a teammate was out:
 
 | Flag | Picks | Beat their average | Model said (avg gain) | Actually got | Got ÷ said |
 |---|---:|---:|---:|---:|---:|
-| Projection boost: PRA | 724 | 78.7% | +4.58 | **+7.25** | 1.58 |
-| Projection boost: PTS | 578 | 76.3% | +2.99 | **+5.04** | 1.69 |
-| Projection boost: REB | 490 | 69.4% | +1.57 | **+1.88** | 1.20 |
-| Projection boost: AST | 120 | 72.5% | +1.30 | **+2.16** | 1.66 |
-| Projection boost: 3PM | 119 | 57.1% | +0.74 | **+0.74** | 1.00 |
+| Projection boost: PRA | 1,800 | 74.8% | +5.40 | **+5.97** | 1.10 |
+| Projection boost: PTS | 1,575 | 71.6% | +3.42 | **+4.04** | 1.18 |
+| Projection boost: REB | 1,361 | 67.7% | +1.74 | **+1.62** | 0.93 |
+| Projection boost: AST | 450 | 69.8% | +1.45 | **+1.67** | 1.15 |
+| Projection boost: 3PM | 495 | 59.6% | +0.74 | **+0.61** | 0.83 |
 | *(no flag) everyone in this group, PRA* | 5,974 | 55.2% | – | +2.15 | – |
 | *(no flag) everyone in this group, PTS* | 5,974 | 52.7% | – | +1.35 | – |
 | *(no flag) everyone in this group, REB* | 5,974 | 50.5% | – | +0.49 | – |

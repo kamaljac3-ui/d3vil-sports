@@ -86,8 +86,7 @@ async function todaysBoard(){
 async function boardUpdate(g,side,D,outNow,newKeys){
   const b=await todaysBoard();if(!b||!b.picks)return false;
   const team=g[side].abbr,picks=b.picks.filter(p=>p.gid===g.id&&p.t===team);if(!picks.length)return false;
-  const roster=(await R.roster(g[side].espnId)).map(n=>D.players[R.nk(n)]).filter(Boolean);
-  const S=R.projectSide(roster,g,side,D,outNow),by=Object.fromEntries(S.players.map(x=>[x.p.key,x]));
+  const S=R.projectSide(await R.teamFor(g,side,D,outNow),g,side,D,outNow),by=Object.fromEntries(S.players.map(x=>[x.p.key,x]));
   const lines=[];
   for(const p of picks){
     const bet=`#${p.i} ${p.n} PRA ${p.s}${p.L}`;
@@ -111,7 +110,8 @@ async function onNews(g,side,D,outNow,newKeys){
   const news=[...newKeys].map(k=>D.players[k]).filter(regular);
   if(!news.length){log(`${g[side].abbr}: ${[...newKeys].join(", ")} out, not regulars, no alert`);return false;}
   const before=new Set([...outNow].filter(k=>!newKeys.has(k)));
-  const S0=R.projectSide(team,g,side,D,before),S1=R.projectSide(team,g,side,D,outNow);
+  // with and without the news, each with its own model inputs (last-3 minutes, returns) from nba-edges' teamFor
+  const S0=R.projectSide(await R.teamFor(g,side,D,before),g,side,D,before),S1=R.projectSide(await R.teamFor(g,side,D,outNow),g,side,D,outNow);
   const prev=Object.fromEntries(S0.players.map(x=>[x.p.key,x.pr]));
   const rows=R.flagRows(S1,null).filter(r=>r.kind==="boost").map(r=>({...r,gain:prev[r.key]?r.projRaw-prev[r.key][r.stat]:r.proj-r.avg}))
     .filter(r=>r.gain>0).sort((a,b)=>b.gain/b.avg-a.gain/a.avg).slice(0,NEWS_TOP);
