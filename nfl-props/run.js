@@ -190,6 +190,15 @@ async function weekly(ctx,kind,games){
 // market's no-vig price (SportsGameOdds consensus; Pinnacle when there is one). Logged as one pick (kind "parlay") with
 // its legs; nfl-lines/grade.js grades it leg by leg on Tuesday.
 const PL=require("./parlay");
+// the read-aloud "Jackson 5" script for the parlay (second push), up to two plain reasons per leg
+const SPOKEN_STAT={recYds:"receiving yards",rec:"catches",rushYds:"rushing yards",passYds:"passing yards"};
+function nflLegSpeech(l){
+  const e=l.e,p=e.p,why=[];
+  if(p.bump&&p.bump.from&&p.bump.from.length)why.push(`With ${p.bump.from.join(" and ")} out, he picks up extra work.`);
+  why.push(`We have him at ${PL.words(Math.round(e.proj))}.`);
+  if(l.mktP!=null)why.push(l.mktP>=0.55?"The other books lean the same way.":l.mktP<0.5?"The other books lean the other way, so this one is our model's call.":"");
+  return {who:p.name,bet:`${e.over?"over":"under"} ${PL.spokenLine(e.ref)} ${SPOKEN_STAT[e.stat]}`,why:why.filter(Boolean)};
+}
 async function sundayParlay(ctx,games){
   const G=[];for(const g of games)G.push(await projectGame(ctx,g));
   const ids=await odds.eventIds(G.map(x=>x.g)),legs=[];
@@ -214,6 +223,7 @@ async function sundayParlay(ctx,games){
       ` (model ${pct(l.modelP)}${l.mktP!=null?`, ${l.mkt} ${pct(l.mktP)}`:""})`).join("\n")+`\n${PL.summary(pl)}`+
     (late?`\n${late} leg${late>1?"s are":" is"} in a late game: its inactives aren't out yet, so check that game's alert before kickoff.`:"");
   const ok=await ntfy(`NFL W${ctx.week} Sunday 🎯 ${pl.n}-leg parlay`,msg,4,["football","dart"]);
+  if(ok)await ntfy(`🎙 Jackson 5 script: NFL Sunday`,PL.script(pl,pl.legs.map(nflLegSpeech),{title:"NFL Sunday",book:pl.legs[0].book}),3,["microphone"]);
   if(LIVE&&ok){const date=etParts().date,key=`picks-${date}.json`;
     writeState(key,(readState(key)||[]).concat([{sport:"nfl",bot:"nfl-props",date,at:new Date().toISOString(),alert:"parlay",week:ctx.week,kind:"parlay",
       decimal:+pl.decimal.toFixed(3),american:pl.american,p:+pl.p.toFixed(4),ev:+pl.ev.toFixed(3),ctx:{model_version:VERSIONS["nfl-props"]},

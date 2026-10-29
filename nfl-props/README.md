@@ -111,7 +111,7 @@ One push on Sundays at `PARLAY_HOUR` (11.75 = 11:45 AM ET, after the 1 PM games'
 `PARLAY_LEGS` (5) legs from different Sunday games. Each leg is a prop at your book's number and price (`MY_BOOKS`), its
 chance a `PARLAY_MARKET_W` (0.5) blend of the model and the market's no-vig price (SportsGameOdds consensus, or Pinnacle),
 using the shared builder `parlay.js` (one leg per game, best by chance × payout). Legs in late games are flagged: their
-inactives aren't out yet. Logged as one pick (`kind:"parlay"`) and graded leg by leg in `nfl-lines/grade.js` on Tuesdays.
+inactives aren't out yet. Logged as one pick (`kind:"parlay"`) and graded leg by leg in `nfl-lines/grade.js` on Tuesdays. A second push, **🎙 Jackson 5 script**, is the same parlay written to be read out loud (`parlay.js` `script`).
 
 ## Prop and game lines: SportsGameOdds (default since 2026-10-29)
 

@@ -490,7 +490,7 @@ function projectSide(team,g,side,D,outKeys,outOpts,minProj=MIN_PROJ){
   // underdog's rotation and bench up)
   const spread=g.homeSpread!=null?(side==="home"?g.homeSpread:-g.homeSpread):null,blowout=spread!=null&&Math.abs(spread)>=M.BLOW.starterSpread;
   const dog=spread!=null&&spread>=M.BLOW.dogSpread;
-  const tags=[...(boost.out.length?[`w/o ${boost.out.map(n=>n.split(" ").slice(-1)[0]).join(", ")}`]:[]),...(env>=1.04?["high team total"]:[]),...(blowout?["blowout risk"]:[]),...(dog?[`${spread>0?"+":""}${spread} underdog`]:[])];
+  const tags=[...(boost.out.length?[`w/o ${boost.out.map(n=>n.replace(/s+(Jr.?|Sr.?|II|III|IV)$/i,"").split(" ").slice(-1)[0]).join(", ")}`]:[]),...(env>=1.04?["high team total"]:[]),...(blowout?["blowout risk"]:[]),...(dog?[`${spread>0?"+":""}${spread} underdog`]:[])];
   const players=[];
   for(const p of team){
     if(outKeys.has(p.key)||p.MIN<minProj)continue;
@@ -654,6 +654,18 @@ function parlayOf(rows){
 }
 const parlayText=pl=>`🎯 ${pl.n}-leg parlay, one leg per game (${pl.legs[0].book})\n`+
   pl.legs.map((l,i)=>`${i+1}. ${l.name} (${l.team}) PRA ${l.po>=0.5?"o":"u"}${l.line} ${SH.fmt(l.price)} · ${pct(l.prob)}${l.soft!=null&&l.soft>=1?" 💰":""}`).join("\n")+`\n${PL.summary(pl)}`;
+// the read-aloud "Jackson 5" script for the parlay (second push), up to two plain reasons per leg from its facts
+const DAYS={Sun:"Sunday",Mon:"Monday",Tue:"Tuesday",Wed:"Wednesday",Thu:"Thursday",Fri:"Friday",Sat:"Saturday"};
+function nbaLegSpeech(l){
+  const over=l.po>=0.5,why=[],wo=l.tags.find(t=>t.startsWith("w/o "));
+  if(l.soft!=null&&l.soft>=1)why.push(`${l.book}'s number is ${PL.spokenLine(l.soft)} ${l.soft===1?"point":"points"} easier than the other books.`);
+  if(wo&&over)why.push(`With ${wo.slice(4).split(", ").join(" and ")} out, there's more for him.`);
+  if(!over&&l.min3!=null&&l.mpg-l.min3>=4)why.push(`His minutes are way down lately, about ${PL.words(Math.round(l.min3))} a night.`);
+  if(l.tags.includes("first game back"))why.push("It's his first game back, so his minutes could be limited.");
+  if(l.games>=3)why.push(l.hits===l.games?`He's gone ${over?"over":"under"} that in all of his last ${PL.words(l.games)}.`:`He's gone ${over?"over":"under"} that in ${PL.words(l.hits)} of his last ${PL.words(l.games)}.`);
+  why.push(`We project him at ${PL.words(Math.round(l.proj))}.`);
+  return {who:l.name,bet:`${over?"over":"under"} ${PL.spokenLine(l.line)} points, rebounds and assists`,why};
+}
 async function board(games,D){
   const key=`board-${TODAY}.json`;if(cached(key,30)&&!DRY&&MODE!=="board")return;
   if(!ODDS_KEY){log("PRA board needs ODDS_API_KEY");return;}
@@ -665,6 +677,7 @@ async function board(games,D){
   const pl=parlayOf(rows);
   if(PARLAY_DAYS.includes(etWeekday())||process.env.PARLAY_FORCE==="1")log(pl?`parlay: ${pl.n} legs, ${pl.american}, chance ${(pl.p*100).toFixed(1)}%`:`parlay: fewer than ${PARLAY_LEGS} games with a candidate leg`);
   await ntfy(`NBA PRA board ${TODAY} (${games.length} games)${pl?" + 🎯 parlay":""}`,msg+(pl?"\n\n"+parlayText(pl):""),top.length?4:2,["basketball","trophy"]);
+  if(pl){const d=etWeekday();await ntfy(`🎙 Jackson 5 script: NBA ${DAYS[d]||d}`,PL.script(pl,pl.legs.map(nbaLegSpeech),{title:`NBA ${DAYS[d]||d}`,book:pl.legs[0].book}),3,["microphone"]);}
   logPicks("board",[["PRA board","prop",top]]);await publishBoard(top);
   // the parlay is logged as one pick (kind "parlay") with its legs; results/track.js grades it leg by leg
   if(pl)logPicks("board",[["parlay","parlay",[{kind:"parlay",key:"parlay",gameId:"multi",stat:String(pl.n),name:`${pl.n}-leg PRA parlay`,
