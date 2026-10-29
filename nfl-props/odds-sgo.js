@@ -15,8 +15,9 @@ const BASE="https://api.sportsgameodds.com/v2";
 const STAT={recYds:"receiving_yards",rec:"receiving_receptions",rushYds:"rushing_yards",passYds:"passing_yards"};
 const STAT_OF=Object.fromEntries(Object.entries(STAT).map(([k,v])=>[v,k]));
 const TTL=env("SGO_TTL_MIN",30),RESERVE=env("SGO_RESERVE",100),AHEAD_H=env("SGO_AHEAD_H",8*24);
-// the books to ask for: the sharp reference(s) + your books + a few US books for the median line
-const BOOKS=envs("SGO_BOOKMAKERS",[...new Set([...SHARP,...MINE,"draftkings","fanduel","betmgm","caesars","espnbet","betrivers"])].filter(b=>b!=="consensus").join(","));
+// every book the key covers by default: SGO rejects the whole call on one unknown bookmakerID (the Odds API's
+// "betonlineag" etc.), so a filter is opt-in (SGO_BOOKMAKERS, SGO's own IDs)
+const BOOKS=envs("SGO_BOOKMAKERS","");
 const TITLE={fanduel:"FanDuel",draftkings:"DraftKings",betmgm:"BetMGM",caesars:"Caesars",espnbet:"ESPN BET",betrivers:"BetRivers",
   pinnacle:"Pinnacle",bovada:"Bovada",unibet:"Unibet",pointsbet:"PointsBet",williamhill:"William Hill",consensus:"Market no-vig (SGO)"};
 // same map as odds.js (which requires this file, so it can't be imported from there)
@@ -60,7 +61,7 @@ let CACHE=null;
 async function events(){
   if(CACHE&&Date.now()-CACHE.at<TTL*6e4)return CACHE.list;
   if(!await affordable("NFL odds"))return CACHE?CACHE.list:null;
-  const now=Date.now(),q=`leagueID=NFL&oddsAvailable=true&includeOpposingOdds=true&bookmakerID=${encodeURIComponent(BOOKS)}`+
+  const now=Date.now(),q=`leagueID=NFL&oddsAvailable=true&includeOpposingOdds=true${BOOKS?`&bookmakerID=${encodeURIComponent(BOOKS)}`:""}`+
     `&startsAfter=${encodeURIComponent(new Date(now-4*36e5).toISOString())}&startsBefore=${encodeURIComponent(new Date(now+AHEAD_H*36e5).toISOString())}&limit=50`;
   const list=[];let cursor=null;
   for(let page=0;page<5;page++){
