@@ -1,3 +1,6 @@
+// NFL_ODDS=sgo (with SPORTSGAMEODDS_KEY): use SportsGameOdds instead (odds-sgo.js, same exports), which keeps the
+// shared Odds API key for nba-edges.
+if(process.env.NFL_ODDS==="sgo"&&process.env.SPORTSGAMEODDS_KEY){module.exports=require("./odds-sgo");return;}
 // Optional lines from The Odds API (the-odds-api.com). Only used when ODDS_API_KEY is set.
 // Credit math: listing events is free; an odds call costs (markets x regions) credits, and a
 // bookmakers= list is billed as one region per 10 books. We always ask for the sharp book plus

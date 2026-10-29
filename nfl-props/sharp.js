@@ -10,9 +10,12 @@
 const {env,envs}=require("./lib");
 
 const SHARP=envs("ODDS_SHARP","pinnacle,lowvig,betonlineag").split(",").map(s=>s.trim()).filter(Boolean);   // first one present wins
+// SportsGameOdds (NFL, NFL_ODDS=sgo) also carries its own no-vig consensus as book "consensus": the last-resort sharp
+// line when no sharp book prices a market. The Odds API has no such book, so it is never added there.
+if(process.env.NFL_ODDS==="sgo"&&!SHARP.includes("consensus"))SHARP.push("consensus");
 const MINE=envs("MY_BOOKS","draftkings,fanduel,betmgm,williamhill_us,espnbet,fanatics,betrivers").split(",").map(s=>s.trim()).filter(Boolean);
 // Odds API bills every 10 bookmakers as one region, so ask for exactly the sharp + your books (max 10).
-const BOOKMAKERS=process.env.ODDS_BOOKMAKERS||[...new Set([...SHARP,...MINE])].slice(0,10).join(",");
+const BOOKMAKERS=process.env.ODDS_BOOKMAKERS||[...new Set([...SHARP,...MINE])].filter(b=>b!=="consensus").slice(0,10).join(",");
 
 const Phi=z=>{const t=1/(1+0.2316419*Math.abs(z)),d=0.3989423*Math.exp(-z*z/2);
   const p=d*t*(0.3193815+t*(-0.3565638+t*(1.781478+t*(-1.821256+t*1.330274))));return z>0?1-p:p;};

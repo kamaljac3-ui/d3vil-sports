@@ -46,6 +46,10 @@ jobs:
           NTFY_SERVER: ${{ secrets.NTFY_SERVER }}
           NTFY_TOKEN: ${{ secrets.NTFY_TOKEN }}
           ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+          # NFL_ODDS=sgo (repo Variable) switches lines/prices to SportsGameOdds (nfl-props/odds-sgo.js), keeping the
+          # shared Odds API credits for nba-edges
+          SPORTSGAMEODDS_KEY: ${{ secrets.SPORTSGAMEODDS_KEY }}
+          NFL_ODDS: ${{ vars.NFL_ODDS }}
           ODDS_MONTHLY_BUDGET: ${{ vars.NL_ODDS_MONTHLY_BUDGET || '100' }}
           LINES: ${{ vars.NL_LINES }}
           MIN_SPREAD: ${{ vars.NL_MIN_SPREAD }}

@@ -202,7 +202,7 @@ const SH=require("../nfl-props/sharp.js");
 const MIN_EV_PROPS=+(process.env.MIN_EV_PROPS||0.03),EV_MAX_GAP=+(process.env.EV_MAX_GAP||2);
 // the sharp book + your books + enough US books for a median line, 10 at most (one region)
 const LINE_BOOKS=(process.env.NBA_LINE_BOOKS||"draftkings,betmgm,williamhill_us,fanatics,betrivers,espnbet").split(",").map(s=>s.trim()).filter(Boolean);
-const BOOKS=[...new Set([...SH.SHARP,...SH.MINE,...LINE_BOOKS])].slice(0,10);
+const BOOKS=[...new Set([...SH.SHARP,...SH.MINE,...LINE_BOOKS])].filter(b=>b!=="consensus").slice(0,10);
 const oddsUsageKey=()=>`odds-usage-${TODAY.slice(0,7)}.json`;
 async function oddsGet(url,cost,what){
   const u=cached(oddsUsageKey(),24*40)||{used:0,remaining:null};
