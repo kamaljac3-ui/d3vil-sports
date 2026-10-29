@@ -25,9 +25,11 @@ const P_MIN=+(process.env.P_MIN||0.58);           // model over/under probabilit
 const PREGAME_MIN=+(process.env.PREGAME_MIN||90);
 const CLOSE_LINES=process.env.CLOSE_LINES!=="0",CLOSE_WINDOW=+(process.env.CLOSE_WINDOW||45);  // closing-line capture, see captureCloses
 // tagged on every logged pick so results/track.js can grade each model version separately; bump it on any model change
-const MODEL_VERSION=process.env.MODEL_VERSION||"2026-10-24-rosters";
-const ABS_MIN={pts:2,reb:1,ast:1,fg3m:0.5};
-const STATS=["pts","reb","ast","fg3m"],AVG={pts:"PTS",reb:"REB",ast:"AST",fg3m:"FG3M"},LABEL={pts:"PTS",reb:"REB",ast:"AST",fg3m:"3PM"};
+const MODEL_VERSION=process.env.MODEL_VERSION||"2026-10-28-pra-blowout";
+const ABS_MIN={pra:3,pts:2,reb:1,ast:1,fg3m:0.5};
+// PRA (points + rebounds + assists) first: it's Kamal's main bet. Its average is the PRA field (withPRA below).
+const STATS=["pra","pts","reb","ast","fg3m"],AVG={pra:"PRA",pts:"PTS",reb:"REB",ast:"AST",fg3m:"FG3M"},LABEL={pra:"PRA",pts:"PTS",reb:"REB",ast:"AST",fg3m:"3PM"};
+const withPRA=D=>{for(const k in D.players){const p=D.players[k];p.PRA=(p.PTS||0)+(p.REB||0)+(p.AST||0);}return D;};
 const CACHE=path.join(__dirname,".cache");fs.mkdirSync(CACHE,{recursive:true});
 // ESPN 403s custom "bot" agents everywhere and a spoofed Chrome agent from GitHub runners; Node's default agent passes both.
 const UA={};
@@ -122,7 +124,7 @@ function blend(cur,prev){
   const T=Object.values(out.teams),avg=k=>{const v=T.map(t=>t[k]).filter(x=>x>0);return v.length?v.reduce((s,x)=>s+x,0)/v.length:null;};
   const zt=T.map(t=>t.oppZones).filter(Boolean);
   out.league={pace:avg("pace"),ppg:avg("ppg"),oppReb:avg("oppReb"),oppAst:avg("oppAst"),zones:zt.length>=20?M.leagueZones(zt):null};
-  return out;
+  return withPRA(out);
 }
 async function fromNbaCom(){
   const cur=await nbaSeason(CUR.nba),prev=await nbaSeason(PREV.nba);
@@ -140,7 +142,7 @@ function readSnap(maxAgeH){
   return null;
 }
 async function loadData(){
-  const hit=cached(`data-${CUR.nba}.json`,12);if(hit)return hit;
+  const hit=cached(`data-${CUR.nba}.json`,12);if(hit)return withPRA(hit);
   let D=readSnap(36);
   if(!D&&process.env.FORCE_ESPN!=="1"){try{D=await fromNbaCom();}catch(e){log(e.message);}}
   if(!D)D=readSnap(24*7);
@@ -151,7 +153,7 @@ async function loadData(){
     D=blend(cur,prev);
   }
   log(`stats: ${Object.keys(D.players).length} players, ${Object.keys(D.teams).length} teams via ${D.src}${D.league.zones?"":" (no zone data)"}`);
-  return store(`data-${CUR.nba}.json`,D);
+  return store(`data-${CUR.nba}.json`,withPRA(D));
 }
 async function snapshot(){
   const D=await fromNbaCom();
@@ -187,7 +189,8 @@ async function injuries(g){
   return out;
 }
 // ---------- prop lines (optional, The Odds API) ----------
-const MKT={player_points:"pts",player_rebounds:"reb",player_assists:"ast",player_threes:"fg3m"};
+// PRA is its own market (player_points_rebounds_assists); each market costs Odds API credits per game
+const MKT={player_points_rebounds_assists:"pra",player_points:"pts",player_rebounds:"reb",player_assists:"ast",player_threes:"fg3m"};
 async function propLines(g){
   if(!ODDS_KEY)return null;
   let ev=cached(`odds-events-${TODAY}.json`,3);
@@ -214,7 +217,8 @@ const MIN_SPREAD=+(process.env.MIN_SPREAD||4),MIN_TOTAL=+(process.env.MIN_TOTAL|
 const TEAM_IDS=[1,2,17,30,4,5,6,7,8,9,10,11,12,13,29,14,15,16,3,18,25,19,20,21,22,23,24,28,26,27];
 // a season's finished regular-season games from the 30 ESPN team schedules
 async function seasonResults(y,maxAgeH){
-  const key=`results-${y}.json`;const hit=cached(key,maxAgeH);if(hit)return hit;
+  // v2 key: older caches were saved without game ids, which the head-to-head boxes need
+  const key=`results2-${y}.json`;const hit=cached(key,maxAgeH);if(hit)return hit;
   const byId={};
   for(let i=0;i<TEAM_IDS.length;i+=6)await Promise.all(TEAM_IDS.slice(i,i+6).map(async id=>{
     const j=await get(`${ESPN}/teams/${id}/schedule?season=${y}&seasontype=2`);
@@ -232,7 +236,7 @@ async function ratings(){
   const prior=prev.length?LN.fitRatings(prev,prev[prev.length-1].date,null):null;
   const played=cur.filter(g=>g.date<now);
   log(`game ratings: ${played.length} games this season, prior from ${prev.length} last season`);
-  return RATINGS={games:played,R:LN.fitRatings(played,now,prior)};
+  return RATINGS={games:played,prev,R:LN.fitRatings(played,now,prior)};
 }
 // ---------- defense context (informational tags only, never in a projection) ----------
 // The 2024-26 backtest: players facing a bottom-3 defense vs their position beat their own average by ~0.7 pts more than
@@ -314,12 +318,43 @@ function lineText(r){
 const linesMessage=rows=>rows.length?`Game lines (model vs line; no proven edge yet, see BACKTEST-LINES.md)\n`+rows.map(lineText).join("\n"):"";
 
 // ---------- scoring ----------
+// Head-to-head (informational tag only). In the 2024-26 box scores a player's PRA over his last 5 meetings with tonight's
+// opponent barely predicts tonight (+0.06 PRA per point of H2H gap, both seasons). The one part that repeated: players
+// 5+ PRA BELOW their average vs this team came in ~1 PRA under their projection and went under a stand-in line 56%/58%
+// of the time (vs 49%/52% for everyone). Team H2H vs the closing line was nothing (spread slope -0.10/-0.07). So: tag the
+// cold side, log h2h on every pick, let the weekly review grade it.
+const H2H_N=+(process.env.H2H_N||5),H2H_COLD=+(process.env.H2H_COLD||5);
+async function meetingBox(id){
+  const key=`box-${id}.json`;const hit=cached(key,24*400);if(hit)return hit;
+  const s=await get(`${ESPN}/summary?event=${id}`);if(!s||!s.boxscore)return null;
+  const out={};
+  for(const t of s.boxscore.players||[])for(const g of t.statistics||[]){const L=g.labels||[];
+    for(const a of g.athletes||[]){if(a.didNotPlay||!a.stats||!a.stats.length)continue;const v=k=>+a.stats[L.indexOf(k)]||0;
+      out[nk(a.athlete.displayName)]=v("PTS")+v("REB")+v("AST");}}
+  return store(key,out);
+}
+// {n, diff}: this player's PRA in his last H2H_N games vs tonight's opponent (this season and last), minus his average now
+const H2H={};
+async function h2hOf(g,D,key){
+  const pair=[g.home.espnAbbr,g.away.espnAbbr].sort().join("|");
+  if(!H2H[pair]){
+    try{const {games,prev}=await ratings();
+      const meet=[...prev,...games].filter(x=>[x.home,x.away].sort().join("|")===pair&&x.date<g.date&&x.id).slice(-H2H_N);
+      H2H[pair]=[];for(const m of meet){const b=await meetingBox(m.id);if(b)H2H[pair].push(b);}}
+    catch(e){H2H[pair]=[];}
+  }
+  const p=D.players[key],v=H2H[pair].map(b=>b[key]).filter(x=>x!=null);
+  if(!p||v.length<2)return null;
+  return {n:v.length,diff:Math.round((v.reduce((a,x)=>a+x,0)/v.length-p.PRA)*10)/10};
+}
 async function sideRows(g,side,D,outKeys,lines){
   const team=(await roster(g[side].espnId)).map(n=>D.players[nk(n)]).filter(Boolean);
   const rows=flagRows(projectSide(team,g,side,D,outKeys),lines),rest=await restOf(g,side);
   // rest and dvp ride along on every logged pick so results/track.js can grade them, tagged or not
-  for(const r of rows){const t=[...r.tags],dv=await dvpOf(D,g,side,r.key);if(rest===1)t.push("b2b 2nd night");if(dv&&dv.show)t.push(dv.text);
-    r.tags=t;r.rest=isFinite(rest)?rest:null;r.dvp=dv&&{pos:dv.pos,rank:dv.rank,of:dv.of,pct:dv.pct};}
+  const opp=g[side==="home"?"away":"home"].abbr;
+  for(const r of rows){const t=[...r.tags],dv=await dvpOf(D,g,side,r.key),h=await h2hOf(g,D,r.key);if(rest===1)t.push("b2b 2nd night");if(dv&&dv.show)t.push(dv.text);
+    if(h&&h.diff<=-H2H_COLD)t.push(`cold vs ${opp}: ${h.diff} PRA over ${h.n} mtgs`);
+    r.tags=t;r.rest=isFinite(rest)?rest:null;r.dvp=dv&&{pos:dv.pos,rank:dv.rank,of:dv.of,pct:dv.pct};r.h2h=h;}
   return rows;
 }
 // Informational tag only, never in the projection: in the 2024-26 box scores regulars who played the 2nd night of a
@@ -340,16 +375,19 @@ function projectSide(team,g,side,D,outKeys,outOpts,minProj=MIN_PROJ){
   else if(O.pace&&lg.pace)env=M.clamp(O.pace/lg.pace,0.94,1.06);
   const oppReb=O.oppReb&&lg.oppReb?M.clamp(O.oppReb/lg.oppReb,0.9,1.1):1;
   const oppAst=O.oppAst&&lg.oppAst?M.clamp(O.oppAst/lg.oppAst,0.9,1.1):1;
-  const blowout=g.homeSpread!=null&&Math.abs(g.homeSpread)>=12;
-  const tags=[...(boost.out.length?[`w/o ${boost.out.map(n=>n.split(" ").slice(-1)[0]).join(", ")}`]:[]),...(env>=1.04?["high team total"]:[]),...(blowout?["blowout risk"]:[])];
+  // this team's spread (negative = favorite) drives the blowout minutes in model.project (starters down at 12+, an 8+
+  // underdog's rotation and bench up)
+  const spread=g.homeSpread!=null?(side==="home"?g.homeSpread:-g.homeSpread):null,blowout=spread!=null&&Math.abs(spread)>=M.BLOW.starterSpread;
+  const dog=spread!=null&&spread>=M.BLOW.dogSpread;
+  const tags=[...(boost.out.length?[`w/o ${boost.out.map(n=>n.split(" ").slice(-1)[0]).join(", ")}`]:[]),...(env>=1.04?["high team total"]:[]),...(blowout?["blowout risk"]:[]),...(dog?[`${spread>0?"+":""}${spread} underdog`]:[])];
   const players=[];
   for(const p of team){
     if(outKeys.has(p.key)||p.MIN<minProj)continue;
     const zone=p.zones&&O.oppZones&&lg.zones?M.zoneMatchup(p.zones,p.gpEff||p.GP,O.oppZones,lg.zones):null;
     const b=ob.forPlayer(p);   // teammate-out multipliers are per player now
-    players.push({p,zone,boost:b,pr:M.project(p,{zone,env,oppReb,oppAst,blowout,boost:b})});
+    players.push({p,zone,boost:b,pr:M.project(p,{zone,env,oppReb,oppAst,spread,blowout,boost:b})});
   }
-  return {me:me.abbr,opp:op.abbr,tags,ctx:{env,oppReb,oppAst,blowout},players};
+  return {me:me.abbr,opp:op.abbr,tags,ctx:{env,oppReb,oppAst,spread,blowout},players};
 }
 // the alert rows: shot-zone edges, prop-line edges (with lines) or projection boosts (without)
 function flagRows(side,lines){

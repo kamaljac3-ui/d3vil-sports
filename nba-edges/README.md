@@ -1,6 +1,6 @@
 # NBA Edges
 
-NBA matchup alerts sent to ntfy: per-game stat projections (projection boosts, and prop lines when `ODDS_API_KEY` is set). Shot-zone edge alerts exist but are off by default, per the backtest. It's the NBA version of `launch-angle/`, comparing a player's own tendencies with what tonight's opponent gives up.
+NBA matchup alerts sent to ntfy: per-game stat projections (projection boosts, and prop lines when `ODDS_API_KEY` is set) for **PRA (points + rebounds + assists)**, points, rebounds, assists and threes. PRA comes first: it's Kamal's main bet. Shot-zone edge alerts exist but are off by default, per the backtest. It's the NBA version of `launch-angle/`, comparing a player's own tendencies with what tonight's opponent gives up.
 
 ## Model (`model.js`)
 
@@ -10,7 +10,8 @@ NBA matchup alerts sent to ntfy: per-game stat projections (projection boosts, a
   - the zone factor
   - scoring environment: implied team total from the ESPN total/spread ÷ team PPG, or opponent pace
   - opponent rebounds and assists allowed ÷ league
-  - blowout trim for starters when the spread is 12 or more
+  - blowout minutes from this team's spread (2026-10-28, `BLOW_*`): starters (28+ MPG) ×0.96 when the spread is 12+ either way; an 8+ point underdog's rotation (20–28 MPG) ×1.046 and bench (<20) ×1.126 for garbage time. Fit on PRA vs the projection with ESPN closing spreads: starters 0.977/0.945 and underdog bench 1.063/1.183 in 2024-25/2025-26, out-of-sample error −0.4%. The favorite's bench came in under only in 2025-26, so it's left alone
+  - PRA is the sum of the points, rebounds and assists projections, calibrated on its own (`CAL.pra`)
   - teammates ruled out: their minutes go to the rest of the rotation, weighted toward players with room to play more (MIN × (36 − MIN)), at a quarter strength (`NBA_OUT_MIN_SCALE` 0.25). Per-minute production gets a small usage bump: 0.15 × the share of that stat the team lost (`NBA_OUT_USAGE` 0.15). This only counts players who have been playing, since a long absence is already in everyone's averages.
 - **Season blend:** until a player has about 15 games, last season is mixed in.
 - **`b2b 2nd night` tag** (informational only, never in the projection): the player's team played yesterday. In the 2024–26 box scores, regulars who played the second night scored right at their projection (+0.15 vs +0.17 pts on other nights). A player's own back-to-back split barely repeated from one season to the next (0.11× ± 0.08), so the tag doesn't say better or worse. What did change is that they sat 21% of second nights vs 16% of other games, so the risk is a late rest day.
@@ -74,11 +75,12 @@ Workflow: `.github/workflows/nba-edges-alerts.yml`. Morning runs at 15:00 UTC, a
 
 - **ESPN** (no key): schedule, spread/total, injuries, rosters, and ESPN-only fallback stats. It 403s custom bot user agents, and a spoofed Chrome agent from GitHub runners, so requests use Node's default agent.
 - **stats.nba.com** (no key): shot zones, pace, opponent stats. It **times out from GitHub runners**, which is why the Action reads the committed snapshot. The snapshot is used if it's under 36h old. Otherwise the Action tries live nba.com, then a snapshot up to 7 days old, then ESPN only (no zones or opponent adjustments).
-- **The Odds API** (optional `ODDS_API_KEY`): player points, rebounds, assists and threes lines, taking the median across US books. Each game costs credits per market.
+- **The Odds API** (optional `ODDS_API_KEY`): player PRA (`player_points_rebounds_assists`), points, rebounds, assists and threes lines, taking the median across US books. Each game costs credits per market, so PRA made each props pull about 25% more expensive (5 markets instead of 4).
+- **Head-to-head boxes:** the last 5 meetings of tonight's two teams (this season and last) from ESPN game summaries, cached as `box-<id>.json` for the `cold vs` tag.
 
 ## Settings (env)
 
-`TOP_N` (6), `ZONE_MIN` (99 = shot-zone alerts off; 1.0 to turn them on), `NBA_OUT_MIN_SCALE` (0.25), `NBA_OUT_USAGE` (0.15), `NBA_OUT_MODE` (`minutes`; `uniform` = the old rule), `NBA_OUT_BENCH_SCALE` (0.25), `MIN_PROJ` (10; 20 = starters only), `BOOST_MIN` (0.10), `P_MIN` (0.58), `NBA_CAL` (JSON override of the calibration constants), `PREGAME_MIN` (90), `ODDS_IN_MORNING` (0), `SPREAD_EDGES` (0), `TOTAL_EDGES` (0), `MIN_SPREAD` (4), `MIN_TOTAL` (6), `NBA_LINES_HALF_LIFE` / `_PRIOR_GAMES` / `_REGRESS` / `_HCA` / `_B2B` / `_INJ` / `_INJ_TOTAL` (game-line model, see `lines.js`), `CLOSE_LINES` (1 = pull prop lines again in the last `CLOSE_WINDOW` (45) minutes before tip as the closing line; one Odds API call per game with props), `MODEL_VERSION` (tag on logged picks; bump it on any model change), `DATE` (test a past slate; keeps finished games), `FORCE_ESPN` (1 = skip nba.com), `DVP_RANK` (3), `DVP_MIN_GP` (10), `DEF_MIN_GP` (5), `DRY_RUN`.
+`TOP_N` (6), `BLOW_STARTER_SPREAD` (12), `BLOW_STARTER` (0.96), `BLOW_DOG_SPREAD` (8), `BLOW_DOG_ROTATION` (1.046), `BLOW_DOG_BENCH` (1.126), `H2H_N` (5), `H2H_COLD` (5 PRA), `ZONE_MIN` (99 = shot-zone alerts off; 1.0 to turn them on), `NBA_OUT_MIN_SCALE` (0.25), `NBA_OUT_USAGE` (0.15), `NBA_OUT_MODE` (`minutes`; `uniform` = the old rule), `NBA_OUT_BENCH_SCALE` (0.25), `MIN_PROJ` (10; 20 = starters only), `BOOST_MIN` (0.10), `P_MIN` (0.58), `NBA_CAL` (JSON override of the calibration constants), `PREGAME_MIN` (90), `ODDS_IN_MORNING` (0), `SPREAD_EDGES` (0), `TOTAL_EDGES` (0), `MIN_SPREAD` (4), `MIN_TOTAL` (6), `NBA_LINES_HALF_LIFE` / `_PRIOR_GAMES` / `_REGRESS` / `_HCA` / `_B2B` / `_INJ` / `_INJ_TOTAL` (game-line model, see `lines.js`), `CLOSE_LINES` (1 = pull prop lines again in the last `CLOSE_WINDOW` (45) minutes before tip as the closing line; one Odds API call per game with props), `MODEL_VERSION` (tag on logged picks; bump it on any model change), `DATE` (test a past slate; keeps finished games), `FORCE_ESPN` (1 = skip nba.com), `DVP_RANK` (3), `DVP_MIN_GP` (10), `DEF_MIN_GP` (5), `DRY_RUN`.
 
 ## Cache (`.cache/`)
 

@@ -115,7 +115,8 @@ async function gradeNba(r){
     if(a.didNotPlay||!a.stats||!a.stats.length)return {status:"void",why:a.reason||"did not play"};
     const L=g.labels,v=k=>a.stats[L.indexOf(k)];
     const min=parseInt(v("MIN"))||0;if(!min)return {status:"void",why:"0 minutes"};
-    return {status:"final",min,pts:+v("PTS")||0,reb:+v("REB")||0,ast:+v("AST")||0,fg3m:parseInt(String(v("3PT")).split("-")[0])||0};
+    const pts=+v("PTS")||0,reb=+v("REB")||0,ast=+v("AST")||0;
+    return {status:"final",min,pts,reb,ast,pra:pts+reb+ast,fg3m:parseInt(String(v("3PT")).split("-")[0])||0};
   }
   return {status:"void",why:"not in box score"};
 }
@@ -196,7 +197,7 @@ function recentLines(L,since){
     out.push(r.result.status==="void"?`${r.date} ${r.name} vs ${r.pitcher}: void (${r.result.why})`:
       r.kind==="live"?`${r.date} ${r.name} vs ${r.pitcher} (live, ${r.inning}): ${r.result.hrVsSP} HR in ${r.result.paVsSP} PA vs him (${pct(r.result.pHRvs)} expected)`:
       `${r.date} ${r.name} vs ${r.pitcher}: ${r.result.hr} HR in ${r.result.pa} PA (${pct(r.result.pHR)} expected), ${r.result.inWin}/${r.result.bbe} in window`);
-  const LBL={pts:"PTS",reb:"REB",ast:"AST",fg3m:"3PM"};
+  const LBL={pra:"PRA",pts:"PTS",reb:"REB",ast:"AST",fg3m:"3PM"};
   for(const r of L.nba.filter(r=>r.date>=since&&r.result)){
     if(r.kind==="spread"||r.kind==="total"){
       const what=r.kind==="spread"?`${r.team} ${r.line>0?"+":""}${r.line}`:`${r.side} ${r.line}`,cl=r.close!=null?`, closed ${r.close}`:"";
@@ -222,6 +223,11 @@ const NBA_FAMILIES=[
   ["D vs position: top half",r=>r.dvp&&r.dvp.rank<=r.dvp.of/2],
   ["high team total",r=>r.tags.includes("high team total")],
   ["blowout risk",r=>r.tags.includes("blowout risk")],
+  // from model 2026-10-28-pra-blowout on: the team's spread drives blowout minutes, and h2h is logged on every pick
+  ["8+ pt underdog",r=>r.tags.some(t=>/ underdog$/.test(t))],
+  ["cold H2H (5+ PRA under avg vs this opp)",r=>r.h2h&&r.h2h.diff<=-5],
+  ["hot H2H (5+ PRA over avg vs this opp)",r=>r.h2h&&r.h2h.diff>=5],
+  ["PRA picks",r=>r.stat==="pra"],
   ["sent < 2h before tip",r=>hoursOut(r)!=null&&hoursOut(r)<2],
   ["sent 2h+ before tip",r=>hoursOut(r)!=null&&hoursOut(r)>=2],
 ];

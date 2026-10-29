@@ -21,7 +21,7 @@ const TEST_INJECT=process.env.TEST_INJECT||"";     // testing: "Player Name" rul
 const CACHE=path.join(__dirname,".cache");fs.mkdirSync(CACHE,{recursive:true});
 const ESPN="https://site.api.espn.com/apis/site/v2/sports/basketball/nba";
 const TODAY=R.TODAY;
-const {STATS,AVG}=R.SETTINGS,LABEL={pts:"PTS",reb:"REB",ast:"AST",fg3m:"3PM"};
+const {STATS,AVG}=R.SETTINGS,LABEL={pra:"PRA",pts:"PTS",reb:"REB",ast:"AST",fg3m:"3PM"};
 const log=(...a)=>console.log(`[news ${new Date().toISOString().slice(11,19)}]`,...a);
 const sleep=ms=>new Promise(s=>setTimeout(s,ms));
 

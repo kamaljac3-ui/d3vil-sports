@@ -39,16 +39,27 @@ function zoneMatchup(p,gp,opp,L){
 
 // ---------- projections ----------
 // pl: season per-game line {MIN,PTS,REB,AST,FG3M,FTM,MIN10?}
-// ctx: {zone, env (scoring environment), oppReb, oppAst, blowout, boost:{pts,reb,ast}}
+// ctx: {zone, env (scoring environment), oppReb, oppAst, spread (this team's spread, negative = favorite),
+//       blowout (old flag, used only when spread is missing), boost:{pts,reb,ast}}
+// Blowout minutes, fit on PRA vs the calibrated projection with ESPN closing spreads (2024-25 fit, 2025-26 check, these
+// values pooled): starters (28+ MPG) lose minutes when the spread is 12+ either way (x0.977 / x0.945 -> 0.96), and an
+// 8+ point underdog's rotation (20-28 MPG, x1.039 / x1.052) and bench (<20, x1.063 / x1.183) pick up garbage time.
+// The favorite's bench came in under only in 2025-26, so it's left alone. Out-of-sample error -0.4%.
+const BLOW={starterSpread:+(process.env.BLOW_STARTER_SPREAD||12),starter:+(process.env.BLOW_STARTER||0.96),
+  dogSpread:+(process.env.BLOW_DOG_SPREAD||8),dogRotation:+(process.env.BLOW_DOG_ROTATION||1.046),dogBench:+(process.env.BLOW_DOG_BENCH||1.126)};
+function blowoutFactor(pl,ctx){
+  const s=ctx.spread;
+  if(s==null)return ctx.blowout&&pl.MIN>=28?BLOW.starter:1;
+  if(pl.MIN>=28)return Math.abs(s)>=BLOW.starterSpread?BLOW.starter:1;
+  if(s>=BLOW.dogSpread)return pl.MIN>=20?BLOW.dogRotation:BLOW.dogBench;
+  return 1;
+}
 function project(pl,ctx){
   const min=pl.MIN10?0.5*pl.MIN+0.5*pl.MIN10:pl.MIN;
-  let minF=pl.MIN?min/pl.MIN:1;if(ctx.blowout&&pl.MIN>=28)minF*=0.95;
+  const minF=(pl.MIN?min/pl.MIN:1)*blowoutFactor(pl,ctx);
   const z=ctx.zone||{ptsFactor:1,threesFactor:1},e=ctx.env||1,b=ctx.boost||{pts:1,reb:1,ast:1};
-  return {min,
-    pts:((pl.PTS-pl.FTM)*z.ptsFactor+pl.FTM)*minF*e*b.pts,
-    reb:pl.REB*minF*(ctx.oppReb||1)*b.reb,
-    ast:pl.AST*minF*(ctx.oppAst||1)*e*b.ast,
-    fg3m:pl.FG3M*z.threesFactor*minF*e*b.pts};
+  const pts=((pl.PTS-pl.FTM)*z.ptsFactor+pl.FTM)*minF*e*b.pts,reb=pl.REB*minF*(ctx.oppReb||1)*b.reb,ast=pl.AST*minF*(ctx.oppAst||1)*e*b.ast;
+  return {min:min*blowoutFactor(pl,ctx),pts,reb,ast,fg3m:pl.FG3M*z.threesFactor*minF*e*b.pts,pra:pts+reb+ast};
 }
 // Calibration, fit by backtest.js on 2024-26 (rerun it and paste its "CAL" line here after a model change):
 //  k     - starters (20+ MPG) get only k of the projection's gap from their average (the gap showed up at 0.6-0.8x;
@@ -57,8 +68,9 @@ function project(pl,ctx){
 //  a,b   - real spread of the stat around that projection: sd = a + b*sqrt(proj). The old fixed spreads were ~2/3 of
 //          the real one in the 8-20 pt range, which made 60% spots look like 85-90%.
 const CAL=process.env.NBA_CAL?JSON.parse(process.env.NBA_CAL):{
-  pts:{k:0.842,m:9.37,beta:0.931,a:1.524,b:1.398},reb:{k:0.575,m:2.59,beta:0.938,a:-0.027,b:1.233},
-  ast:{k:0.666,m:2.366,beta:0.937,a:-0.036,b:1.17},fg3m:{k:0.612,m:1.198,beta:0.906,a:-0.081,b:1.164}};
+  pra:{k:0.689,m:10.618,beta:0.95,a:3.563,b:1.065},pts:{k:0.672,m:8.482,beta:0.938,a:1.504,b:1.406},
+  reb:{k:0.541,m:2.079,beta:0.939,a:-0.046,b:1.243},ast:{k:0.566,m:2.156,beta:0.938,a:-0.04,b:1.174},
+  fg3m:{k:0.548,m:1.12,beta:0.907,a:-0.081,b:1.164}};
 function calibrate(stat,proj,avg,mpg,cal=CAL){
   const c=cal[stat];if(!c||!(avg>=0))return proj;
   const p=mpg>=20?avg+c.k*(proj-avg):proj;
@@ -105,4 +117,4 @@ function outBoost(team,outKeys,teamGP,opts={}){
   }};
 }
 
-module.exports={ZONES,zonesFromRow,leagueZones,zoneMatchup,project,calibrate,sdOf,pOver,outBoost,clamp,CAL};
+module.exports={ZONES,zonesFromRow,leagueZones,zoneMatchup,project,BLOW,blowoutFactor,calibrate,sdOf,pOver,outBoost,clamp,CAL};

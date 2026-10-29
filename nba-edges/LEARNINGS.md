@@ -25,6 +25,11 @@ How this fits with the weekly review: this file holds what the **backtests** set
 | Road city / nightlife (Atlanta, Miami…) | City spread came from the home team's defense. With a posted total, or comparing free-night vs back-to-back arrivals in the same city, the spread is noise. ATL −0.9, MIA +2.6 | Rejected |
 | Game lines (spread/total) vs the close | Spreads 50-53% vs the close at any disagreement; totals lose (`BACKTEST-LINES.md`) | No ✅ by default; 4+ pt spreads logged as tracked picks |
 | Backtest rosters | nba.com historical snapshots list each player's *current* team (Jan 2025 had Davis on DAL). Fixed 2026-10-24: rosters now come from box scores | Fixed |
+| PRA (points + rebounds + assists) | Calibrated on its own (2026-10-28): stand-in-line picks 73.1% (2024-25 fit) / 75.1% (2025-26), and "said 60-65%" hit 60%, so the probabilities hold out of sample (a little conservative at the top). Projection 2.6-3.0% better than the plain average | In model and alerts (stat `pra`, Odds API market `player_points_rebounds_assists`), model `2026-10-28-pra-blowout` |
+| Blowouts (closing spread) | Starters 28+ MPG at 12+ either way: −0.8/−1.9 PRA vs projection, about 2-3 fewer minutes, unders 55% (stand-in line). An 8+ point underdog's bench: +0.8/+2.7 PRA, +4-5 minutes, overs 59%/67%. Its rotation: +0.5/+1.1. Fit factors on 2024-25 cut 2025-26 error 0.4% | In model (`BLOW_*`), replaces the flat ×0.95 trim; tags `blowout risk` and `+N underdog` |
+| Head-to-head, player (last 5 meetings) | PRA in recent meetings minus his average barely predicts tonight: +0.06 ± 0.02 / ± 0.01 PRA per point, both seasons. Only the cold side repeated: 5+ under his average vs this team → −0.8/−1.0 vs projection, unders 56%/58% (stand-in line) vs 49%/52% for everyone. The hot side didn't (+0.5/+0.2) | Info tag `cold vs OPP` (5+ PRA under, 2+ meetings); `h2h` logged on every pick |
+| Head-to-head, team (last 5 meetings) | Recent H2H margin vs the closing line: slope −0.10 ± 0.07 / −0.07 ± 0.04; betting the H2H side when 6+ off the line went 49% / 46%. H2H totals: nothing | Rejected |
+| Defense vs position for PRA | Same as for points: softest 10% of defenses +1.5 PRA vs the player's average but +0.4/+0.2 vs the projection; slope +0.11 ± 0.05 / −0.03 ± 0.05 | Info tag only (unchanged) |
 
 ## Weak leads (not proven; check before acting)
 
@@ -42,3 +47,4 @@ Picks logged from 2026-10-25 on carry `tags`, `rest`, `dvp` {pos, rank, of, pct}
 5. **Minutes:** projected vs played and the per-minute rate. Big minutes misses point at rotation/injury handling; rate misses point at the projection itself.
 6. **Model versions:** `2026-10-24-rosters` (usage 0.15, new CAL) vs earlier picks. Usage 0.15 was marginal out of sample; if CLV or results slip, test usage 0 again.
 7. **nba-news boosts** (model label `nba-news`): 4/14 beat their average as of 2026-10-26. Tiny sample, but worth watching.
+8. **Model `2026-10-28-pra-blowout`:** PRA picks (props and boosts) are the main bet now, so grade the "PRA picks" group on CLV first. Blowout minutes: the "8+ pt underdog" group (bench/rotation overs) should beat "no tags"; if it doesn't over 100+ picks, the books already price garbage time. "cold H2H" should run under its projection (the backtest said about −1 PRA, 56-58% unders).

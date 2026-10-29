@@ -14,7 +14,7 @@ const OUT=process.env.OUT||path.join(__dirname,"BACKTEST.md");
 const CACHE=path.join(__dirname,".cache","bt");fs.mkdirSync(CACHE,{recursive:true});
 const CONC=+(process.env.CONCURRENCY||4);
 const {STATS,AVG,ZONE_MIN,BOOST_MIN,ABS_MIN,P_MIN}=R.SETTINGS;
-const LABEL={pts:"PTS",reb:"REB",ast:"AST",fg3m:"3PM"};
+const LABEL={pra:"PRA",pts:"PTS",reb:"REB",ast:"AST",fg3m:"3PM"};
 const log=(...a)=>console.log("[bt]",...a);
 const sleep=ms=>new Promise(s=>setTimeout(s,ms));
 // regular-season date ranges (ET)
@@ -59,6 +59,7 @@ async function gamesOn(d){
       return {id:e.id,date:d,home:s("home"),away:s("away")};});
   });
 }
+function readOdds(id){try{return JSON.parse(fs.readFileSync(path.join(CACHE,`od-${id}.json`),"utf8"));}catch(e){return null;}}
 async function boxOf(id){
   return diskCached(`g2-${id}.json`,async()=>{
     const s=await getJ(`${ESPN}/summary?event=${id}`);if(!s)return null;
@@ -89,11 +90,14 @@ async function replay(season){
   for(const g of games.sort((a,b)=>a.date<b.date?-1:1)){
     if(!g.b)continue;
     const bucket=addDays(start,7*Math.floor(days(start,g.date)/7));
-    if(!snaps[bucket])snaps[bucket]=await snapshot(season,bucket,prev);
+    if(!snaps[bucket]){snaps[bucket]=await snapshot(season,bucket,prev);for(const p of Object.values(snaps[bucket].players))p.PRA=(p.PTS||0)+(p.REB||0)+(p.AST||0);}
     const D=snaps[bucket];
     let homeSpread=null;const m=/^(\S+)\s+(-?[\d.]+)$/.exec(g.b.details||"");
     if(g.b.details==="EVEN")homeSpread=0;else if(m)homeSpread=m[1]===g.home?-Math.abs(+m[2]):Math.abs(+m[2]);
-    const G={home:{abbr:abbr(g.home)},away:{abbr:abbr(g.away)},total:g.b.total,homeSpread};
+    // ESPN's closing spread/total from the core API (cached by backtest-lines.js as od-<id>.json) covers both seasons;
+    // the summary's pick center only has lines from Nov 2025. Run backtest-lines.js first to fill the cache.
+    const od=readOdds(g.id);if(od&&od.closeSpread!=null)homeSpread=od.closeSpread;
+    const G={home:{abbr:abbr(g.home)},away:{abbr:abbr(g.away)},total:od&&od.closeTotal!=null?od.closeTotal:g.b.total,homeSpread};
     for(const side of ["home","away"]){
       const espnAbbr=g[side],box=g.b.box[espnAbbr]||[],played=new Map(box.filter(x=>!x.dnp&&x.min>0).map(x=>[R.nk(x.name),x]));
       // roster: everyone in the box + everyone who has appeared for this team; one of them who didn't play is "out"
@@ -103,7 +107,7 @@ async function replay(season){
       const team=[...keys].filter(k=>D.players[k]).map(k=>({...D.players[k],team:G[side].abbr,gpCur:T.apps[k]||0}));
       const cd=new Set(box.filter(x=>x.dnp&&/coach/i.test(x.reason)).map(x=>R.nk(x.name)));
       const out=new Set(team.filter(p=>!played.has(p.key)&&!cd.has(p.key)).map(p=>p.key));
-      sides.push({season,date:g.date,G,side,D,team,out,played,hasLine:!!g.b.total});
+      sides.push({season,date:g.date,G,side,D,team,out,played,hasLine:G.total!=null});
       for(const k of played.keys()){if(lastTeam[k]&&lastTeam[k]!==espnAbbr)delete teams[lastTeam[k]].apps[k];lastTeam[k]=espnAbbr;T.apps[k]=(T.apps[k]||0)+1;}
     }
   }
@@ -119,9 +123,9 @@ function score(sides,outOpts,minProj=20){
       const a=x.played.get(p.key)||null;   // null = coach's-decision DNP (a bet on him would be void)
       const f=flags.filter(r=>r.key===p.key);
       recs.push({season:x.season,date:x.date,name:p.name,team:S.me,opp:S.opp,hasLine:x.hasLine,outCount:S.tags.some(t=>t.startsWith("w/o")),
-        p:{MIN:p.MIN,MIN10:p.MIN10,PTS:p.PTS,REB:p.REB,AST:p.AST,FG3M:p.FG3M,FTM:p.FTM,gpCur:p.gpCur},
+        p:{MIN:p.MIN,MIN10:p.MIN10,PTS:p.PTS,REB:p.REB,AST:p.AST,PRA:p.PRA,FG3M:p.FG3M,FTM:p.FTM,gpCur:p.gpCur},
         zone:zone&&{ptsFactor:zone.ptsFactor,threesFactor:zone.threesFactor,delta:zone.delta},ctx:S.ctx,boost,pr,prc:Object.fromEntries(STATS.map(s=>[s,M.calibrate(s,pr[s],p[AVG[s]],p.MIN)])),
-        act:a&&{min:a.min,pts:a.pts,reb:a.reb,ast:a.ast,fg3m:a.fg3m},
+        act:a&&{min:a.min,pts:a.pts,reb:a.reb,ast:a.ast,pra:a.pts+a.reb+a.ast,fg3m:a.fg3m},
         zoneFlag:f.some(r=>r.kind==="zone"),boostFlags:f.filter(r=>r.kind==="boost").map(r=>r.stat)});
     }
   }
@@ -149,9 +153,10 @@ function fitCal(recs){
 const OLD_SD={pts:p=>Math.max(4,0.28*p),reb:p=>Math.max(1.8,0.35*p),ast:p=>Math.max(1.5,0.38*p),fg3m:p=>Math.max(0.9,0.55*p)};
 const oldPOver=(proj,line,s)=>M.pOver(proj,line,s,{[s]:{a:OLD_SD[s](proj),b:0}});
 // every player-game against a stand-in line (his average rounded to x.5); cal null = old probabilities
-function propSim(recs,cal){
+// stats: the old/new comparison uses the four original stats (the old spreads had no PRA); PRA gets its own row
+function propSim(recs,cal,stats=STATS.filter(s=>OLD_SD[s])){
   const bins={};let picks=0,wins=0,ll=0,n=0;
-  for(const r of recs)for(const s of STATS){
+  for(const r of recs)for(const s of stats){
     const avg=r.p[AVG[s]];if(!(avg>=0.6))continue;
     const L=Math.floor(avg)+0.5,proj=cal?M.calibrate(s,r.pr[s],avg,r.p.MIN,cal):r.pr[s],po=cal?M.pOver(proj,L,s,cal):oldPOver(proj,L,s);
     const over=r.act[s]>L,c=Math.max(po,1-po),win=(po>=0.5)===over;
@@ -171,7 +176,7 @@ const VARIANTS={
   "without last-10 minutes":r=>M.project({...r.p,MIN10:undefined},{...r.ctx,boost:r.boost,zone:r.zone}),
   "without game total / pace":r=>M.project(r.p,{...r.ctx,boost:r.boost,zone:r.zone,env:1}),
   "without opponent REB/AST allowed":r=>M.project(r.p,{...r.ctx,boost:r.boost,zone:r.zone,oppReb:1,oppAst:1}),
-  "without blowout trim":r=>M.project(r.p,{...r.ctx,boost:r.boost,zone:r.zone,blowout:false}),
+  "without blowout minutes":r=>M.project(r.p,{...r.ctx,boost:r.boost,zone:r.zone,spread:null,blowout:false}),
   "without teammate-out boost":r=>M.project(r.p,{...r.ctx,zone:r.zone,boost:NOBOOST}),
 };
 // teammate-out settings to compare; the best on the fit season (by total relative error on PTS/REB/AST) becomes the default
@@ -247,8 +252,8 @@ function fitTable(recs,label){
   md.push(`## Prop probabilities (calibration)`,"",
     `The prop alert needs an honest probability, not just a projection. \`model.calibrate\` shrinks a starter's projected gap from his average by k, pulls every projection toward m by beta (a high season average is partly luck), and \`model.sdOf\` sets the spread as a + b·√projection. Fit on ${train}, checked on the rest. Real prop lines aren't available historically, so each player-game gets a **stand-in line: his average rounded to x.5**. Books' real lines are sharper than that, so these hit rates run higher than live ones; the point is whether "the model says 70%" means 70%. "Picks" are the ones the alert would send (P_MIN ${P_MIN}, minimum gaps ${JSON.stringify(ABS_MIN)}). Rotation and bench players (10+ MPG) who played.`,"",
     "| Season | Probabilities | Said 55-60% → hit | Said 60-65% → hit | Said 65-75% → hit | Said 75%+ → hit | Picks | Pick hit rate | Log loss |","|---|---|---:|---:|---:|---:|---:|---:|---:|");
-  for(const s of SEASONS)for(const [lab,cal] of [["old fixed spreads, raw projection",null],[`calibrated (fit on ${train})`,calTrain]]){
-    const x=propSim(CR[s],cal),b=k=>x.bins[k]?`${pc(x.bins[k].said/x.bins[k].n)} → ${pc(x.bins[k].hit/x.bins[k].n)}`:"–";
+  for(const s of SEASONS)for(const [lab,cal,stats] of [["old fixed spreads, raw projection (PTS/REB/AST/3PM)",null],[`calibrated (fit on ${train}) (PTS/REB/AST/3PM)`,calTrain],[`calibrated (fit on ${train}) **PRA**`,calTrain,["pra"]]]){
+    const x=propSim(CR[s],cal,stats),b=k=>x.bins[k]?`${pc(x.bins[k].said/x.bins[k].n)} → ${pc(x.bins[k].hit/x.bins[k].n)}`:"–";
     md.push(`| ${s}${s===train?" (fit)":""} | ${lab} | ${b("55-60")} | ${b("60-65")} | ${b("65-75")} | ${b("75+")} | ${x.picks.toLocaleString()} | ${pc(x.wins/x.picks)} | ${x.ll.toFixed(4)} |`);}
   md.push("",`Fit on all seasons (this goes in \`model.js\` CAL, or set \`NBA_CAL\`):`,"","```",JSON.stringify(calAll),"```","");
   log("CAL "+JSON.stringify(calAll));
