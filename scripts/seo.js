@@ -100,6 +100,10 @@ for (const f of postFiles) {
 // Section pages.
 tagPage("index.html", { url: `${SITE}/` });
 sitemap.unshift([`${SITE}/`, today]);
+if (fs.existsSync(path.join(ROOT, "archive.html"))) { // built by archive.js
+  tagPage("archive.html", { url: `${SITE}/archive.html` });
+  sitemap.splice(1, 0, [`${SITE}/archive.html`, today]);
+}
 for (const f of fs.readdirSync(path.join(ROOT, "commentary")).filter((x) => x.endsWith(".html"))) {
   const rel = `commentary/${f}`;
   const url = f === "index.html" ? `${SITE}/commentary/` : `${SITE}/commentary/${f}`;

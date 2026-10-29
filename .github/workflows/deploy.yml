@@ -24,10 +24,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Adds canonical/social/article tags and writes sitemap.xml in the
-      # checked-out copy only (never committed). See scripts/seo.js.
-      - name: Add SEO tags and sitemap
-        run: node scripts/seo.js
+      # Builds archive.html, then adds canonical/social/article tags and
+      # writes sitemap.xml, in the checked-out copy only (never committed).
+      # See scripts/archive.js and scripts/seo.js.
+      - name: Build archive, add SEO tags and sitemap
+        run: |
+          node scripts/archive.js
+          node scripts/seo.js
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

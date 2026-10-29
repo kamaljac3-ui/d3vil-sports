@@ -180,7 +180,9 @@ College football spreads and totals. **`cfb-lines/README.md` is the full referen
 - writes `sitemap.xml` (not committed; it only exists on the live site)
 
 So the daily routine needs no SEO changes, and the newsletter trigger is unaffected. The homepage `<h1>` is `.sr-only` (hidden on screen).
-Known limits: robots.txt can't work on a github.io project site (it must sit at the domain root), and the 7-day post retention means old posts drop out of Google.
+`scripts/archive.js` runs just before it and builds `archive.html` (every post, newest first), also deploy-only.
+Posts are kept permanently since 2026-10-29 (66 deleted posts restored, the 27 D3vil-era ones rebranded); the homepage still shows only the 7 newest cards.
+Known limit: robots.txt can't work on a github.io project site (it must sit at the domain root).
 
 ## Conventions and lessons (apply to every bot here)
 

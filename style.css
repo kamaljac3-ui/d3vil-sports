@@ -566,3 +566,17 @@ footer.site {
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
   overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
 }
+
+/* Archive: the homepage link to it, and archive.html (built at deploy by scripts/archive.js). */
+.archive-link {
+  display: inline-block; margin-top: 20px;
+  font-family: "Sora", sans-serif; font-weight: 700; font-size: 0.95rem;
+  color: var(--accent); text-decoration: none;
+}
+.archive-link:hover { text-decoration: underline; }
+.archive-title { font-family: "Sora", sans-serif; font-size: 2rem; margin: 12px 0 4px; }
+.archive-sub { color: var(--text-dim); margin: 0 0 8px; }
+.archive-month {
+  font-family: "Sora", sans-serif; font-size: 0.85rem; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--text-dim); margin: 32px 0 12px; padding-bottom: 6px; border-bottom: 1px solid var(--border);
+}

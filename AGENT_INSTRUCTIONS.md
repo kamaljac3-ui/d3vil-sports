@@ -48,8 +48,8 @@ on the site (same visual system as the sibling series on 48th State
 World News, just re-branded — `commentary/index.html` is the archive
 listing, each piece is its own `commentary/<slug>.html`). The daily
 routine should never create, edit, count, or reference anything under
-`commentary/` — it is not a league section, does not factor into
-retention, and has its own separate promotion (a `notice-box` link on
+`commentary/` — it is not a league section, does not count toward
+the homepage's 7 cards, and has its own separate promotion (a `notice-box` link on
 the homepage, not a `posts/` entry).
 
 This file is the complete, self-contained procedure for producing one day's
@@ -312,8 +312,8 @@ In `index.html`, insert a new `.post-card` immediately after the
 </a>
 ```
 
-Leave every earlier `.post-card` in place below it for now — pruning down
-to the last 7 happens in step 7, after the "latest" alias is updated.
+Leave every earlier `.post-card` in place below it for now — trimming the
+homepage to 7 cards happens in step 7, after the "latest" alias is updated.
 
 ## 6. Update the "latest" alias
 
@@ -331,32 +331,26 @@ cp posts/<date>.html posts/latest.html
 -Force` instead.) Do this every day — it's the one file in `posts/` that
 *is* meant to be overwritten rather than appended to.
 
-## 7. Enforce 7-day retention
+## 7. Keep the homepage to 7 cards (never delete posts)
 
-The site keeps only the 7 most recent daily posts — a rolling window, not
-a permanent archive. (This window is also the source for a separate,
-not-yet-automated 7-day audio recap — don't shrink it below 7 without
-checking that dependency first.) After updating `posts/latest.html`:
+**Every daily post stays on the site permanently** (changed 2026-10-29, kamal's
+choice, for search traffic: a deleted post loses whatever Google ranking it
+had). Never `git rm` a dated post file. The full list of posts lives on
+`archive.html`, which the deploy workflow builds automatically
+(`scripts/archive.js`) — don't create or edit it.
 
-1. List every dated post file (this excludes `latest.html`); since
-   filenames are `YYYY-MM-DD.html`, sorting them sorts oldest to newest:
-   ```
-   ls posts/*.html | grep -v 'posts/latest.html' | sort
-   ```
-2. If there are more than 7, everything except the last 7 lines of that
-   output needs to go:
-   ```
-   ls posts/*.html | grep -v 'posts/latest.html' | sort | head -n -7
-   ```
-3. For each file that comes back from that command:
-   - Remove it: `git rm posts/<date>.html`
-   - Remove its matching `.post-card` block from `index.html` — the
-     whole `<a class="post-card" href="posts/<date>.html">...</a>`
-     element, including its `.date`, `<h2>`, and `<p>` — delete the full
-     block, don't leave a broken/empty entry behind.
-4. If there are 7 or fewer dated posts total (true for the first several
-   days after this policy started), there's nothing to remove — skip this
-   step.
+Only the homepage is trimmed. After updating `posts/latest.html`:
+
+1. Count the `.post-card` blocks between `<!-- POSTS:START -->` and
+   `<!-- POSTS:END -->` in `index.html`.
+2. If there are more than 7, remove the oldest cards (the ones at the bottom)
+   until 7 remain — the whole `<a class="post-card" href="posts/<date>.html">...</a>`
+   element, including its `.date`, `<h2>`, and `<p>`. Don't leave a
+   broken/empty entry behind, and don't touch the post files themselves.
+3. Leave the `All past roundups` link below `<!-- POSTS:END -->` alone.
+
+(The weekly audio recap reads only the newest 7 dated posts on its own, so
+keeping older posts doesn't change it.)
 
 ## 8. Commit and push
 
