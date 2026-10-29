@@ -60,6 +60,28 @@ Every morning push ends with a **Game lines** block: each game's spread and tota
 - **So there's no ✅ by default.** `SPREAD_EDGES=1` / `TOTAL_EDGES=1` turn them on. Spreads off by `MIN_SPREAD` (4) or more are still logged as tracked picks, and `results/` grades them against the result **and the closing line**. If the morning disagreements keep beating the close, that's the evidence to turn ✅ on.
 - **Known limit: offseason moves.** Ratings start from last season's *teams*, so a team that lost its stars over the summer looks too good for the first few weeks (Oct 2026: LAC without Leonard, Harden and Zubac, model OKC −7 vs the market's −14.5). The market prices that; the model doesn't until the games come in.
 
+## PRA board (top 10 PRA bets of the slate)
+
+One push a day, sent by the first pregame run after `BOARD_HOUR` (13 = 1 PM ET), or by `MODE=board`. For every projected
+player with a PRA line it takes the side the model likes **at your book's number and price** (`MY_BOOKS`, FanDuel; else the
+median at -110), keeps it if the calibrated projection is `BOARD_MIN_GAP` (2.5) or more off the line and the EV is positive,
+and ranks by EV. One bet per player, top `BOARD_N` (10). Each comes with its facts:
+
+```
+2. Domantas Sabonis (SAC) vs NOP: PRA o34.5 -110 FanDuel
+   proj 38.7 → 66%, +26% EV · Pinnacle fair 50%
+   L5 40 56 33 42 (3/4 over) · avg 34.4 · 34 min
+   w/o Cardwell, Murray, Raynaud; high team total
+```
+
+- **Facts, not ranking:** last 5 games' PRA this season (from ESPN box scores, cached as `pra-<id>.json`) and how many beat the
+  line, season average, projected minutes, last meetings vs this opponent, the sharp fair chance of that exact bet
+  (Pinnacle, else the other US books' no-vig consensus), and the tags (teammates out, b2b, DvP, blowout/underdog, cold H2H).
+- **Credits:** the board's props pull is cached as `book-<id>.json` and reused by that evening's pregame alerts for
+  `PROPS_TTL_H` (8) hours, so a game costs about 2 credits (this pull + the closing line).
+- **Grading:** board picks are logged as `kind:"prop"`, `stat:"pra"`, mode `board`; the ledger's review groups them as
+  "PRA board". Last-5 hit rates are descriptive: the backtest found recent form/H2H adds little beyond the projection.
+
 ## Modes (`run.js`)
 
 | `MODE` | What it does |
@@ -83,7 +105,7 @@ Workflow: `.github/workflows/nba-edges-alerts.yml`. Morning runs at 15:00 UTC, a
 
 ## Settings (env)
 
-`TOP_N` (6), `NBA_PROP_MARKETS` (pra), `NBA_ODDS_BUDGET` (450), `NBA_ODDS_RESERVE` (25), `MY_BOOKS`, `ODDS_SHARP`, `NBA_LINE_BOOKS`, `MIN_EV_PROPS` (0.03), `EV_MAX_GAP` (2), `EV_TOP` (5), `BLOW_STARTER_SPREAD` (12), `BLOW_STARTER` (0.96), `BLOW_DOG_SPREAD` (8), `BLOW_DOG_ROTATION` (1.046), `BLOW_DOG_BENCH` (1.126), `H2H_N` (5), `H2H_COLD` (5 PRA), `ZONE_MIN` (99 = shot-zone alerts off; 1.0 to turn them on), `NBA_OUT_MIN_SCALE` (0.25), `NBA_OUT_USAGE` (0.15), `NBA_OUT_MODE` (`minutes`; `uniform` = the old rule), `NBA_OUT_BENCH_SCALE` (0.25), `MIN_PROJ` (10; 20 = starters only), `BOOST_MIN` (0.10), `P_MIN` (0.58), `NBA_CAL` (JSON override of the calibration constants), `PREGAME_MIN` (90), `ODDS_IN_MORNING` (0), `SPREAD_EDGES` (0), `TOTAL_EDGES` (0), `MIN_SPREAD` (4), `MIN_TOTAL` (6), `NBA_LINES_HALF_LIFE` / `_PRIOR_GAMES` / `_REGRESS` / `_HCA` / `_B2B` / `_INJ` / `_INJ_TOTAL` (game-line model, see `lines.js`), `CLOSE_LINES` (1 = pull prop lines again in the last `CLOSE_WINDOW` (45) minutes before tip as the closing line; one Odds API call per game with props), `MODEL_VERSION` (tag on logged picks; bump it on any model change), `DATE` (test a past slate; keeps finished games), `FORCE_ESPN` (1 = skip nba.com), `DVP_RANK` (3), `DVP_MIN_GP` (10), `DEF_MIN_GP` (5), `DRY_RUN`.
+`TOP_N` (6), `BOARD_N` (10), `BOARD_HOUR` (13 ET), `BOARD_MIN_GAP` (2.5), `PROPS_TTL_H` (8), `NBA_PROP_MARKETS` (pra), `NBA_ODDS_BUDGET` (450), `NBA_ODDS_RESERVE` (25), `MY_BOOKS`, `ODDS_SHARP`, `NBA_LINE_BOOKS`, `MIN_EV_PROPS` (0.03), `EV_MAX_GAP` (2), `EV_TOP` (5), `BLOW_STARTER_SPREAD` (12), `BLOW_STARTER` (0.96), `BLOW_DOG_SPREAD` (8), `BLOW_DOG_ROTATION` (1.046), `BLOW_DOG_BENCH` (1.126), `H2H_N` (5), `H2H_COLD` (5 PRA), `ZONE_MIN` (99 = shot-zone alerts off; 1.0 to turn them on), `NBA_OUT_MIN_SCALE` (0.25), `NBA_OUT_USAGE` (0.15), `NBA_OUT_MODE` (`minutes`; `uniform` = the old rule), `NBA_OUT_BENCH_SCALE` (0.25), `MIN_PROJ` (10; 20 = starters only), `BOOST_MIN` (0.10), `P_MIN` (0.58), `NBA_CAL` (JSON override of the calibration constants), `PREGAME_MIN` (90), `ODDS_IN_MORNING` (0), `SPREAD_EDGES` (0), `TOTAL_EDGES` (0), `MIN_SPREAD` (4), `MIN_TOTAL` (6), `NBA_LINES_HALF_LIFE` / `_PRIOR_GAMES` / `_REGRESS` / `_HCA` / `_B2B` / `_INJ` / `_INJ_TOTAL` (game-line model, see `lines.js`), `CLOSE_LINES` (1 = pull prop lines again in the last `CLOSE_WINDOW` (45) minutes before tip as the closing line; one Odds API call per game with props), `MODEL_VERSION` (tag on logged picks; bump it on any model change), `DATE` (test a past slate; keeps finished games), `FORCE_ESPN` (1 = skip nba.com), `DVP_RANK` (3), `DVP_MIN_GP` (10), `DEF_MIN_GP` (5), `DRY_RUN`.
 
 ## Cache (`.cache/`)
 

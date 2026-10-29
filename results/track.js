@@ -229,6 +229,7 @@ const NBA_FAMILIES=[
   ["cold H2H (5+ PRA under avg vs this opp)",r=>r.h2h&&r.h2h.diff<=-5],
   ["hot H2H (5+ PRA over avg vs this opp)",r=>r.h2h&&r.h2h.diff>=5],
   ["PRA picks",r=>r.stat==="pra"],
+  ["PRA board (top 10 of the slate)",r=>(r.modes||[]).includes("board")],
   ["sent < 2h before tip",r=>hoursOut(r)!=null&&hoursOut(r)<2],
   ["sent 2h+ before tip",r=>hoursOut(r)!=null&&hoursOut(r)>=2],
 ];

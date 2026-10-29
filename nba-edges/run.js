@@ -25,7 +25,7 @@ const P_MIN=+(process.env.P_MIN||0.58);           // model over/under probabilit
 const PREGAME_MIN=+(process.env.PREGAME_MIN||90);
 const CLOSE_LINES=process.env.CLOSE_LINES!=="0",CLOSE_WINDOW=+(process.env.CLOSE_WINDOW||45);  // closing-line capture, see captureCloses
 // tagged on every logged pick so results/track.js can grade each model version separately; bump it on any model change
-const MODEL_VERSION=process.env.MODEL_VERSION||"2026-10-28-ev";
+const MODEL_VERSION=process.env.MODEL_VERSION||"2026-10-29-board";
 const ABS_MIN={pra:3,pts:2,reb:1,ast:1,fg3m:0.5};
 // PRA (points + rebounds + assists) first: it's Kamal's main bet. Its average is the PRA field (withPRA below).
 const STATS=["pra","pts","reb","ast","fg3m"],AVG={pra:"PRA",pts:"PTS",reb:"REB",ast:"AST",fg3m:"FG3M"},LABEL={pra:"PRA",pts:"PTS",reb:"REB",ast:"AST",fg3m:"3PM"};
@@ -219,9 +219,13 @@ async function oddsGet(url,cost,what){
 }
 // {lines: {key: {stat: median line}}, offers: {key: {stat: [{key: book, title, side A=over/B=under, L, price}]}}}
 const BOOK_MEMO={};
-async function propBook(g){
+// A pull is reused for PROPS_TTL_H hours (the PRA board's 1:30 PM pull serves the evening's pregame alerts), so a game
+// costs ~2 credits: the board/pregame pull and the closing-line pull (fresh=true).
+const PROPS_TTL_H=+(process.env.PROPS_TTL_H||8);
+async function propBook(g,fresh=false){
   if(!ODDS_KEY||!PROP_MARKETS.length)return null;
-  if(g.id in BOOK_MEMO)return BOOK_MEMO[g.id];
+  if(!fresh&&g.id in BOOK_MEMO)return BOOK_MEMO[g.id];
+  if(!fresh){const hit=cached(`book-${g.id}.json`,PROPS_TTL_H);if(hit){log(`${label(g)}: props from a pull ${Math.round((Date.now()-hit.at)/6e4)} min old`);return BOOK_MEMO[g.id]=hit;}}
   let ev=cached(`odds-events-${TODAY}.json`,3);   // listing events costs nothing
   if(!ev)ev=store(`odds-events-${TODAY}.json`,await get(`https://api.the-odds-api.com/v4/sports/basketball_nba/events?apiKey=${ODDS_KEY}`)||[]);
   const e=ev.find(x=>x.home_team.endsWith(g.home.name)&&x.away_team.endsWith(g.away.name));if(!e)return BOOK_MEMO[g.id]=null;
@@ -235,7 +239,23 @@ async function propBook(g){
     if(o.name==="Over")((acc[k]=acc[k]||{})[s]=acc[k][s]||[]).push(o.point);}
   const med=a=>{a=a.slice().sort((x,y)=>x-y);return a[Math.floor(a.length/2)];};
   const lines={};for(const k in acc){lines[k]={};for(const s in acc[k])lines[k][s]=med(acc[k][s]);}
-  return BOOK_MEMO[g.id]={lines,offers};
+  for(const k in offers)for(const s in offers[k])offers[k][s].push(...consensusOffers(offers[k][s]));
+  return BOOK_MEMO[g.id]=store(`book-${g.id}.json`,{at:Date.now(),lines,offers});
+}
+// Fallback "sharp" line when Pinnacle (or another sharp book) doesn't price a prop: the other US books' no-vig price,
+// averaged at the number most of them post. Your own books are left out so FanDuel isn't graded against itself.
+// sharp.js tries the real sharp books first; "consensus" is appended last (Odds API has no book by that name).
+if(!SH.SHARP.includes("consensus"))SH.SHARP.push("consensus");
+const implied=ml=>ml<0?-ml/(-ml+100):100/(ml+100),toAmerican=p=>p>=0.5?Math.round(-100*p/(1-p)):Math.round(100*(1-p)/p);
+function consensusOffers(list){
+  const byL={};
+  for(const o of list){if(SH.MINE.includes(o.key)||SH.SHARP.includes(o.key))continue;(byL[o.L]=byL[o.L]||{})[o.key]=(byL[o.L][o.key]||{});byL[o.L][o.key][o.side]=o.price;}
+  let best=null;
+  for(const [L,books] of Object.entries(byL)){const q=Object.values(books).filter(b=>b.A!=null&&b.B!=null).map(b=>implied(b.A)/(implied(b.A)+implied(b.B)));
+    if(q.length>=2&&(!best||q.length>best.n))best={L:+L,n:q.length,p:q.reduce((a,x)=>a+x,0)/q.length};}
+  if(!best)return [];
+  const t=`US-book no-vig (${best.n})`;
+  return [{key:"consensus",title:t,side:"A",L:best.L,price:toAmerican(best.p)},{key:"consensus",title:t,side:"B",L:best.L,price:toAmerican(1-best.p)}];
 }
 async function propLines(g){const b=await propBook(g);return b&&b.lines;}
 // 💰 rows: a price at your books worth MIN_EV_PROPS+ against the sharp book's no-vig line (spread = the model's own sd)
@@ -295,7 +315,9 @@ const POSG={PG:"G",SG:"G",G:"G",SF:"F",PF:"F",F:"F",C:"C"},POSN={G:"guards",F:"f
 const ord=n=>n+(n%100>=11&&n%100<=13?"th":["th","st","nd","rd"][n%10]||"th");
 // one finished game's box: {ESPN abbr: [{name,pos,min,pts}]}; finished games never change, so it's cached for good
 async function boxScore(id){
-  const key=`box-${id}.json`;const hit=cached(key,24*400);if(hit)return hit;
+  // meetingBox (head-to-head) wrote flat {player: PRA} files under this same name from 2026-10-28 until 2026-10-29;
+  // only the per-team shape (every value an array) counts as a hit, anything else is refetched
+  const key=`box-${id}.json`;const hit=cached(key,24*400);if(hit&&Object.values(hit).every(Array.isArray))return hit;
   const s=await get(`${ESPN}/summary?event=${id}`);if(!s||!s.boxscore||!s.boxscore.players)return null;
   const box={};
   for(const t of s.boxscore.players){const g=t.statistics[0],L=g.labels;
@@ -374,7 +396,8 @@ const linesMessage=rows=>rows.length?`Game lines (model vs line; no proven edge 
 // cold side, log h2h on every pick, let the weekly review grade it.
 const H2H_N=+(process.env.H2H_N||5),H2H_COLD=+(process.env.H2H_COLD||5);
 async function meetingBox(id){
-  const key=`box-${id}.json`;const hit=cached(key,24*400);if(hit)return hit;
+  // pra-<id>, not box-<id>: that name is boxScore's per-team cache (DvP)
+  const key=`pra-${id}.json`;const hit=cached(key,24*400);if(hit)return hit;
   const s=await get(`${ESPN}/summary?event=${id}`);if(!s||!s.boxscore)return null;
   const out={};
   for(const t of s.boxscore.players||[])for(const g of t.statistics||[]){const L=g.labels||[];
@@ -406,6 +429,7 @@ async function sideRows(g,side,D,outKeys,lines){
   for(const r of rows){const t=[...r.tags],dv=await dvpOf(D,g,side,r.key),h=await h2hOf(g,D,r.key);if(rest===1)t.push("b2b 2nd night");if(dv&&dv.show)t.push(dv.text);
     if(h&&h.diff<=-H2H_COLD)t.push(`cold vs ${opp}: ${h.diff} PRA over ${h.n} mtgs`);
     r.tags=t;r.rest=isFinite(rest)?rest:null;r.dvp=dv&&{pos:dv.pos,rank:dv.rank,of:dv.of,pct:dv.pct};r.h2h=h;}
+  rows.S=S;rows.rest=rest;   // the PRA board reads every projected player, not just the flagged ones
   return rows;
 }
 // Informational tag only, never in the projection: in the 2024-26 box scores regulars who played the 2nd night of a
@@ -485,7 +509,7 @@ async function captureCloses(games){
   for(const g of games){
     const mins=(new Date(g.date)-Date.now())/6e4;if(mins>CLOSE_WINDOW||mins<0)continue;
     const mine=picks.filter(p=>p.gameId===g.id&&(p.kind==="prop"||p.kind==="ev")&&p.close==null);if(!mine.length)continue;
-    const lines=await propLines(g);if(!lines)continue;
+    const b=await propBook(g,true),lines=b&&b.lines;if(!lines)continue;
     for(const p of mine){const c=lines[p.key]&&lines[p.key][p.stat];if(c!=null){p.close=c;p.closeAt=new Date().toISOString();changed=true;}}
     log(`${label(g)}: closing lines for ${mine.filter(p=>p.close!=null).length}/${mine.length} props`);
   }
@@ -508,7 +532,64 @@ async function gameRows(g,D,withLines){
   // 💰: ruled-out players can't be bet, so drop them
   const ev=evRows(g,D,book,{...H.proj,...A.proj}).filter(r=>!out.has(r.key));
   let line=null;try{line=await lineRow(g,D,out);}catch(e){log("game lines skipped:",e.message);}
-  return {rows,line,ev};
+  return {rows,line,ev,H,A,book,out};
+}
+// ---------- PRA board: the slate's top BOARD_N PRA bets, with the facts behind each ----------
+// Ranked by expected value at your book's price (MY_BOOKS, FanDuel), using the calibrated model probability; the facts
+// (last 5, season, minutes, last meetings, sharp price, tags) are context, not part of the ranking. Sent once a day by
+// the first pregame run after BOARD_HOUR ET (or MODE=board), from the same props pull the pregame alerts reuse.
+const BOARD_N=+(process.env.BOARD_N||10),BOARD_HOUR=+(process.env.BOARD_HOUR||13),BOARD_MIN_GAP=+(process.env.BOARD_MIN_GAP||2.5);
+const payout=ml=>ml>0?ml/100:100/-ml;
+const etHour=()=>+new Intl.DateTimeFormat("en-US",{timeZone:"America/New_York",hour:"numeric",hourCycle:"h23"}).format(new Date());
+// this team's last n finished games this season: [{date, opp, box (name key -> PRA)}]
+async function teamLast(espnAbbr,before,n=5){
+  const {games}=await ratings(),mine=games.filter(x=>(x.home===espnAbbr||x.away===espnAbbr)&&x.date<before&&x.id).slice(-n),out=[];
+  for(const m of mine){const b=await meetingBox(m.id);if(b)out.push({date:m.date,opp:m.home===espnAbbr?m.away:m.home,box:b});}
+  return out;
+}
+async function boardRows(g,D){
+  const x=await gameRows(g,D,true);if(!x.book)return [];
+  const rows=[];
+  for(const [side,R] of [["home",x.H],["away",x.A]]){
+    const S=R.S,opp=g[side==="home"?"away":"home"],last=await teamLast(g[side].espnAbbr,g.date);
+    for(const {p,pr} of S.players){
+      if(x.out.has(p.key))continue;
+      const offers=(x.book.offers[p.key]||{}).pra||[],med=x.book.lines[p.key]&&x.book.lines[p.key].pra;if(med==null)continue;
+      const proj=M.calibrate("pra",pr.pra,p.PRA,p.MIN);
+      // the number you can bet: your book's line on the side the model likes, else the median at -110
+      const lean=proj>med?"A":"B",mine=offers.find(o=>SH.MINE.includes(o.key)&&o.side===lean),L=mine?mine.L:med,price=mine?mine.price:-110;
+      if(Math.abs(proj-L)<BOARD_MIN_GAP)continue;
+      const po=M.pOver(proj,L,"pra"),prob=lean==="A"?po:1-po,ev=prob*payout(price)-(1-prob);if(ev<=0)continue;
+      // the sharp (or US-book consensus) fair chance of that exact bet
+      const fair=SH.staleTwoWay(offers,{sigma:M.sdOf("pra",L),maxGap:EV_MAX_GAP,minEV:-1}).find(o=>o.key===(mine&&mine.key)&&o.side===lean&&o.L===L);
+      const l5=last.map(m=>m.box[p.key]),played=l5.filter(v=>v!=null),hits=played.filter(v=>lean==="A"?v>L:v<L).length;
+      const h=await h2hOf(g,D,p.key),dv=await dvpOf(D,g,side,p.key);
+      const tags=[...S.tags,...(R.rest===1?["b2b 2nd night"]:[]),...(dv&&dv.show?[dv.text]:[]),...(h&&h.diff<=-H2H_COLD?[`cold vs ${opp.abbr}`]:[])];
+      rows.push({kind:"prop",stat:"pra",name:p.name,key:p.key,team:S.me,opp:S.opp,mpg:p.MIN,minProj:pr.min,proj,projRaw:pr.pra,avg:p.PRA,line:L,po,price,
+        book:mine?mine.title:"median",prob,ev,fair:fair?{p:fair.fair,book:fair.sharp.title}:null,l5,hits,games:played.length,h2h:h,tags,
+        rest:isFinite(R.rest)?R.rest:null,dvp:dv&&{pos:dv.pos,rank:dv.rank,of:dv.of,pct:dv.pct},gameId:g.id,tip:g.date});
+    }
+  }
+  return rows;
+}
+const boardLine=(r,i)=>{
+  const side=r.po>=0.5?"o":"u",l5=r.l5.map(v=>v==null?"–":v).join(" ");
+  return `${i+1}. ${r.name} (${r.team}) vs ${r.opp}: PRA ${side}${r.line} ${SH.fmt(r.price)} ${r.book}\n`+
+    `   proj ${f1(r.proj)} → ${pct(r.prob)}, +${(r.ev*100).toFixed(0)}% EV`+(r.fair?` · ${r.fair.book} fair ${pct(r.fair.p)}`:"")+`\n`+
+    `   L5 ${l5}${r.games?` (${r.hits}/${r.games} ${side==="o"?"over":"under"})`:""} · avg ${f1(r.avg)} · ${Math.round(r.minProj)} min`+
+    (r.h2h?` · last ${r.h2h.n} vs ${r.opp}: ${r.h2h.diff>=0?"+":""}${r.h2h.diff} vs avg`:"")+(r.tags.length?`\n   ${r.tags.join("; ")}`:"");
+};
+async function board(games,D){
+  const key=`board-${TODAY}.json`;if(cached(key,30)&&!DRY&&MODE!=="board")return;
+  if(!ODDS_KEY){log("PRA board needs ODDS_API_KEY");return;}
+  let rows=[];for(const g of games)rows=rows.concat(await boardRows(g,D));
+  // one bet per player (his best side/number), best EV first
+  const seen=new Set(),top=rows.sort((a,b)=>b.ev-a.ev).filter(r=>!seen.has(r.key)&&seen.add(r.key)).slice(0,BOARD_N);
+  const msg=top.length?top.map(boardLine).join("\n")+`\n\nRanked by EV at your book's price from the model's calibrated chance. Model edges aren't proven vs closing lines yet; 💰 alerts (book vs sharp) are the market-based ones.`
+    :"No PRA bet clears the bar on this slate.";
+  await ntfy(`NBA PRA board ${TODAY} (${games.length} games)`,msg,top.length?4:2,["basketball","trophy"]);
+  logPicks("board",[["PRA board","prop",top]]);
+  if(!DRY&&NTFY_TOPIC)store(key,true);
 }
 // ✅ game-line picks, logged like the player picks (same sent-only rule) for results/track.js
 function logLinePicks(mode,lineRows){
@@ -542,6 +623,7 @@ if(require.main===module)(async()=>{
   const games=await slate();log(`${TODAY}: ${games.length} upcoming games, mode=${MODE}`);
   if(!games.length)return;
   const D=await loadData();
+  if(MODE==="board")return board(games,D);
   if(MODE==="morning"){
     const sentKey=`morning-${TODAY}.json`;if(cached(sentKey,30)&&!DRY){log("morning already sent");return;}
     let all=[];const lineRows=[];
@@ -552,6 +634,8 @@ if(require.main===module)(async()=>{
     logPicks("morning",secs);logLinePicks("morning",lineRows);
     if(!DRY&&NTFY_TOPIC)store(sentKey,true);
   }else{
+    // the PRA board goes out once a day, from the first pregame run after BOARD_HOUR ET (crons can run late, so no own cron)
+    if(etHour()>=BOARD_HOUR)await board(games,D);
     const sent=cached(`pregame-${TODAY}.json`,30)||{};
     for(const g of games){
       const mins=(new Date(g.date)-Date.now())/6e4;

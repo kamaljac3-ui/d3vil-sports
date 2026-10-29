@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: "morning or pregame"
+        description: "morning, pregame (also sends the PRA board once after 1 PM ET), or board"
         default: morning
       dry_run:
         description: "1 = print instead of sending"
