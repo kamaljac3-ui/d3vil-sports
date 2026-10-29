@@ -183,11 +183,19 @@ async function roster(espnId){
   const j=await get(`${ESPN}/teams/${espnId}/roster`);
   return store(key,(j&&j.athletes||[]).map(a=>a.displayName||a.fullName));
 }
+// Out/Doubtful players (a Set of name keys); out.status maps every listed player to his status, so picks on players who
+// are Questionable / Day-To-Day / Probable can be tagged and graded (ESPN keeps no history, so this can only be learned live)
 async function injuries(g){
-  const j=await get(`${ESPN}/summary?event=${g.id}`);const out=new Set();
-  for(const t of (j&&j.injuries)||[])for(const i of t.injuries||[])if(/^(out|doubtful)$/i.test(i.status||""))out.add(nk(i.athlete&&i.athlete.displayName));
+  const j=await get(`${ESPN}/summary?event=${g.id}`);const out=new Set();out.status=new Map();
+  for(const t of (j&&j.injuries)||[])for(const i of t.injuries||[]){const k=nk(i.athlete&&i.athlete.displayName);out.status.set(k,i.status||"");
+    if(/^(out|doubtful)$/i.test(i.status||""))out.add(k);}
   return out;
 }
+// PRA line vs the sum of the points, rebounds and assists lines (only when those markets are pulled too, which costs 3
+// more credits a game: NBA_PROP_MARKETS=pra,pts,reb,ast). Positive = the PRA line sits below the sum. Logged, not traded on.
+const COMP_GAP=+(process.env.COMP_GAP||2);
+const compGap=(lines,key,stat)=>{const l=lines&&lines[key];if(stat!=="pra"||!l||l.pra==null||l.pts==null||l.reb==null||l.ast==null)return null;return Math.round((l.pts+l.reb+l.ast-l.pra)*10)/10;};
+const injTag=st=>st&&/questionable|day-to-day|probable/i.test(st)?st.toLowerCase():null;
 // ---------- prop lines and prices (The Odds API, optional ODDS_API_KEY) ----------
 // The key is on the free tier (500 credits/month). Since 2026-10-29 the NFL bots use SportsGameOdds (NFL_ODDS=sgo), so
 // the key is this bot's; it still keeps a monthly budget (NBA_ODDS_BUDGET) and stops at NBA_ODDS_RESERVE left.
@@ -449,7 +457,11 @@ async function sideRows(g,side,D,outKeys,lines){
   const opp=g[side==="home"?"away":"home"].abbr;
   for(const r of rows){const t=[...r.tags],dv=await dvpOf(D,g,side,r.key),h=await h2hOf(g,D,r.key);if(rest===1)t.push("b2b 2nd night");if(dv&&dv.show)t.push(dv.text);
     if(h&&h.diff<=-H2H_COLD)t.push(`cold vs ${opp}: ${h.diff} PRA over ${h.n} mtgs`);
-    r.tags=t;r.rest=isFinite(rest)?rest:null;r.dvp=dv&&{pos:dv.pos,rank:dv.rank,of:dv.of,pct:dv.pct};r.h2h=h;}
+    const st=outKeys.status&&outKeys.status.get(r.key);if(injTag(st))t.push(injTag(st));
+    const pp=S.players.find(x=>x.p.key===r.key);if(pp&&pp.p.back)t.push("first game back");if(pp&&pp.p.starBack)t.push("star teammate back");
+    r.back=pp?pp.p.back||0:0;r.starBack=!!(pp&&pp.p.starBack);r.min3=pp?pp.p.MIN3:null;
+    r.tags=t;r.rest=isFinite(rest)?rest:null;r.dvp=dv&&{pos:dv.pos,rank:dv.rank,of:dv.of,pct:dv.pct};r.h2h=h;r.inj=st||null;
+    r.compGap=compGap(lines,r.key,r.stat);if(r.compGap!=null&&Math.abs(r.compGap)>=COMP_GAP)t.push(`PRA line ${Math.abs(r.compGap)} ${r.compGap>0?"below":"above"} P+R+A lines`);}
   rows.S=S;rows.rest=rest;   // the PRA board reads every projected player, not just the flagged ones
   return rows;
 }
@@ -585,10 +597,12 @@ async function boardRows(g,D){
       const fair=SH.staleTwoWay(offers,{sigma:M.sdOf("pra",L),maxGap:EV_MAX_GAP,minEV:-1}).find(o=>o.key===(mine&&mine.key)&&o.side===lean&&o.L===L);
       const l5=last.map(m=>m.box[p.key]),played=l5.filter(v=>v!=null),hits=played.filter(v=>lean==="A"?v>L:v<L).length;
       const h=await h2hOf(g,D,p.key),dv=await dvpOf(D,g,side,p.key);
-      const tags=[...S.tags,...(R.rest===1?["b2b 2nd night"]:[]),...(dv&&dv.show?[dv.text]:[]),...(h&&h.diff<=-H2H_COLD?[`cold vs ${opp.abbr}`]:[])];
+      const st=x.out.status&&x.out.status.get(p.key),cg=compGap(x.book.lines,p.key,"pra");
+      const tags=[...S.tags,...(R.rest===1?["b2b 2nd night"]:[]),...(dv&&dv.show?[dv.text]:[]),...(h&&h.diff<=-H2H_COLD?[`cold vs ${opp.abbr}`]:[]),...(injTag(st)?[injTag(st)]:[]),
+        ...(p.back?["first game back"]:[]),...(p.starBack?["star teammate back"]:[]),...(cg!=null&&Math.abs(cg)>=COMP_GAP?[`PRA line ${Math.abs(cg)} ${cg>0?"below":"above"} P+R+A lines`]:[])];
       rows.push({kind:"prop",stat:"pra",name:p.name,key:p.key,team:S.me,opp:S.opp,mpg:p.MIN,minProj:pr.min,proj,projRaw:pr.pra,avg:p.PRA,line:L,po,price,
         book:mine?mine.title:"median",prob,ev,fair:fair?{p:fair.fair,book:fair.sharp.title}:null,l5,hits,games:played.length,h2h:h,tags,
-        rest:isFinite(R.rest)?R.rest:null,dvp:dv&&{pos:dv.pos,rank:dv.rank,of:dv.of,pct:dv.pct},gameId:g.id,tip:g.date});
+        rest:isFinite(R.rest)?R.rest:null,dvp:dv&&{pos:dv.pos,rank:dv.rank,of:dv.of,pct:dv.pct},inj:st||null,compGap:cg,back:p.back||0,starBack:!!p.starBack,min3:p.MIN3,gameId:g.id,tip:g.date});
     }
   }
   return rows;

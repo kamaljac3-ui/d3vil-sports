@@ -230,6 +230,17 @@ const NBA_FAMILIES=[
   ["hot H2H (5+ PRA over avg vs this opp)",r=>r.h2h&&r.h2h.diff>=5],
   ["PRA picks",r=>r.stat==="pra"],
   ["PRA board (top 10 of the slate)",r=>(r.modes||[]).includes("board")],
+  // live-only angles (no history to backtest): star overs shaded by books?, questionable players, PRA vs P+R+A lines
+  ["PRA over, star (avg 30+)",r=>r.stat==="pra"&&r.kind==="prop"&&r.po>=0.5&&r.avg>=30],
+  ["PRA under, star (avg 30+)",r=>r.stat==="pra"&&r.kind==="prop"&&r.po<0.5&&r.avg>=30],
+  ["PRA over, role player (avg < 20)",r=>r.stat==="pra"&&r.kind==="prop"&&r.po>=0.5&&r.avg<20],
+  ["PRA under, role player (avg < 20)",r=>r.stat==="pra"&&r.kind==="prop"&&r.po<0.5&&r.avg<20],
+  ["listed questionable / day-to-day / probable",r=>r.inj&&/questionable|day-to-day|probable/i.test(r.inj)],
+  ["PRA line 2+ below the P+R+A lines",r=>r.compGap!=null&&r.compGap>=2],
+  ["PRA line 2+ above the P+R+A lines",r=>r.compGap!=null&&r.compGap<=-2],
+  // in the model since 2026-10-29 (checks the backtest's factors hold live)
+  ["first game back",r=>r.back===1],
+  ["star teammate back",r=>r.starBack===true],
   ["sent < 2h before tip",r=>hoursOut(r)!=null&&hoursOut(r)<2],
   ["sent 2h+ before tip",r=>hoursOut(r)!=null&&hoursOut(r)>=2],
 ];
