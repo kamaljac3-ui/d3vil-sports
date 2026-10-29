@@ -25,7 +25,7 @@ const P_MIN=+(process.env.P_MIN||0.58);           // model over/under probabilit
 const PREGAME_MIN=+(process.env.PREGAME_MIN||90);
 const CLOSE_LINES=process.env.CLOSE_LINES!=="0",CLOSE_WINDOW=+(process.env.CLOSE_WINDOW||45);  // closing-line capture, see captureCloses
 // tagged on every logged pick so results/track.js can grade each model version separately; bump it on any model change
-const MODEL_VERSION=process.env.MODEL_VERSION||"2026-10-29-minutes";
+const MODEL_VERSION=process.env.MODEL_VERSION||"2026-10-29-market";
 const ABS_MIN={pra:3,pts:2,reb:1,ast:1,fg3m:0.5};
 // PRA (points + rebounds + assists) first: it's Kamal's main bet. Its average is the PRA field (withPRA below).
 const STATS=["pra","pts","reb","ast","fg3m"],AVG={pra:"PRA",pts:"PTS",reb:"REB",ast:"AST",fg3m:"FG3M"},LABEL={pra:"PRA",pts:"PTS",reb:"REB",ast:"AST",fg3m:"3PM"};
@@ -233,7 +233,10 @@ const PROPS_TTL_H=+(process.env.PROPS_TTL_H||8);
 async function propBook(g,fresh=false){
   if(!ODDS_KEY||!PROP_MARKETS.length)return null;
   if(!fresh&&g.id in BOOK_MEMO)return BOOK_MEMO[g.id];
-  if(!fresh){const hit=cached(`book-${g.id}.json`,PROPS_TTL_H);if(hit){log(`${label(g)}: props from a pull ${Math.round((Date.now()-hit.at)/6e4)} min old`);return BOOK_MEMO[g.id]=hit;}}
+  if(!fresh){const hit=cached(`book-${g.id}.json`,PROPS_TTL_H);if(hit){log(`${label(g)}: props from a pull ${Math.round((Date.now()-hit.at)/6e4)} min old`);
+    // pulls cached before the consensus fallback existed get it added here
+    for(const k in hit.offers)for(const st in hit.offers[k])if(!hit.offers[k][st].some(o=>o.key==="consensus"))hit.offers[k][st].push(...consensusOffers(hit.offers[k][st]));
+    return BOOK_MEMO[g.id]=hit;}}
   let ev=cached(`odds-events-${TODAY}.json`,3);   // listing events costs nothing
   if(!ev)ev=store(`odds-events-${TODAY}.json`,await get(`https://api.the-odds-api.com/v4/sports/basketball_nba/events?apiKey=${ODDS_KEY}`)||[]);
   const e=ev.find(x=>x.home_team.endsWith(g.home.name)&&x.away_team.endsWith(g.away.name));if(!e)return BOOK_MEMO[g.id]=null;
@@ -572,6 +575,8 @@ async function gameRows(g,D,withLines){
 // (last 5, season, minutes, last meetings, sharp price, tags) are context, not part of the ranking. Sent once a day by
 // the first pregame run after BOARD_HOUR ET (or MODE=board), from the same props pull the pregame alerts reuse.
 const BOARD_N=+(process.env.BOARD_N||10),BOARD_HOUR=+(process.env.BOARD_HOUR||13),BOARD_MIN_GAP=+(process.env.BOARD_MIN_GAP||2.5);
+// weight on the model vs the market's no-vig chance (0.5 = even); both are logged so the weekly review can fit it
+const BOARD_MARKET_W=+(process.env.BOARD_MARKET_W||0.5);
 const payout=ml=>ml>0?ml/100:100/-ml;
 const etHour=()=>+new Intl.DateTimeFormat("en-US",{timeZone:"America/New_York",hour:"numeric",hourCycle:"h23"}).format(new Date());
 // this team's last n finished games this season: [{date, opp, box (name key -> PRA)}]
@@ -589,19 +594,32 @@ async function boardRows(g,D){
       if(x.out.has(p.key))continue;
       const offers=(x.book.offers[p.key]||{}).pra||[],med=x.book.lines[p.key]&&x.book.lines[p.key].pra;if(med==null)continue;
       const proj=M.calibrate("pra",pr.pra,p.PRA,p.MIN);
-      // the number you can bet: your book's line on the side the model likes, else the median at -110
-      const lean=proj>med?"A":"B",mine=offers.find(o=>SH.MINE.includes(o.key)&&o.side===lean),L=mine?mine.L:med,price=mine?mine.price:-110;
-      if(Math.abs(proj-L)<BOARD_MIN_GAP)continue;
-      const po=M.pOver(proj,L,"pra"),prob=lean==="A"?po:1-po,ev=prob*payout(price)-(1-prob);if(ev<=0)continue;
-      // the sharp (or US-book consensus) fair chance of that exact bet
-      const fair=SH.staleTwoWay(offers,{sigma:M.sdOf("pra",L),maxGap:EV_MAX_GAP,minEV:-1}).find(o=>o.key===(mine&&mine.key)&&o.side===lean&&o.L===L);
+      // Both sides at your book's own numbers (MY_BOOKS, FanDuel). The model's chance is blended with the market's no-vig
+      // chance of that exact bet (Pinnacle, else the other US books' consensus without your book) at BOARD_MARKET_W; a bet
+      // makes the board if the model is BOARD_MIN_GAP+ off the line with +EV, or if the market alone says your book is
+      // stale (MIN_EV_PROPS+) and the model doesn't disagree. Players your book doesn't list are skipped (you can't bet them).
+      const fairs=SH.staleTwoWay(offers,{sigma:M.sdOf("pra",med),maxGap:EV_MAX_GAP,minEV:-1});
+      let best=null;
+      for(const o of offers.filter(o=>SH.MINE.includes(o.key))){
+        const L=o.L,price=o.price,po=M.pOver(proj,L,"pra"),mp=o.side==="A"?po:1-po;
+        const f=fairs.find(y=>y.key===o.key&&y.side===o.side&&y.L===L),kp=f?f.fair:null;
+        const bp=kp!=null?BOARD_MARKET_W*mp+(1-BOARD_MARKET_W)*kp:mp,ev=bp*payout(price)-(1-bp),kev=kp!=null?kp*payout(price)-(1-kp):null;
+        const modelPick=Math.abs(proj-L)>=BOARD_MIN_GAP&&(o.side==="A")===(proj>L),marketPick=kev!=null&&kev>=MIN_EV_PROPS&&mp>=0.5;
+        if(!(modelPick||marketPick)||ev<=0)continue;
+        // how much easier your number is than the market's, in your direction (+ = softer at your book)
+        const soft=f?(o.side==="A"?f.sharp.L-L:L-f.sharp.L):null;
+        if(!best||ev>best.ev)best={side:o.side,L,price,book:o.title,mp,kp,bp,ev,kev,soft,sharp:f?{book:f.sharp.title,L:f.sharp.L}:null,why:modelPick&&marketPick?"both":modelPick?"model":"market"};
+      }
+      if(!best)continue;
+      const L=best.L,price=best.price,lean=best.side,po=M.pOver(proj,L,"pra"),prob=best.bp,ev=best.ev;
+      const fair=best.kp!=null?{p:best.kp,book:best.sharp.book,L:best.sharp.L}:null;
       const l5=last.map(m=>m.box[p.key]),played=l5.filter(v=>v!=null),hits=played.filter(v=>lean==="A"?v>L:v<L).length;
       const h=await h2hOf(g,D,p.key),dv=await dvpOf(D,g,side,p.key);
       const st=x.out.status&&x.out.status.get(p.key),cg=compGap(x.book.lines,p.key,"pra");
       const tags=[...S.tags,...(R.rest===1?["b2b 2nd night"]:[]),...(dv&&dv.show?[dv.text]:[]),...(h&&h.diff<=-H2H_COLD?[`cold vs ${opp.abbr}`]:[]),...(injTag(st)?[injTag(st)]:[]),
-        ...(p.back?["first game back"]:[]),...(p.starBack?["star teammate back"]:[]),...(cg!=null&&Math.abs(cg)>=COMP_GAP?[`PRA line ${Math.abs(cg)} ${cg>0?"below":"above"} P+R+A lines`]:[])];
+        ...(best.soft!=null&&best.soft>=1?[`💰 ${best.book} ${best.soft} softer than ${best.sharp.book}`]:[]),...(p.back?["first game back"]:[]),...(p.starBack?["star teammate back"]:[]),...(cg!=null&&Math.abs(cg)>=COMP_GAP?[`PRA line ${Math.abs(cg)} ${cg>0?"below":"above"} P+R+A lines`]:[])];
       rows.push({kind:"prop",stat:"pra",name:p.name,key:p.key,team:S.me,opp:S.opp,mpg:p.MIN,minProj:pr.min,proj,projRaw:pr.pra,avg:p.PRA,line:L,po,price,
-        book:mine?mine.title:"median",prob,ev,fair:fair?{p:fair.fair,book:fair.sharp.title}:null,l5,hits,games:played.length,h2h:h,tags,
+        book:best.book,prob,ev,modelP:best.mp,mktP:best.kp,mktEV:best.kev,soft:best.soft,why:best.why,fair,l5,hits,games:played.length,h2h:h,tags,
         rest:isFinite(R.rest)?R.rest:null,dvp:dv&&{pos:dv.pos,rank:dv.rank,of:dv.of,pct:dv.pct},inj:st||null,compGap:cg,back:p.back||0,starBack:!!p.starBack,min3:p.MIN3,gameId:g.id,tip:g.date});
     }
   }
@@ -610,7 +628,7 @@ async function boardRows(g,D){
 const boardLine=(r,i)=>{
   const side=r.po>=0.5?"o":"u",l5=r.l5.map(v=>v==null?"–":v).join(" ");
   return `${i+1}. ${r.name} (${r.team}) vs ${r.opp}: PRA ${side}${r.line} ${SH.fmt(r.price)} ${r.book}\n`+
-    `   proj ${f1(r.proj)} → ${pct(r.prob)}, +${(r.ev*100).toFixed(0)}% EV`+(r.fair?` · ${r.fair.book} fair ${pct(r.fair.p)}`:"")+`\n`+
+    `   proj ${f1(r.proj)} · model ${pct(r.modelP)}`+(r.fair?` · ${r.fair.book} ${r.fair.L} ${pct(r.fair.p)}`:"")+` → ${pct(r.prob)}, +${(r.ev*100).toFixed(0)}% EV`+(r.why==="market"?" (market pick)":"")+`\n`+
     `   L5 ${l5}${r.games?` (${r.hits}/${r.games} ${side==="o"?"over":"under"})`:""} · avg ${f1(r.avg)} · ${Math.round(r.minProj)} min`+
     (r.h2h?` · last ${r.h2h.n} vs ${r.opp}: ${r.h2h.diff>=0?"+":""}${r.h2h.diff} vs avg`:"")+(r.tags.length?`\n   ${r.tags.join("; ")}`:"");
 };
@@ -631,7 +649,7 @@ async function board(games,D){
   let rows=[];for(const g of games)rows=rows.concat(await boardRows(g,D));
   // one bet per player (his best side/number), best EV first
   const seen=new Set(),top=rows.sort((a,b)=>b.ev-a.ev).filter(r=>!seen.has(r.key)&&seen.add(r.key)).slice(0,BOARD_N);
-  const msg=top.length?top.map(boardLine).join("\n")+`\n\nRanked by EV at your book's price from the model's calibrated chance. Model edges aren't proven vs closing lines yet; 💰 alerts (book vs sharp) are the market-based ones.`
+  const msg=top.length?top.map(boardLine).join("\n")+`\n\nRanked by EV at your book's price, from a ${Math.round(BOARD_MARKET_W*100)}/${Math.round((1-BOARD_MARKET_W)*100)} blend of the model and the market's no-vig chance (Pinnacle, else the other US books without yours). 💰 = your book's number is softer than the market's. The model alone isn't proven vs closing lines yet.`
     :"No PRA bet clears the bar on this slate.";
   await ntfy(`NBA PRA board ${TODAY} (${games.length} games)`,msg,top.length?4:2,["basketball","trophy"]);
   logPicks("board",[["PRA board","prop",top]]);await publishBoard(top);

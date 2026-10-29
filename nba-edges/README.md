@@ -65,7 +65,7 @@ Every morning push ends with a **Game lines** block: each game's spread and tota
 One push a day, sent by the first pregame run after `BOARD_HOUR` (13 = 1 PM ET), or by `MODE=board`. For every projected
 player with a PRA line it takes the side the model likes **at your book's number and price** (`MY_BOOKS`, FanDuel; else the
 median at -110), keeps it if the calibrated projection is `BOARD_MIN_GAP` (2.5) or more off the line and the EV is positive,
-and ranks by EV. One bet per player, top `BOARD_N` (10). Each comes with its facts:
+and ranks by EV. **Since model `2026-10-29-market` it uses the other books too** (no extra credits; they come in the same pull): the chance is a `BOARD_MARKET_W` (0.5) blend of the model and the market's no-vig chance of that exact FanDuel bet (Pinnacle, else DraftKings/BetMGM/Caesars/Fanatics/BetRivers/ESPN BET without FanDuel), a stale FanDuel number the model doesn't disagree with can make the board on its own ("market pick"), and 💰 marks FanDuel being 1+ point softer than the market. The ledger review reports the log loss of model vs market vs blends, so the weight can be fit from real results. One bet per player, top `BOARD_N` (10). Each comes with its facts:
 
 ```
 2. Domantas Sabonis (SAC) vs NOP: PRA o34.5 -110 FanDuel

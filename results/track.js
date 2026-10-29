@@ -230,6 +230,11 @@ const NBA_FAMILIES=[
   ["hot H2H (5+ PRA over avg vs this opp)",r=>r.h2h&&r.h2h.diff>=5],
   ["PRA picks",r=>r.stat==="pra"],
   ["PRA board (top 10 of the slate)",r=>(r.modes||[]).includes("board")],
+  // board vs the other books (from model 2026-10-29-market): mktP = the market's no-vig chance of the exact bet
+  ["PRA board: your book softer than the market (💰)",r=>(r.modes||[]).includes("board")&&r.soft>=1],
+  ["PRA board: market-only pick",r=>r.why==="market"],
+  ["PRA board: market agrees (its chance 50%+)",r=>(r.modes||[]).includes("board")&&r.mktP!=null&&r.mktP>=0.5],
+  ["PRA board: market disagrees (under 50%)",r=>(r.modes||[]).includes("board")&&r.mktP!=null&&r.mktP<0.5],
   // live-only angles (no history to backtest): star overs shaded by books?, questionable players, PRA vs P+R+A lines
   ["PRA over, star (avg 30+)",r=>r.stat==="pra"&&r.kind==="prop"&&r.po>=0.5&&r.avg>=30],
   ["PRA under, star (avg 30+)",r=>r.stat==="pra"&&r.kind==="prop"&&r.po<0.5&&r.avg>=30],
@@ -268,6 +273,12 @@ function nbaTagCard(recs){
   if(!f.length)return [];
   const out=[`NBA by tag: ${f.length} graded picks with tags logged${small(f.length)}`];
   for(const [name,fn] of NBA_FAMILIES){const g=f.filter(fn);if(g.length)out.push(`- ${name} (${g.length}): ${nbaGroup(g)}`);}
+  // model vs market: log loss of the model's chance, the market's no-vig chance and blends of the two on graded picks
+  // that carry both (board picks). The lowest log loss says what BOARD_MARKET_W in nba-edges should be.
+  const mm=f.filter(r=>r.modelP!=null&&r.mktP!=null&&r.kind==="prop"&&r.result[r.stat]!==r.line);
+  if(mm.length){const won=r=>(r.result[r.stat]>r.line)===(r.po>=0.5),ll=w=>mean(mm.map(r=>{const p=Math.min(0.99,Math.max(0.01,w*r.modelP+(1-w)*r.mktP));return -Math.log(won(r)?p:1-p);}));
+    const ws=[0,0.25,0.5,0.75,1].map(w=>[w,ll(w)]),best=ws.reduce((a,b)=>b[1]<a[1]?b:a);
+    out.push(`- Model vs market on ${mm.length} picks (log loss, lower = better): ${ws.map(([w,v])=>`${w===1?"model only":w===0?"market only":Math.round(w*100)+"% model"} ${v.toFixed(3)}`).join(", ")}; best ${best[0]===1?"model only":best[0]===0?"market only":Math.round(best[0]*100)+"% model"}${mm.length<100?" (small sample)":""}`);}
   // misses from minutes vs misses from the per-minute rate: says which half of the projection to fix
   const m=f.filter(r=>r.result.min>0&&r.minProj>0&&r.proj>0);
   if(m.length){const dm=m.map(r=>r.result.min-r.minProj),rate=m.map(r=>(r.result[r.stat]/r.result.min)/(r.proj/r.minProj));
