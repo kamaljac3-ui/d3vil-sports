@@ -194,8 +194,10 @@ const PL=require("./parlay");
 const SPOKEN_STAT={recYds:"receiving yards",rec:"catches",rushYds:"rushing yards",passYds:"passing yards"};
 function nflLegSpeech(l){
   const e=l.e,p=e.p,why=[];
-  if(p.bump&&p.bump.from&&p.bump.from.length)why.push(`With ${p.bump.from.join(" and ")} out, he picks up extra work.`);
-  why.push(`We have him at ${PL.words(Math.round(e.proj))}.`);
+  // yards are skewed (a few big games pull the average up), so an under can be the likelier side with the average above
+  // the line; the script says the chance, not the projection, so it never sounds backwards
+  if(e.over&&p.bump&&p.bump.from&&p.bump.from.length)why.push(`With ${p.bump.from.join(" and ")} out, he picks up extra work.`);
+  why.push(`Our numbers give the ${e.over?"over":"under"} about ${PL.words(Math.round(l.p*100))} percent.`);
   if(l.mktP!=null)why.push(l.mktP>=0.55?"The other books lean the same way.":l.mktP<0.5?"The other books lean the other way, so this one is our model's call.":"");
   return {who:p.name,bet:`${e.over?"over":"under"} ${PL.spokenLine(e.ref)} ${SPOKEN_STAT[e.stat]}`,why:why.filter(Boolean)};
 }
