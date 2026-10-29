@@ -63,6 +63,46 @@ async function outsFor(g,poll){
 const tipStr=g=>new Date(g.date).toLocaleTimeString("en-US",{timeZone:"America/New_York",hour:"numeric",minute:"2-digit"});
 const f1=v=>v.toFixed(1),pct=v=>Math.round(v*100)+"%";
 
+// ---------- board updates: a late Out that touches today's PRA board ----------
+// nba-edges posts a compact copy of the board (about 1 PM ET) to NTFY_TOPIC + BOARD_DATA_SUFFIX. When a new Out lands for
+// a team with board picks: the pick's own player out -> "voids"; a teammate out -> re-project him with tonight's outs and
+// say how his chance at the board's line moved (or that it now leans the other way). No odds are pulled, so the line
+// shown is the board's number; the book has usually moved by then. BOARD_JSON=<file> feeds a board for testing.
+const BOARD_SUFFIX=process.env.BOARD_DATA_SUFFIX||"-board",BOARD_UPDATE_MIN=+(process.env.BOARD_UPDATE_MIN||1);
+let BOARD=null,BOARD_AT=0;
+async function todaysBoard(){
+  if(process.env.BOARD_JSON)return JSON.parse(fs.readFileSync(process.env.BOARD_JSON,"utf8"));
+  if(!NTFY_TOPIC)return null;
+  if(BOARD&&Date.now()-BOARD_AT<10*6e4)return BOARD;
+  const h={};if(NTFY_TOKEN)h.Authorization="Bearer "+NTFY_TOKEN;
+  try{
+    const r=await fetch(`${NTFY_SERVER}/${encodeURIComponent(NTFY_TOPIC+BOARD_SUFFIX)}/json?poll=1&since=20h`,{headers:h,signal:AbortSignal.timeout(20000)});
+    if(!r.ok){log("board fetch",r.status);return null;}
+    let b=null;
+    for(const line of (await r.text()).split("\n")){try{const m=JSON.parse(line);if(m.event!=="message")continue;const j=JSON.parse(m.message);if(j.date===TODAY)b=j;}catch(e){}}
+    BOARD=b;BOARD_AT=Date.now();return b;
+  }catch(e){log("board fetch error",e.message);return null;}
+}
+async function boardUpdate(g,side,D,outNow,newKeys){
+  const b=await todaysBoard();if(!b||!b.picks)return false;
+  const team=g[side].abbr,picks=b.picks.filter(p=>p.gid===g.id&&p.t===team);if(!picks.length)return false;
+  const roster=(await R.roster(g[side].espnId)).map(n=>D.players[R.nk(n)]).filter(Boolean);
+  const S=R.projectSide(roster,g,side,D,outNow),by=Object.fromEntries(S.players.map(x=>[x.p.key,x]));
+  const lines=[];
+  for(const p of picks){
+    const bet=`#${p.i} ${p.n} PRA ${p.s}${p.L}`;
+    if(newKeys.has(p.k)){lines.push(`${bet}: he's OUT, the bet voids (FanDuel refunds props on players who don't play)`);continue;}
+    const x=by[p.k];if(!x)continue;
+    const proj=M.calibrate("pra",x.pr.pra,x.p.PRA,x.p.MIN),po=M.pOver(proj,p.L,"pra"),prob=p.s==="o"?po:1-po;
+    if(Math.abs(proj-p.proj)<BOARD_UPDATE_MIN)continue;
+    lines.push(`${bet}: proj ${f1(p.proj)} → ${f1(proj)}, ${pct(p.prob)} → ${pct(prob)}`+(prob<0.5?", now leans the other way: skip it":prob>p.prob?", stronger":", weaker"));
+  }
+  if(!lines.length){log(`${team}: board picks unchanged by the news`);return false;}
+  const who=[...newKeys].map(k=>(D.players[k]&&D.players[k].name)||k).join(", ");
+  await ntfy(`Board update: ${who} OUT (${team}), ${tipStr(g)} ET`,lines.join("\n")+"\n\nLines are the board's 1 PM numbers; the book has likely moved since.",4,["basketball","warning"]);
+  return true;
+}
+
 // A regular was just ruled out: project his team with and without the news; list who gains and clears the bar.
 async function onNews(g,side,D,outNow,newKeys){
   const team=(await R.roster(g[side].espnId)).map(n=>D.players[R.nk(n)]).filter(Boolean);
@@ -100,6 +140,7 @@ async function onNews(g,side,D,outNow,newKeys){
         const m=outs[g[side].espnAbbr],newKeys=new Set();
         for(const k of m.keys()){const sk=`${g.id}|${k}`;if(!state.seen[sk]){state.seen[sk]=1;if(!first)newKeys.add(k);}}
         // first look at a game (start of day or cold cache): the morning/pregame alerts already cover these outs
+        if(newKeys.size){try{if(await boardUpdate(g,side,D,new Set(m.keys()),newKeys))alerts++;}catch(e){log("board update error",g.id,e.message);}}
         if(newKeys.size){try{if(await onNews(g,side,D,new Set(m.keys()),newKeys))alerts++;}catch(e){log("news error",g.id,e.message);}}
       }
     }

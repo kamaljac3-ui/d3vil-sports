@@ -39,3 +39,7 @@ DRY_RUN=1 DATE=2026-03-15 POLLS=3 POLL_SEC=2 TEST_INJECT="Deni Avdija" node nba-
 - **Questionable players aren't alerted.** Only Out/Doubtful rulings trigger an alert.
 - **Returns aren't alerted.** A player coming back from an injury doesn't trigger an alert.
 - **Unproven live.** The backtest knew every absence in advance, so the live hit rate will be lower by however much late scratches and line moves cost. The results tracker will measure it.
+
+## Board updates
+
+When a new Out lands on a team with picks on today's PRA board (nba-edges posts it to `NTFY_TOPIC` + `-board` around 1 PM ET), this bot also sends a **Board update**: the board player himself out → the bet voids; a teammate out → his re-projected chance at the board's line, if it moved 1+ PRA (`BOARD_UPDATE_MIN`), with "skip it" when it now leans the other way. It reads the board from ntfy only when news lands, and pulls no odds. Test with `BOARD_JSON=<file> TEST_INJECT="Player Name"`.

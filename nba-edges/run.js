@@ -579,6 +579,17 @@ const boardLine=(r,i)=>{
     `   L5 ${l5}${r.games?` (${r.hits}/${r.games} ${side==="o"?"over":"under"})`:""} · avg ${f1(r.avg)} · ${Math.round(r.minProj)} min`+
     (r.h2h?` · last ${r.h2h.n} vs ${r.opp}: ${r.h2h.diff>=0?"+":""}${r.h2h.diff} vs avg`:"")+(r.tags.length?`\n   ${r.tags.join("; ")}`:"");
 };
+// A compact copy of the board goes to a second ntfy topic (NTFY_TOPIC + BOARD_DATA_SUFFIX, not subscribed on the phone),
+// where nba-news reads it when a late Out lands, to send a "Board update" for the picks on that team.
+const BOARD_DATA_SUFFIX=process.env.BOARD_DATA_SUFFIX||"-board";
+async function publishBoard(top){
+  if(DRY||!NTFY_TOPIC||!top.length)return;
+  const data={date:TODAY,at:new Date().toISOString(),model:MODEL_VERSION,picks:top.map((r,i)=>({i:i+1,k:r.key,n:r.name,t:r.team,gid:r.gameId,
+    s:r.po>=0.5?"o":"u",L:r.line,price:r.price,proj:+r.proj.toFixed(2),prob:+r.prob.toFixed(3)}))};
+  const h={"Content-Type":"application/json"};if(NTFY_TOKEN)h.Authorization="Bearer "+NTFY_TOKEN;
+  const r=await fetch(NTFY_SERVER,{method:"POST",headers:h,body:JSON.stringify({topic:NTFY_TOPIC+BOARD_DATA_SUFFIX,title:"board-data",message:JSON.stringify(data),priority:1})}).catch(e=>({status:e.message}));
+  log("board data",r.status);
+}
 async function board(games,D){
   const key=`board-${TODAY}.json`;if(cached(key,30)&&!DRY&&MODE!=="board")return;
   if(!ODDS_KEY){log("PRA board needs ODDS_API_KEY");return;}
@@ -588,7 +599,7 @@ async function board(games,D){
   const msg=top.length?top.map(boardLine).join("\n")+`\n\nRanked by EV at your book's price from the model's calibrated chance. Model edges aren't proven vs closing lines yet; 💰 alerts (book vs sharp) are the market-based ones.`
     :"No PRA bet clears the bar on this slate.";
   await ntfy(`NBA PRA board ${TODAY} (${games.length} games)`,msg,top.length?4:2,["basketball","trophy"]);
-  logPicks("board",[["PRA board","prop",top]]);
+  logPicks("board",[["PRA board","prop",top]]);await publishBoard(top);
   if(!DRY&&NTFY_TOPIC)store(key,true);
 }
 // ✅ game-line picks, logged like the player picks (same sent-only rule) for results/track.js

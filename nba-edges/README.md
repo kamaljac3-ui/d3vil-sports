@@ -79,6 +79,7 @@ and ranks by EV. One bet per player, top `BOARD_N` (10). Each comes with its fac
   (Pinnacle, else the other US books' no-vig consensus), and the tags (teammates out, b2b, DvP, blowout/underdog, cold H2H).
 - **Credits:** the board's props pull is cached as `book-<id>.json` and reused by that evening's pregame alerts for
   `PROPS_TTL_H` (8) hours, so a game costs about 2 credits (this pull + the closing line).
+- **Late news (`nba-news`):** the board is also posted as compact JSON to a second ntfy topic (`NTFY_TOPIC` + `BOARD_DATA_SUFFIX`, default `-board`; don't subscribe to it). When NBA News sees a new Out on a team with board picks, it sends a **Board update**: the pick's own player out → the bet voids; a teammate out → his re-projected chance at the board's line, if it moved `BOARD_UPDATE_MIN` (1) PRA or more, and "skip it" if it now leans the other way. No odds are pulled, so it can't say how far the book's line moved.
 - **Grading:** board picks are logged as `kind:"prop"`, `stat:"pra"`, mode `board`; the ledger's review groups them as
   "PRA board". Last-5 hit rates are descriptive: the backtest found recent form/H2H adds little beyond the projection.
 
