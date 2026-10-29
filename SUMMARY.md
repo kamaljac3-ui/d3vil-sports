@@ -1,6 +1,6 @@
 # Bot results
 
-Updated 2026-10-28. 0 picks waiting on games to finish.
+Updated 2026-10-29. 0 picks waiting on games to finish.
 
 ## Last 7 days
 
@@ -9,25 +9,26 @@ MLB: 3 hitter-games (small sample: noise until ~100+)
 - Off the flagged starter: HR in 0 of 3 games he started
 - Launch window: 10% of 10 batted balls at 25-35 deg vs 13% predicted
 
-NBA (model pre-2026-10-24): 126 picks
-- Projection boosts: 11/19 beat their average (58%); model said +2.1, got +1.2 per pick
-- Prop lines: 63-44 (59%), +13.3 units at -110 (break-even 52.4%)
-NBA (model nba-news): 17 picks (small sample: noise until ~100+)
-- Projection boosts: 4/17 beat their average (24%); model said +2.1, got -1.8 per pick
-NBA (model 2026-10-24-rosters): 19 picks (small sample: noise until ~100+)
-- Projection boosts: 1/1 beat their average (100%); model said +2.3, got +1.4 per pick
-- Prop lines: 9-3 (75%), +5.2 units at -110 (break-even 52.4%)
-  - Closing line: 8 with a close; it moved our way 0, against us 0, avg +0.0 (beating the close is the early sign of a real edge)
-- Game spreads (model 4+ pts off the line): 3-3 (50%), -0.3 units at -110; vs the close: our way 3, against 0, avg +0.8
+NBA (model pre-2026-10-24): 96 picks (small sample: noise until ~100+)
+- Projection boosts: 6/13 beat their average (46%); model said +2.1, got -0.4 per pick
+- Prop lines: 51-32 (61%), +14.4 units at -110 (break-even 52.4%)
+NBA (model nba-news): 19 picks (small sample: noise until ~100+)
+- Projection boosts: 5/19 beat their average (26%); model said +2.1, got -1.3 per pick
+NBA (model 2026-10-24-rosters): 32 picks (small sample: noise until ~100+)
+- Projection boosts: 2/4 beat their average (50%); model said +1.8, got +0.7 per pick
+- Prop lines: 12-8 (60%), +2.9 units at -110 (break-even 52.4%)
+  - Closing line: 16 with a close; it moved our way 0, against us 0, avg +0.0 (beating the close is the early sign of a real edge)
+- Game spreads (model 4+ pts off the line): 3-5 (38%), -2.3 units at -110; vs the close: our way 3, against 0, avg +0.6
 
-NBA by tag: 16 graded picks with tags logged (small sample: noise until ~100+)
-- teammate out (w/o) (14): props 7-3 +3.4u, close our way 0/6 (avg +0.0); boosts 1/4 beat avg (25%), said +2.5 got -1.6
-- b2b 2nd night (5): props 3-1 +1.7u, close our way 0/4 (avg +0.0); boosts 1/1 beat avg (100%), said +2.3 got +1.4
-- high team total (8): props 3-1 +1.7u, close our way 0/2 (avg +0.0); boosts 1/4 beat avg (25%), said +2.5 got -1.6
-- sent < 2h before tip (15): props 9-3 +5.2u, close our way 0/8 (avg +0.0); boosts 0/3 beat avg (0%), said +2.6 got -2.6
-- sent 2h+ before tip (1): boosts 1/1 beat avg (100%), said +2.3 got +1.4
-- Minutes: projected 26.1, played 24.9 (avg miss 4.5, 1 picks 8+ min short); per-minute rate 140% of projected
-- Didn't play (void): 1/17 (6%); on a b2b 2nd night 0/5 (0%)
+NBA by tag: 31 graded picks with tags logged (small sample: noise until ~100+)
+- teammate out (w/o) (29): props 10-8 +1.1u, close our way 0/14 (avg +0.0); boosts 4/11 beat avg (36%), said +2.1 got -0.8
+- b2b 2nd night (6): props 3-2 +0.7u, close our way 0/5 (avg +0.0); boosts 1/1 beat avg (100%), said +2.3 got +1.4
+- high team total (12): props 3-2 +0.7u, close our way 0/3 (avg +0.0); boosts 2/7 beat avg (29%), said +2.3 got -1.5
+- blowout risk (4): props 1-3 -2.1u, close our way 0/4 (avg +0.0)
+- sent < 2h before tip (27): props 12-8 +2.9u, close our way 0/16 (avg +0.0); boosts 2/7 beat avg (29%), said +2.3 got -1.7
+- sent 2h+ before tip (4): boosts 2/4 beat avg (50%), said +1.8 got +0.7
+- Minutes: projected 24.7, played 25.4 (avg miss 4.6, 1 picks 8+ min short); per-minute rate 130% of projected
+- Didn't play (void): 2/33 (6%); on a b2b 2nd night 0/6 (0%)
 
 ## All time
 
@@ -41,22 +42,23 @@ MLB live (pitching changes): 29 picks, 20 faced the new pitcher (small sample: n
 NBA (model pre-2026-10-24): 130 picks
 - Projection boosts: 11/19 beat their average (58%); model said +2.1, got +1.2 per pick
 - Prop lines: 65-46 (59%), +13.1 units at -110 (break-even 52.4%)
-NBA (model nba-news): 17 picks (small sample: noise until ~100+)
-- Projection boosts: 4/17 beat their average (24%); model said +2.1, got -1.8 per pick
-NBA (model 2026-10-24-rosters): 19 picks (small sample: noise until ~100+)
-- Projection boosts: 1/1 beat their average (100%); model said +2.3, got +1.4 per pick
-- Prop lines: 9-3 (75%), +5.2 units at -110 (break-even 52.4%)
-  - Closing line: 8 with a close; it moved our way 0, against us 0, avg +0.0 (beating the close is the early sign of a real edge)
-- Game spreads (model 4+ pts off the line): 3-3 (50%), -0.3 units at -110; vs the close: our way 3, against 0, avg +0.8
+NBA (model nba-news): 21 picks (small sample: noise until ~100+)
+- Projection boosts: 6/21 beat their average (29%); model said +2.1, got -1.7 per pick
+NBA (model 2026-10-24-rosters): 32 picks (small sample: noise until ~100+)
+- Projection boosts: 2/4 beat their average (50%); model said +1.8, got +0.7 per pick
+- Prop lines: 12-8 (60%), +2.9 units at -110 (break-even 52.4%)
+  - Closing line: 16 with a close; it moved our way 0, against us 0, avg +0.0 (beating the close is the early sign of a real edge)
+- Game spreads (model 4+ pts off the line): 3-5 (38%), -2.3 units at -110; vs the close: our way 3, against 0, avg +0.6
 
-NBA by tag: 16 graded picks with tags logged (small sample: noise until ~100+)
-- teammate out (w/o) (14): props 7-3 +3.4u, close our way 0/6 (avg +0.0); boosts 1/4 beat avg (25%), said +2.5 got -1.6
-- b2b 2nd night (5): props 3-1 +1.7u, close our way 0/4 (avg +0.0); boosts 1/1 beat avg (100%), said +2.3 got +1.4
-- high team total (8): props 3-1 +1.7u, close our way 0/2 (avg +0.0); boosts 1/4 beat avg (25%), said +2.5 got -1.6
-- sent < 2h before tip (15): props 9-3 +5.2u, close our way 0/8 (avg +0.0); boosts 0/3 beat avg (0%), said +2.6 got -2.6
-- sent 2h+ before tip (1): boosts 1/1 beat avg (100%), said +2.3 got +1.4
-- Minutes: projected 26.1, played 24.9 (avg miss 4.5, 1 picks 8+ min short); per-minute rate 140% of projected
-- Didn't play (void): 1/17 (6%); on a b2b 2nd night 0/5 (0%)
+NBA by tag: 31 graded picks with tags logged (small sample: noise until ~100+)
+- teammate out (w/o) (29): props 10-8 +1.1u, close our way 0/14 (avg +0.0); boosts 4/11 beat avg (36%), said +2.1 got -0.8
+- b2b 2nd night (6): props 3-2 +0.7u, close our way 0/5 (avg +0.0); boosts 1/1 beat avg (100%), said +2.3 got +1.4
+- high team total (12): props 3-2 +0.7u, close our way 0/3 (avg +0.0); boosts 2/7 beat avg (29%), said +2.3 got -1.5
+- blowout risk (4): props 1-3 -2.1u, close our way 0/4 (avg +0.0)
+- sent < 2h before tip (27): props 12-8 +2.9u, close our way 0/16 (avg +0.0); boosts 2/7 beat avg (29%), said +2.3 got -1.7
+- sent 2h+ before tip (4): boosts 2/4 beat avg (50%), said +1.8 got +0.7
+- Minutes: projected 24.7, played 25.4 (avg miss 4.6, 1 picks 8+ min short); per-minute rate 130% of projected
+- Didn't play (void): 2/33 (6%); on a b2b 2nd night 0/6 (0%)
 
 ## How to read this
 
@@ -66,6 +68,24 @@ NBA by tag: 16 graded picks with tags logged (small sample: noise until ~100+)
 
 ## Recent picks
 
+- 2026-10-28 Will Riley PTS (boost): void (COACH'S DECISION)
+- 2026-10-28 Trae Young PTS (boost, proj 21.4, avg 19.1): 14
+- 2026-10-28 Oscar Tshiebwe REB (boost, proj 8.1, avg 6.6): 5
+- 2026-10-28 Oscar Tshiebwe PTS (boost, proj 10.0, avg 7.8): 7
+- 2026-10-28 Obi Toppin PTS (boost, proj 14.9, avg 12.7): 13
+- 2026-10-28 MIA @ ATL ATL -2.5 (spread, closed -2.5): 129-117
+- 2026-10-28 Kenrich Williams REB (prop, u5.5): 3
+- 2026-10-28 Jared McCain REB (prop, u3.5): 4
+- 2026-10-28 Jared McCain PTS (prop, u16.5): 10
+- 2026-10-28 GSW @ MIN MIN -3.5 (spread, closed -3.5): 119-114
+- 2026-10-28 Dylan Harper 3PM (prop, u1.5): 2
+- 2026-10-28 Darryn Peterson PTS (prop, u15.5): 18
+- 2026-10-28 Darryn Peterson AST (prop, u3.5): 3
+- 2026-10-28 Darryn Peterson 3PM (prop, u1.5): 3
+- 2026-10-28 Cooper Flagg AST (prop, u6.5): 8
+- 2026-10-28 Clint Capela REB (boost, proj 5.4, avg 4.2): 8
+- 2026-10-28 Anthony Davis PTS (boost, proj 23.1, avg 21.0): 18
+- 2026-10-28 Alex Sarr PTS (boost, proj 16.3, avg 14.3): 18
 - 2026-10-27 DET @ NYK DET +4.5 (spread, closed 4.5): 97-111
 - 2026-10-27 BKN @ BOS BOS -12.5 (spread, closed -13.5): 124-125
 - 2026-10-26 Reed Sheppard PTS (prop, o8.5): 13
@@ -202,35 +222,3 @@ NBA by tag: 16 graded picks with tags logged (small sample: noise until ~100+)
 - 2026-10-23 Andre Drummond REB (prop, o6.5): 2
 - 2026-10-23 Aaron Nesmith PTS (prop, o10.5): 9
 - 2026-10-23 Aaron Nesmith PTS (boost, proj 15.9, avg 13.8): 9
-- 2026-10-21 Tre Jones REB (prop, o1.5): 3
-- 2026-10-21 Tre Jones PTS (prop, o8.5): 13
-- 2026-10-21 Tre Jones AST (prop, o3.5): 0
-- 2026-10-21 Trae Young PTS (boost, proj 20.4, avg 17.9): 20
-- 2026-10-21 Trae Young AST (boost, proj 9.1, avg 8.0): 13
-- 2026-10-21 Tim Hardaway Jr. PTS (prop, o9.5): 3
-- 2026-10-21 Tim Hardaway Jr. 3PM (prop, o1.5): 1
-- 2026-10-21 Saddiq Bey REB (prop, o3.5): 5
-- 2026-10-21 Saddiq Bey PTS (prop, o10.5): 13
-- 2026-10-21 Royce O'Neale REB (prop, o3.5): 4
-- 2026-10-21 Reed Sheppard REB (prop, o1.5): 2
-- 2026-10-21 Reed Sheppard PTS (prop, o8.5): 3
-- 2026-10-21 Reed Sheppard 3PM (prop, o1.5): 1
-- 2026-10-21 Pascal Siakam PTS (boost, proj 26.6, avg 24.0): 30
-- 2026-10-21 Naz Reid PTS (prop, u17.5): 20
-- 2026-10-21 Isaiah Collier PTS (prop, o5.5): 7
-- 2026-10-21 Isaiah Collier AST (prop, o4.5): 3
-- 2026-10-21 Isaac Okoro PTS (prop, o5.5): 4
-- 2026-10-21 Grayson Allen PTS (prop, o12.5): 21
-- 2026-10-21 Grayson Allen AST (prop, o2.5): 4
-- 2026-10-21 Giannis Antetokounmpo AST (prop, u6.5): 1
-- 2026-10-21 De'Anthony Melton PTS (boost, proj 14.3, avg 12.3): 0
-- 2026-10-21 Davion Mitchell 3PM (prop, o0.5): 1
-- 2026-10-21 Darius Garland PTS (boost, proj 21.2, avg 18.8): 30
-- 2026-10-21 Cam Spencer PTS (prop, o6.5): 3
-- 2026-10-21 Cam Spencer AST (prop, o3.5): 2
-- 2026-10-21 Brandon Williams PTS (boost, proj 15.3, avg 13.0): 14
-- 2026-10-21 Bennedict Mathurin PTS (prop, o12.5): 11
-- 2026-10-21 Bennedict Mathurin 3PM (prop, o0.5): 0
-- 2026-10-21 Anthony Davis PTS (boost, proj 23.0, avg 20.4): 34
-- 2026-10-21 Alperen Sengun AST (prop, o4.5): 5
-- 2026-10-21 Alex Sarr PTS (boost, proj 18.5, avg 16.3): 6
