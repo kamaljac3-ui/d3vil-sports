@@ -65,3 +65,5 @@ Backtest 2026 wk 4–7 (Oct 27): rec yds MAE 22.5 vs 24.2 recent avg, rec 1.57 v
 5. **Passing yards:** bias −6.8 and shrinking; check again at week 10 whether it's new starters or league-wide.
 6. **Rushing yards:** live picks 5-4 but week 7 over-projected rush yards by 17 yds on 4 picks (Bijan, Chase Brown).
    Backtest bias is +1.3, so watch, not fix.
+
+- **🎯 Parlays (2026-10-29):** Sunday 5-leg props parlay at 11:45 AM ET. Legs are treated as independent (one per game). Grade on the legs first (do the legs win at their blended chance?) and on the price: a parlay only pays if each leg's edge beats the book's cut five times over. Under ~50 parlays the W-L is pure luck (a fair 5-leg hits ~5-10%); judge the legs, not the tickets.

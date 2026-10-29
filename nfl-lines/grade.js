@@ -58,6 +58,7 @@ const picksOf=bot=>{const d=path.join(DIR,bot,".cache");return fs.existsSync(d)?
 
   // ---------- player props (nfl-props) ----------
   for(const p of picksOf("nfl-props")){
+    if(p.kind==="parlay")continue;   // graded below, leg by leg
     const g=G[p.game];const r={bot:"nfl-props",kind:p.kind,market:p.market,game:p.game,week:g?+g.week:p.week,at:p.at,alert:p.alert,ctx:p.ctx||null,
       label:`${p.player} ${p.side} ${p.point} ${p.market}`,price:p.price??null,book:p.book||null};
     if(!g||g.result===""){out.push({...r,res:"pending"});continue;}
@@ -68,6 +69,20 @@ const picksOf=bot=>{const d=path.join(DIR,bot,".cache");return fs.existsSync(d)?
     out.push({...r,actual:v,res,units:profit(res,r.price),proj:p.proj,prob:p.prob,fair:p.fair,ev:p.ev,actual_snap:snap??null});
   }
 
+  // ---------- Sunday parlays (nfl-props kind "parlay"): every leg like a prop; a leg whose player didn't play is dropped ----------
+  for(const p of picksOf("nfl-props").filter(p=>p.kind==="parlay")){
+    const r={bot:"nfl-props",kind:"parlay",market:"parlay",game:"multi",week:p.week,at:p.at,alert:"parlay",ctx:p.ctx||null,label:`${(p.legs||[]).length}-leg parlay ${p.american>0?"+":""}${p.american}`,price:p.american,book:null};
+    const legs=[];let pending=false;
+    for(const l of p.legs||[]){const g=G[l.game];if(!g||g.result===""){pending=true;break;}
+      const row=(l.playerId&&ST[l.game+"|"+l.playerId])||ST[l.game+"|"+normName(l.player)];
+      if(!row){legs.push({...l,res:"void"});continue;}
+      const v=+row[STAT[l.market]]||0,d=l.side==="Over"?v-l.point:l.point-v;legs.push({...l,actual:v,res:d>0?"W":d<0?"L":"P"});}
+    if(pending){out.push({...r,res:"pending"});continue;}
+    const live=legs.filter(l=>l.res==="W"||l.res==="L");
+    if(!live.length){out.push({...r,res:"void",legs});continue;}
+    const D=live.reduce((a,l)=>a*(l.price>0?1+l.price/100:1+100/-l.price),1),won=live.every(l=>l.res==="W");
+    out.push({...r,res:won?"W":"L",units:won?D-1:-1,legs,legsWon:live.filter(l=>l.res==="W").length,legsLive:live.length,prob:p.p});
+  }
   fs.writeFileSync(path.join(DIR,"graded.json"),JSON.stringify(out,null,1));
   const sum=(label,R)=>{const g=R.filter(x=>x.res==="W"||x.res==="L"||x.res==="P"),w=g.filter(x=>x.res==="W").length,l=g.filter(x=>x.res==="L").length,pu=g.length-w-l;
     const u=g.reduce((a,x)=>a+x.units,0),c=g.filter(x=>x.clv!=null);
@@ -77,11 +92,11 @@ const picksOf=bot=>{const d=path.join(DIR,bot,".cache");return fs.existsSync(d)?
     ["Lines: 💰 stale spread/total",x=>x.bot==="nfl-lines"&&x.kind==="stale"&&x.market!=="ml"],["Lines: 💰 stale moneyline",x=>x.bot==="nfl-lines"&&x.kind==="stale"&&x.market==="ml"],["Props: model vs line",x=>x.bot==="nfl-props"&&x.kind==="model"],
     ["  props model, Friday alert",x=>x.bot==="nfl-props"&&x.kind==="model"&&x.alert==="fri"],["  props model, game-day alert",x=>x.bot==="nfl-props"&&x.kind==="model"&&x.alert==="gameday"],
     ["  props model, Overs",x=>x.bot==="nfl-props"&&x.kind==="model"&&/Over/.test(x.label)],["  props model, Unders",x=>x.bot==="nfl-props"&&x.kind==="model"&&/Under/.test(x.label)],
-    ["Props: 💰 stale",x=>x.bot==="nfl-props"&&x.kind==="stale"]];
+    ["Props: 💰 stale",x=>x.bot==="nfl-props"&&x.kind==="stale"],["🎯 Sunday parlays",x=>x.kind==="parlay"]];
   for(const [l,f] of groups)console.log(sum(l,out.filter(f)));
   console.log(`pending ${out.filter(x=>x.res==="pending").length}, void ${out.filter(x=>x.res==="void").length}`);
   // per-week W-L for each family (graded-weekly.json, for charts)
-  const fam=x=>x.bot==="nfl-lines"?(x.kind==="stale"?"lines-stale":"lines-model"):(x.kind==="stale"?"props-stale":"props-model");
+  const fam=x=>x.kind==="parlay"?"parlay":x.bot==="nfl-lines"?(x.kind==="stale"?"lines-stale":"lines-model"):(x.kind==="stale"?"props-stale":"props-model");
   const wk={};for(const x of out.filter(x=>["W","L","P"].includes(x.res))){const k=fam(x)+"|"+x.week,o=wk[k]||(wk[k]={fam:fam(x),week:x.week,w:0,l:0,p:0,units:0});o[x.res.toLowerCase()]++;o.units+=x.units;}
   fs.writeFileSync(path.join(DIR,"graded-weekly.json"),JSON.stringify(Object.values(wk).sort((a,b)=>a.week-b.week),null,1));
   for(const o of Object.values(wk).sort((a,b)=>a.fam.localeCompare(b.fam)||a.week-b.week))console.log(`  ${o.fam.padEnd(12)} wk${o.week}: ${o.w}-${o.l}${o.p?"-"+o.p:""} ${(o.units>=0?"+":"")+o.units.toFixed(2)}u`);

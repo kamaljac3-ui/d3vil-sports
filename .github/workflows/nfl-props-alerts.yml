@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: "auto, wed, fri, gameday, backtest, or oddsprobe (what the SportsGameOdds key returns)"
+        description: "auto, wed, fri, gameday, parlay (the Sunday 5-leg parlay now), backtest, or oddsprobe (what the SportsGameOdds key returns)"
         default: auto
       dry_run:
         description: "1 = print alerts to the log instead of sending (and mark nothing as sent)"

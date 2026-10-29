@@ -98,7 +98,21 @@ async function nbaClose(id){
   const n=v=>{const f=parseFloat(String(v==null?"":v).replace("+",""));return isFinite(f)?f:null;},h=x.homeTeamOdds||{};
   return {spread:n(h.close&&h.close.pointSpread&&h.close.pointSpread.american)??n(x.spread),total:n(x.close&&x.close.total&&x.close.total.american)??n(x.overUnder)};
 }
+// a parlay (nba-edges board, kind "parlay"): every leg graded like a prop; a leg whose player didn't play is dropped
+// (books void that leg and shorten the parlay), the parlay wins only if every remaining leg wins
+const decOf=ml=>ml>0?1+ml/100:1+100/-ml;
+async function gradeParlay(r){
+  const legs=[];
+  for(const l of r.legs||[]){const x=await gradeNba({...l,kind:"prop"});if(!x)return null;
+    if(x.status!=="final"){legs.push({key:l.key,status:"void"});continue;}
+    const a=x[l.stat];legs.push({key:l.key,status:"final",actual:a,won:a===l.line?null:(a>l.line)===(l.side==="o")});}
+  const live=legs.filter(l=>l.status==="final"&&l.won!==null);
+  if(!live.length)return {status:"void",why:"every leg void",legs};
+  const won=live.every(l=>l.won),D=(r.legs||[]).filter(l=>live.some(x=>x.key===l.key)).reduce((a,l)=>a*decOf(l.price),1);
+  return {status:"final",won,legs,legsLive:live.length,decimal:+D.toFixed(3),units:won?+(D-1).toFixed(3):-1};
+}
 async function gradeNba(r){
+  if(r.kind==="parlay")return gradeParlay(r);
   const s=await nbaSummary(r.gameId);if(!s)return null;
   const comp=s.header.competitions[0],st=comp.status.type;
   if(/postponed|cancel/i.test(st.name))return {status:"void",why:st.description};
@@ -180,6 +194,9 @@ function nbaCard(recs){
     }
   }
   const evp=f.filter(r=>r.kind==="ev");if(evp.length)out.push(`- 💰 Stale prices (your book vs the sharp no-vig line): ${evSummary(evp)}`);
+  const par=f.filter(r=>r.kind==="parlay");
+  if(par.length){const w=par.filter(r=>r.result.won).length,u=par.reduce((a,r)=>a+r.result.units,0);
+    out.push(`- 🎯 Parlays: ${w}-${par.length-w}, ${sg(u)} units (promised chance ${pct(mean(par.map(r=>r.p)))} a parlay); legs won ${par.reduce((a,r)=>a+r.result.legs.filter(l=>l.won).length,0)}/${par.reduce((a,r)=>a+r.result.legsLive,0)}`);}
   // game lines: tracked spread/total disagreements (no ✅ by default), against the result and the closing line
   for(const k of ["spread","total"]){
     const g=f.filter(r=>r.kind===k);if(!g.length)continue;
@@ -200,6 +217,7 @@ function recentLines(L,since){
       `${r.date} ${r.name} vs ${r.pitcher}: ${r.result.hr} HR in ${r.result.pa} PA (${pct(r.result.pHR)} expected), ${r.result.inWin}/${r.result.bbe} in window`);
   const LBL={pra:"PRA",pts:"PTS",reb:"REB",ast:"AST",fg3m:"3PM"};
   for(const r of L.nba.filter(r=>r.date>=since&&r.result)){
+    if(r.kind==="parlay"){out.push(r.result.status==="void"?`${r.date} ${r.name}: void`:`${r.date} ${r.name} ${r.american>0?"+":""}${r.american}: ${r.result.won?"WON":"lost"} (${r.result.legs.filter(l=>l.won).length}/${r.result.legsLive} legs)`);continue;}
     if(r.kind==="spread"||r.kind==="total"){
       const what=r.kind==="spread"?`${r.team} ${r.line>0?"+":""}${r.line}`:`${r.side} ${r.line}`,cl=r.close!=null?`, closed ${r.close}`:"";
       out.push(r.result.status==="void"?`${r.date} ${r.name} ${what}: void (${r.result.why})`:`${r.date} ${r.name} ${what} (${r.kind}${cl}): ${r.result.as}-${r.result.hs}`);continue;}

@@ -28,6 +28,7 @@ const CFG={
   // stale props (needs ODDS_API_KEY): your books' prices vs the sharp book's no-vig price
   MIN_EV:env("MIN_EV_PROPS",0.03),STALE_N:env("STALE_N",6),
   STALE_GAP:{recYds:env("STALE_GAP_RECYDS",8),rec:env("STALE_GAP_REC",1),rushYds:env("STALE_GAP_RUSHYDS",8),passYds:env("STALE_GAP_PASSYDS",15)},
+  PARLAY_HOUR:env("PARLAY_HOUR",11.75),PARLAY_LEGS:env("PARLAY_LEGS",5),PARLAY_MARKET_W:env("PARLAY_MARKET_W",0.5),   // Sunday parlay
   ODDS_TOP:env("ODDS_TOP_PLAYERS",20),ODDS_MAX_EVENTS:env("ODDS_MAX_EVENTS",8),ODDS_ON_GAMEDAY:env("ODDS_ON_GAMEDAY",0),
 };
 const LABEL={recYds:"rec yds",rec:"rec",rushYds:"rush yds",passYds:"pass yds"};
@@ -183,6 +184,43 @@ async function weekly(ctx,kind,games){
   return ok;
 }
 
+// ---------- Sunday parlay (one push, PARLAY_HOUR ET on Sundays: 11:45 AM, after the 1 PM games' inactives) ----------
+// The best PARLAY_LEGS legs from different Sunday games (nfl-props/parlay.js, shared with the NBA Saturday parlay). Each
+// leg is a prop at your book's number and price (MY_BOOKS), its chance a PARLAY_MARKET_W blend of the model and the
+// market's no-vig price (SportsGameOdds consensus; Pinnacle when there is one). Logged as one pick (kind "parlay") with
+// its legs; nfl-lines/grade.js grades it leg by leg on Tuesday.
+const PL=require("./parlay");
+async function sundayParlay(ctx,games){
+  const G=[];for(const g of games)G.push(await projectGame(ctx,g));
+  const ids=await odds.eventIds(G.map(x=>x.g)),legs=[];
+  for(const x of G){
+    const ev=ids[x.g.game_id];if(!ev)continue;
+    const lines=await odds.eventLines(ev,Object.keys(LABEL));if(!lines)continue;
+    for(const p of x.players){
+      const L=lines[normName(p.name)];if(!L)continue;p.lines=L;
+      for(const s in p.stats){
+        const e=evaluate(p,s,p.lines);if(!e||e.refKind!=="line"||!e.price||e.prob<0.5)continue;
+        const l=L[s],side=e.over?"A":"B";
+        const f=SH.staleTwoWay(l.offers||[],{sigma:M.sdOf(s,l.line),maxGap:CFG.STALE_GAP[s],minEV:-1}).find(o=>SH.MINE.includes(o.key)&&o.side===side&&o.L===e.ref);
+        const kp=f?f.fair:null,pb=kp!=null?CFG.PARLAY_MARKET_W*e.prob+(1-CFG.PARLAY_MARKET_W)*kp:e.prob;
+        legs.push({game:x.g.game_id,p:pb,modelP:e.prob,mktP:kp,price:e.price.price,book:e.price.book,e,kick:x.kick,mkt:f?f.sharp.title:null});
+      }
+    }
+  }
+  const pl=PL.build(legs,CFG.PARLAY_LEGS);
+  if(!pl){log(`Sunday parlay: fewer than ${CFG.PARLAY_LEGS} games with a priced leg (${new Set(legs.map(l=>l.game)).size})`);return false;}
+  const late=pl.legs.filter(l=>etParts(new Date(l.kick)).h>=15).length;
+  const msg=pl.legs.map((l,i)=>`${i+1}. ${l.e.over?"OVER":"UNDER"} ${l.e.p.name} (${l.e.p.game}) ${LABEL[l.e.stat]} ${l.e.ref} ${odds.fmtPrice(l.price)} ${l.book} · ${pct(l.p)}`+
+      ` (model ${pct(l.modelP)}${l.mktP!=null?`, ${l.mkt} ${pct(l.mktP)}`:""})`).join("\n")+`\n${PL.summary(pl)}`+
+    (late?`\n${late} leg${late>1?"s are":" is"} in a late game: its inactives aren't out yet, so check that game's alert before kickoff.`:"");
+  const ok=await ntfy(`NFL W${ctx.week} Sunday 🎯 ${pl.n}-leg parlay`,msg,4,["football","dart"]);
+  if(LIVE&&ok){const date=etParts().date,key=`picks-${date}.json`;
+    writeState(key,(readState(key)||[]).concat([{sport:"nfl",bot:"nfl-props",date,at:new Date().toISOString(),alert:"parlay",week:ctx.week,kind:"parlay",
+      decimal:+pl.decimal.toFixed(3),american:pl.american,p:+pl.p.toFixed(4),ev:+pl.ev.toFixed(3),ctx:{model_version:VERSIONS["nfl-props"]},
+      legs:pl.legs.map(l=>({player:l.e.p.name,playerId:l.e.p.id,game:l.game,market:l.e.stat,side:l.e.over?"Over":"Under",point:l.e.ref,price:l.price,book:l.book,p:+l.p.toFixed(3),modelP:+l.modelP.toFixed(3),mktP:l.mktP==null?null:+l.mktP.toFixed(3)}))}]));}
+  return ok;
+}
+
 // ---------- game-day alert (~90 min before kickoff, when inactives post) ----------
 async function gameday(ctx,g){
   const x=await projectGame(ctx,g);let stale=[];
@@ -246,26 +284,36 @@ async function tick(){
   const waits=[Math.max(0,upcoming[0].kick-CFG.GD_MAX*6e4-now)];
   for(const [day,hr,k] of [["Wed",CFG.WED_HOUR,"wed"],["Fri",CFG.FRI_HOUR,"fri"]])
     if(et.wd===day&&!sent[k])waits.push(Math.max(0,etToUtc(et.date,`${hr}:00`).getTime()-now));
+  const ph=`${Math.floor(CFG.PARLAY_HOUR)}:${String(Math.round((CFG.PARLAY_HOUR%1)*60)).padStart(2,"0")}`;
+  if(et.wd==="Sun"&&!sent.parlay)waits.push(Math.max(0,etToUtc(et.date,ph).getTime()-now));
   const hint=Math.min(...waits);
 
-  let kind=null,gd=[];
+  let kind=null,gd=[],parlay=false;
+  // Sunday games still to kick off (manual MODE=parlay on another day: the week's Sunday games)
+  const sunday=()=>weekGames.filter(g=>etParts(new Date(g.kick)).wd==="Sun"&&g.kick>now+10*6e4&&(MODE==="parlay"||etParts(new Date(g.kick)).date===et.date));
   if(MODE==="auto"){
+    parlay=et.wd==="Sun"&&et.h+et.m/60>=CFG.PARLAY_HOUR&&!sent.parlay&&sunday().length>0;
     if(et.wd==="Wed"&&et.h>=CFG.WED_HOUR&&!sent.wed)kind="wed";
     else if(et.wd==="Fri"&&et.h>=CFG.FRI_HOUR&&!sent.fri)kind="fri";
     gd=upcoming.filter(g=>inWindow(g)&&!sent.games[g.game_id]);
   }else if(MODE==="wed"||MODE==="fri")kind=MODE;
+  else if(MODE==="parlay")parlay=true;
   else if(MODE==="gameday"){
     const pick=process.env.GAME?sched.filter(g=>g.game_id===process.env.GAME):upcoming.filter(inWindow);
     gd=pick.length?pick:upcoming.slice(0,1);
-  }else throw new Error(`Unknown MODE "${MODE}" (auto, wed, fri, gameday)`);
-  log(`${et.wd} ${et.date} ${et.h}:${String(et.m).padStart(2,"0")} ET, week ${week}, mode=${MODE}${DRY?" (dry run)":""}: weekly=${kind||"-"}, game-day=${gd.map(g=>g.game_id).join(",")||"-"}`);
-  if(!kind&&!gd.length)return hint;
+  }else throw new Error(`Unknown MODE "${MODE}" (auto, wed, fri, gameday, parlay)`);
+  log(`${et.wd} ${et.date} ${et.h}:${String(et.m).padStart(2,"0")} ET, week ${week}, mode=${MODE}${DRY?" (dry run)":""}: weekly=${kind||"-"}, game-day=${gd.map(g=>g.game_id).join(",")||"-"}${parlay?", Sunday parlay":""}`);
+  if(!kind&&!gd.length&&!parlay)return hint;
 
   const DB=await data.load(S);
   const ctx={DB,S,week,depth:await data.depthCharts(S),inj:await data.injuryReport(S,week),sl:await data.sleeper(gd.length?1:12)};
   if(kind){
     const ok=await weekly(ctx,kind,weekGames);
     if(LIVE&&ok){sent[kind]=true;writeState(sentKey,sent);}
+  }
+  if(parlay){
+    const ok=await sundayParlay(ctx,sunday());
+    if(LIVE&&ok){sent.parlay=true;writeState(sentKey,sent);}
   }
   for(const g of gd){
     const c={...ctx};if(g.week!==week){c.week=g.week;c.inj=await data.injuryReport(S,g.week);}

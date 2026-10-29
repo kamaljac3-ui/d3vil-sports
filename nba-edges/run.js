@@ -643,6 +643,17 @@ async function publishBoard(top){
   const r=await fetch(NTFY_SERVER,{method:"POST",headers:h,body:JSON.stringify({topic:NTFY_TOPIC+BOARD_DATA_SUFFIX,title:"board-data",message:JSON.stringify(data),priority:1})}).catch(e=>({status:e.message}));
   log("board data",r.status);
 }
+// Saturday parlay (PARLAY_DAYS, ET weekday names): the best PARLAY_LEGS legs from different games among the board's
+// candidates, each at its blended chance and your book's price (nfl-props/parlay.js, shared with the NFL Sunday parlay).
+const PL=require("../nfl-props/parlay.js");
+const PARLAY_LEGS=+(process.env.PARLAY_LEGS||5),PARLAY_DAYS=(process.env.PARLAY_DAYS||"Sat").split(",").map(x=>x.trim());
+const etWeekday=()=>new Intl.DateTimeFormat("en-US",{timeZone:"America/New_York",weekday:"short"}).format(process.env.DATE?new Date(process.env.DATE+"T17:00:00Z"):new Date());
+function parlayOf(rows){
+  if(!PARLAY_DAYS.includes(etWeekday())&&process.env.PARLAY_FORCE!=="1")return null;
+  return PL.build(rows.map(r=>({...r,game:r.gameId,p:r.prob})),PARLAY_LEGS);
+}
+const parlayText=pl=>`🎯 ${pl.n}-leg parlay, one leg per game (${pl.legs[0].book})\n`+
+  pl.legs.map((l,i)=>`${i+1}. ${l.name} (${l.team}) PRA ${l.po>=0.5?"o":"u"}${l.line} ${SH.fmt(l.price)} · ${pct(l.prob)}${l.soft!=null&&l.soft>=1?" 💰":""}`).join("\n")+`\n${PL.summary(pl)}`;
 async function board(games,D){
   const key=`board-${TODAY}.json`;if(cached(key,30)&&!DRY&&MODE!=="board")return;
   if(!ODDS_KEY){log("PRA board needs ODDS_API_KEY");return;}
@@ -651,8 +662,14 @@ async function board(games,D){
   const seen=new Set(),top=rows.sort((a,b)=>b.ev-a.ev).filter(r=>!seen.has(r.key)&&seen.add(r.key)).slice(0,BOARD_N);
   const msg=top.length?top.map(boardLine).join("\n")+`\n\nRanked by EV at your book's price, from a ${Math.round(BOARD_MARKET_W*100)}/${Math.round((1-BOARD_MARKET_W)*100)} blend of the model and the market's no-vig chance (Pinnacle, else the other US books without yours). 💰 = your book's number is softer than the market's. The model alone isn't proven vs closing lines yet.`
     :"No PRA bet clears the bar on this slate.";
-  await ntfy(`NBA PRA board ${TODAY} (${games.length} games)`,msg,top.length?4:2,["basketball","trophy"]);
+  const pl=parlayOf(rows);
+  if(PARLAY_DAYS.includes(etWeekday())||process.env.PARLAY_FORCE==="1")log(pl?`parlay: ${pl.n} legs, ${pl.american}, chance ${(pl.p*100).toFixed(1)}%`:`parlay: fewer than ${PARLAY_LEGS} games with a candidate leg`);
+  await ntfy(`NBA PRA board ${TODAY} (${games.length} games)${pl?" + 🎯 parlay":""}`,msg+(pl?"\n\n"+parlayText(pl):""),top.length?4:2,["basketball","trophy"]);
   logPicks("board",[["PRA board","prop",top]]);await publishBoard(top);
+  // the parlay is logged as one pick (kind "parlay") with its legs; results/track.js grades it leg by leg
+  if(pl)logPicks("board",[["parlay","parlay",[{kind:"parlay",key:"parlay",gameId:"multi",stat:String(pl.n),name:`${pl.n}-leg PRA parlay`,
+    legs:pl.legs.map(l=>({key:l.key,name:l.name,team:l.team,gameId:l.gameId,stat:"pra",side:l.po>=0.5?"o":"u",line:l.line,price:l.price,p:+l.prob.toFixed(3)})),
+    decimal:+pl.decimal.toFixed(3),american:pl.american,p:+pl.p.toFixed(4),ev:+pl.ev.toFixed(3)}]]]);
   if(!DRY&&NTFY_TOPIC)store(key,true);
 }
 // ✅ game-line picks, logged like the player picks (same sent-only rule) for results/track.js

@@ -105,6 +105,14 @@ Read the "right side" column carefully. It's measured against a naive recent ave
 already correct for most of that pull back toward the typical result, so the edge against real lines will be much smaller.
 That's why the optional Odds API mode exists.
 
+## 🎯 Sunday parlay
+
+One push on Sundays at `PARLAY_HOUR` (11.75 = 11:45 AM ET, after the 1 PM games' inactives), or `MODE=parlay`: the best
+`PARLAY_LEGS` (5) legs from different Sunday games. Each leg is a prop at your book's number and price (`MY_BOOKS`), its
+chance a `PARLAY_MARKET_W` (0.5) blend of the model and the market's no-vig price (SportsGameOdds consensus, or Pinnacle),
+using the shared builder `parlay.js` (one leg per game, best by chance × payout). Legs in late games are flagged: their
+inactives aren't out yet. Logged as one pick (`kind:"parlay"`) and graded leg by leg in `nfl-lines/grade.js` on Tuesdays.
+
 ## Prop and game lines: SportsGameOdds (default since 2026-10-29)
 
 With the repo Variable `NFL_ODDS=sgo` and the secret `SPORTSGAMEODDS_KEY`, both NFL bots take every line and price from
