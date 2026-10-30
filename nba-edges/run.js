@@ -663,7 +663,7 @@ function nbaLegSpeech(l){
   if(!over&&l.min3!=null&&l.mpg-l.min3>=4)why.push(`His minutes are way down lately, about ${PL.words(Math.round(l.min3))} a night.`);
   if(l.tags.includes("first game back"))why.push("It's his first game back, so his minutes could be limited.");
   if(l.games>=3)why.push(l.hits===l.games?`He's gone ${over?"over":"under"} that in all of his last ${PL.words(l.games)}.`:`He's gone ${over?"over":"under"} that in ${PL.words(l.hits)} of his last ${PL.words(l.games)}.`);
-  why.push(`We project him at ${PL.words(Math.round(l.proj))}.`);
+  why.push(`I got him at ${PL.words(Math.round(l.proj))}.`);
   return {who:l.name,bet:`${over?"over":"under"} ${PL.spokenLine(l.line)} points, rebounds and assists`,why};
 }
 // ---------- NBA Short script (Mon/Wed/Fri, right after the board): 5 PRA picks in KJ's voice for the cloned-voice Short ----------
@@ -697,14 +697,20 @@ const SHORT_WHY={
   out:[(r,n)=>`${n} out. Somebody's eating. It's him.`,(r,n)=>`No ${n} tonight. More touches, more everything.`],
   mins:[r=>`His minutes fell off a cliff.`,r=>`They cut his minutes, and the line didn't notice.`,r=>`He's barely playing lately. Easy.`],
   hits:[r=>`He's cleared it in ${PL.words(r.hits)} of his last ${PL.words(r.games)}.`,r=>`${PL.words(r.hits)} of his last ${PL.words(r.games)}. You see the pattern.`],
-  proj:[r=>`We got him at ${PL.words(Math.round(r.proj))}.`,r=>`Our number says ${PL.words(Math.round(r.proj))}. Respectfully.`]};
+  proj:[r=>`I got him at ${PL.words(Math.round(r.proj))}.`,r=>`I see ${PL.words(Math.round(r.proj))} tonight. Respectfully.`]};
+// KJ owns the picks (kamal, Oct 30): never "the computer/model picked"; lead with "I'm riding with" and say his confidence,
+// the pick's chance clamped to 60-70 percent
+const SHORT_LEAD=["I'm riding with","Give me","I like","Put me down for","I'm on"];
+const SHORT_CONF=[c=>`I'm ${c} percent on that.`,c=>`${cap(c)} percent confident.`,c=>`Call it ${c} percent.`,c=>`I'm ${c} percent there.`,c=>`${cap(c)} percent. I'm comfortable.`];
+const shortConf=r=>PL.words(Math.min(70,Math.max(60,Math.round(r.prob*100))));
+const cap=x=>x.charAt(0).toUpperCase()+x.slice(1);
 function shortLines(picks){
   const used={};const take=(k,...a)=>{const i=used[k]||0;used[k]=i+1;return SHORT_WHY[k][i%SHORT_WHY[k].length](...a);};
-  return picks.map(r=>{
+  return picks.map((r,i)=>{
     const over=r.po>=0.5,wo=r.tags.find(t=>t.startsWith("w/o "));
     const why=r.soft!=null&&r.soft>=1?take("soft",r):wo&&over?take("out",r,wo.slice(4).split(", ").join(" and ")):
       !over&&r.min3!=null&&r.mpg-r.min3>=4?take("mins",r):r.games>=4&&r.hits>=r.games-1?take("hits",r):take("proj",r);
-    return `${r.name}, ${over?"over":"under"} ${PL.spokenLine(r.line)}. ${why}`;
+    return `${SHORT_LEAD[i%SHORT_LEAD.length]} ${r.name}, ${over?"over":"under"} ${PL.spokenLine(r.line)}. ${why} ${SHORT_CONF[i%SHORT_CONF.length](shortConf(r))}`;
   });
 }
 // The Short as data: the scout-format fields plus shorts.py build settings for KJ's approved "Matrix meets sports" look
@@ -726,7 +732,7 @@ function shortData(cands,games){
   const tags=["nba player props","nba props tonight","nba picks tonight","pra props","nba bets",...picks.slice(0,3).map(r=>r.name.toLowerCase()+" props")];
   const hashtags=["#shorts","#nba","#nbapicks","#playerprops","#sportsbetting","#nbabets"];
   return {date:TODAY,day,model:MODEL_VERSION,title:`NBA Player Props Tonight: 5 PRA Bets (${day} ${md})`,hook,voiceover,words:voiceover.split(/\s+/).length,
-    onscreen:beats,tags,description:`Tonight's 5 PRA bets from the 48th State model, checked against the other books. Not a guarantee. 21+, bet responsibly. Newsletters: link in bio. ${hashtags.join(" ")}`,
+    onscreen:beats,tags,description:`KJ's 5 PRA bets for tonight, shopped against the other books. Not a guarantee. 21+, bet responsibly. Newsletters: link in bio. ${hashtags.join(" ")}`,
     pinned:`${lastName(picks[0].name)} over or under tonight? Wrong answers only. 👇`,
     tiktok:`5 PRA bets for tonight's NBA slate. ${lastName(picks[0].name)}: riding or fading? 👇 Newsletters: link in bio. #nba #nbapicks #playerprops #nbabets #sportsbetting`,
     pronunciation:`P-R-A = "P R A" (letters). Check: ${picks.map(r=>r.name).join(", ")}`,oneLiner:joke,
