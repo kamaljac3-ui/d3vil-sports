@@ -681,6 +681,8 @@ const SHORT_ONELINERS=[
   "My overs hit so rarely, the under sends me a thank-you note.",
   "I don't chase. I just jog behind it. Real slow.",
   "Bankroll management? I manage it. Straight to zero. Very organized."];
+// one-night notes read right after the hook (kamal, Oct 30: NBA Cup opening night; point differential is a Cup tiebreaker)
+const SHORT_NOTES={"2026-10-30":o=>`It's NBA Cup opening night, and point differential breaks ties. Nobody's coasting.${o>=3?" That's why I'm heavy on overs.":" Could be a lot of overs tonight."}`};
 const lastName=n=>n.replace(/\s+(Jr\.?|Sr\.?|II|III|IV)$/i,"").split(" ").slice(-1)[0];
 function shortPicks(top){
   // names people know first (22+ min or 18+ PRA a night), then the rest; 💰 and market-agrees picks first; max 2 a game
@@ -724,7 +726,8 @@ function shortData(cands,games){
   const day=DAYS[etWeekday()]||etWeekday(),soft=picks.some(r=>r.soft!=null&&r.soft>=1);
   const hook=soft?`Five P-R-A bets tonight. Let's be real, the books left one wide open.`:`Five P-R-A bets tonight. Let's be real, this ${day} slate is loaded.`;
   const doy=Math.floor((Date.parse(TODAY)-Date.parse(TODAY.slice(0,4)+"-01-01"))/864e5),joke=SHORT_ONELINERS[doy%SHORT_ONELINERS.length];
-  const voiceover=[hook,"Points, rebounds and assists, all combined.",...shortLines(picks),joke,`${lastName(picks[0].name)}: you riding or fading? Comments.`,
+  const overs=picks.filter(r=>r.po>=0.5).length,note=SHORT_NOTES[TODAY]?SHORT_NOTES[TODAY](overs):null;
+  const voiceover=[hook,...(note?[note]:[]),"Points, rebounds and assists, all combined.",...shortLines(picks),joke,`${lastName(picks[0].name)}: you riding or fading? Comments.`,
     "Twenty-one and up, bet responsible. Newsletters, link's in the bio. We out."].join(" ");
   const md=new Date(TODAY+"T12:00:00Z").toLocaleDateString("en-US",{month:"short",day:"numeric",timeZone:"UTC"});
   const side=r=>r.po>=0.5?"o":"u",LN=r=>lastName(r.name).toUpperCase();
