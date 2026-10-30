@@ -12,6 +12,21 @@ Injury-news alerts sent to the same ntfy topic as the other bots. When a regular
 4. **Alert.** Example: `POR: Deni Avdija OUT vs PHI, 6:00 PM ET`, then `Branden Carlson (bench 12 mpg): PTS proj 8.5 vs 5.8 avg (+47%)`. It's priority 5 when someone clears the bar, 3 when no teammate does. The picks are logged to `.cache/picks-<date>.json` (mode `news`) for `results/`.
 5. **State.** Seen outs persist across the two daily windows via the Actions cache (`nba-news-` prefix, saved even when a run fails).
 
+## Your book's price on the news (added 2026-10-29)
+
+The edge from a late Out lasts only until the book moves, so the alert now carries the bet. On news, the bot makes **one fresh Odds API pull for that game** (PRA only, 1 credit, at most `NEWS_ODDS_MAX` (8) a day across both windows, sharing nba-edges' `ODDS_API_KEY` and its reserve). Then for each teammate the alert lists, or whose calibrated PRA projection rose `NEWS_PRA_MIN` (0.75)+ with the news, it shows your book's (`MY_BOOKS`, FanDuel) best over with positive EV:
+
+```
+💰 FanDuel PRA right now:
+Branden Carlson (bench 12 mpg): PRA o9.5 -110 FanDuel
+   proj 14.0 (was 13.1 before the news) · model 73%, +40% EV · Pinnacle 10.5 55%
+```
+
+- **EV uses the model's chance**, not a blend, because the market may not have priced the news in yet. That's the point. The market's no-vig chance (Pinnacle, else the other US books) is shown next to it.
+- **"line already moved up"** means your book's number is already 1+ above the pre-news projection, so the book has caught up.
+- Up to `NEWS_PRA_TOP` (4) bets. They're logged as `kind:"prop"`, `stat:"pra"` (mode `news`), so `results/` grades them like board picks.
+- `NEWS_ODDS=0` turns it off. Without `ODDS_API_KEY` the alert is the same as before.
+
 ## Schedule (`.github/workflows/nba-news-alerts.yml`)
 
 - **Windows.** Two a day, Oct–Jun:
@@ -22,7 +37,7 @@ Injury-news alerts sent to the same ntfy topic as the other bots. When a regular
 
 ## Settings (env)
 
-`POLL_SEC` (120), `MAX_MINUTES` (350), `NEWS_TOP` (5), `MIN_TIP_MIN` (5), `DATE`, `DRY_RUN`.
+`POLL_SEC` (120), `MAX_MINUTES` (350), `NEWS_TOP` (5), `MIN_TIP_MIN` (5), `NEWS_ODDS` (1), `NEWS_ODDS_MAX` (8), `NEWS_PRA_MIN` (0.75), `NEWS_PRA_TOP` (4), `MY_BOOKS`, `DATE`, `DRY_RUN`.
 
 The `nba-edges` settings also apply: `BOOST_MIN`, `MIN_PROJ`, `NBA_OUT_*`.
 
@@ -42,4 +57,4 @@ DRY_RUN=1 DATE=2026-03-15 POLLS=3 POLL_SEC=2 TEST_INJECT="Deni Avdija" node nba-
 
 ## Board updates
 
-When a new Out lands on a team with picks on today's PRA board (nba-edges posts it to `NTFY_TOPIC` + `-board` around 1 PM ET), this bot also sends a **Board update**: the board player himself out → the bet voids; a teammate out → his re-projected chance at the board's line, if it moved 1+ PRA (`BOARD_UPDATE_MIN`), with "skip it" when it now leans the other way. It reads the board from ntfy only when news lands, and pulls no odds. Test with `BOARD_JSON=<file> TEST_INJECT="Player Name"`.
+When a new Out lands on a team with picks on today's PRA board (nba-edges posts it to `NTFY_TOPIC` + `-board` around 1 PM ET), this bot also sends a **Board update**: the board player himself out → the bet voids; a teammate out → his re-projected chance at the board's line, if it moved 1+ PRA (`BOARD_UPDATE_MIN`), with "skip it" when it now leans the other way. It reads the board from ntfy only when news lands; the line shown is the board's 1 PM number (the fresh FanDuel prices are in the news alert itself). Test with `BOARD_JSON=<file> TEST_INJECT="Player Name"`.

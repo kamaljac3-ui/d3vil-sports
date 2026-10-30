@@ -6,6 +6,7 @@
 // One run polls until MAX_MINUTES or until every game today has tipped (two windows a day on game days).
 const fs=require("fs"),path=require("path");
 const R=require("../nba-edges/run.js"),M=require("../nba-edges/model");   // the NBA model and data, read-only
+const SH=require("../nfl-props/sharp.js");                                   // your books (MY_BOOKS) and the no-vig price, read-only
 
 const DRY=process.env.DRY_RUN==="1";
 const NTFY_SERVER=(process.env.NTFY_SERVER||"https://ntfy.sh").replace(/\/$/,"");
@@ -44,6 +45,7 @@ async function ntfy(title,message,priority=4,tags=["basketball","ambulance"]){
 const STATE=`news-${TODAY}.json`;
 const state=cached(STATE,30)||{seen:{},games:{}};   // seen["gameId|playerKey"], games[gameId] = baseline taken
 const save=()=>{if(!DRY&&NTFY_TOPIC)store(STATE,state);};
+const MODEL_VERSION=R.MODEL_VERSION;
 function logPicks(rows){
   if(DRY||!NTFY_TOPIC||!rows.length)return;
   const key=`picks-${TODAY}.json`,at=new Date().toISOString();
@@ -102,6 +104,51 @@ async function boardUpdate(g,side,D,outNow,newKeys){
   return true;
 }
 
+// ---------- your book's PRA price on the news (2026-10-29) ----------
+// The edge from a late Out lasts until the book moves, so the alert carries the bet: one fresh Odds API pull for the game
+// (1 credit, PRA only; at most NEWS_ODDS_MAX a day, shared by both windows) and, for each teammate the alert lists or whose
+// calibrated PRA projection rose NEWS_PRA_MIN+ with the news, your book's (MY_BOOKS, FanDuel) best over: line, price, the model's chance
+// at that line, the market's no-vig chance (Pinnacle, else the other US books) and EV on the model's chance. The market
+// may not have priced the news in yet, which is the point, so EV is on the model. NEWS_ODDS=0 turns it off.
+const NEWS_ODDS=process.env.NEWS_ODDS!=="0"&&!!process.env.ODDS_API_KEY,NEWS_ODDS_MAX=+(process.env.NEWS_ODDS_MAX||8);
+const NEWS_PRA_MIN=+(process.env.NEWS_PRA_MIN||0.75),NEWS_PRA_TOP=+(process.env.NEWS_PRA_TOP||4),EV_MAX_GAP=+(process.env.EV_MAX_GAP||2);
+const BOOK_AT={};
+async function freshBook(g){
+  if(!NEWS_ODDS)return null;
+  const b=BOOK_AT[g.id];if(b&&Date.now()-b.at<10*6e4)return b.book;   // news for both teams at once: one pull
+  if((state.odds||0)>=NEWS_ODDS_MAX){log(`news odds: ${NEWS_ODDS_MAX} pulls today already, no prices`);return null;}
+  state.odds=(state.odds||0)+1;
+  const book=await R.propBook(g,true);BOOK_AT[g.id]={at:Date.now(),book};return book;
+}
+const calPra=x=>M.calibrate("pra",x.pr.pra,x.p.PRA,x.p.MIN);
+// teammates the alert lists, or whose PRA projection the news raised NEWS_PRA_MIN+, each with pre/post projections
+function praGainers(S0,S1,outNow,listed){
+  const prev=Object.fromEntries(S0.players.map(x=>[x.p.key,x]));
+  return S1.players.filter(x=>!outNow.has(x.p.key)&&prev[x.p.key]).map(x=>({x,proj:calPra(x),proj0:calPra(prev[x.p.key])}))
+    .filter(r=>r.proj-r.proj0>=NEWS_PRA_MIN||(listed.has(r.x.p.key)&&r.proj>r.proj0));
+}
+function praRows(gainers,book,g){
+  if(!book)return [];
+  const out=[];
+  for(const {x,proj,proj0} of gainers){
+    const k=x.p.key,offers=(book.offers[k]||{}).pra||[],med=book.lines[k]&&book.lines[k].pra;if(med==null)continue;
+    const fairs=SH.staleTwoWay(offers,{sigma:M.sdOf("pra",med),maxGap:EV_MAX_GAP,minEV:-1});
+    let best=null;
+    for(const o of offers.filter(o=>SH.MINE.includes(o.key)&&o.side==="A")){   // the news raises him: the over
+      const mp=M.pOver(proj,o.L,"pra"),ev=SH.ev(mp,o.price),f=fairs.find(y=>y.key===o.key&&y.side==="A"&&y.L===o.L);
+      if(!best||ev>best.ev)best={L:o.L,price:o.price,book:o.title,mp,ev,kp:f?f.fair:null,sharp:f?{book:f.sharp.title,L:f.sharp.L}:null};
+    }
+    if(!best||best.ev<=0||best.mp<0.5)continue;
+    out.push({kind:"prop",stat:"pra",name:x.p.name,key:k,team:x.p.team||"",mpg:x.p.MIN,proj,proj0,projRaw:x.pr.pra,avg:x.p.PRA,
+      line:best.L,po:best.mp,price:best.price,book:best.book,prob:best.mp,ev:best.ev,mktP:best.kp,fair:best.sharp&&best.kp!=null?{p:best.kp,...best.sharp}:null,
+      model:MODEL_VERSION,gameId:g.id,tip:g.date});
+  }
+  return out.sort((a,b)=>b.ev-a.ev).slice(0,NEWS_PRA_TOP);
+}
+const praLine=r=>`${r.name}${r.mpg<20?` (bench ${Math.round(r.mpg)} mpg)`:""}: PRA o${r.line} ${SH.fmt(r.price)} ${r.book}\n`+
+  `   proj ${f1(r.proj)} (was ${f1(r.proj0)} before the news) · model ${pct(r.prob)}, +${Math.round(r.ev*100)}% EV`+
+  (r.fair?` · ${r.fair.book} ${r.fair.L} ${pct(r.fair.p)}`:"")+(r.line>=r.proj0+1?" · line already moved up":"");
+
 // A regular was just ruled out: project his team with and without the news; list who gains and clears the bar.
 async function onNews(g,side,D,outNow,newKeys){
   const team=(await R.roster(g[side].espnId)).map(n=>D.players[R.nk(n)]).filter(Boolean);
@@ -115,13 +162,16 @@ async function onNews(g,side,D,outNow,newKeys){
   const prev=Object.fromEntries(S0.players.map(x=>[x.p.key,x.pr]));
   const rows=R.flagRows(S1,null).filter(r=>r.kind==="boost").map(r=>({...r,gain:prev[r.key]?r.projRaw-prev[r.key][r.stat]:r.proj-r.avg}))
     .filter(r=>r.gain>0).sort((a,b)=>b.gain/b.avg-a.gain/a.avg).slice(0,NEWS_TOP);
+  const gainers=praGainers(S0,S1,outNow,new Set(rows.map(r=>r.key)));
+  const pra=gainers.length?praRows(gainers,await freshBook(g),g):[];
   const opp=g[side==="home"?"away":"home"].abbr,who=news.map(p=>`${p.name} (${Math.round(p.MIN)} mpg)`).join(", ");
   const title=`${g[side].abbr}: ${news.map(p=>p.name).join(", ")} OUT vs ${opp}, ${tipStr(g)} ET`;
-  const body=rows.length
+  const bets=pra.length?`💰 ${SH.MINE.length===1?pra[0].book:"Your books"} PRA right now:\n`+pra.map(praLine).join("\n")+"\n\n":"";
+  const body=bets+(rows.length
     ?`Who gains:\n`+rows.map(r=>`${r.name}${r.mpg<20?` (bench ${Math.round(r.mpg)} mpg)`:""}: ${LABEL[r.stat]} proj ${f1(r.proj)} vs ${f1(r.avg)} avg (+${pct(r.proj/r.avg-1)})`).join("\n")+`\n\nOut: ${who}`
-    :`Out: ${who}. No teammate boost clears the bar.`;
-  await ntfy(title,body,rows.length?5:3);
-  logPicks(rows.map(r=>({...r,gameId:g.id,tip:g.date})));
+    :`Out: ${who}. No teammate boost clears the bar.`);
+  await ntfy(title,body,rows.length||pra.length?5:3);
+  logPicks(rows.map(r=>({...r,gameId:g.id,tip:g.date})).concat(pra));
   return true;
 }
 
