@@ -55,3 +55,5 @@ jobs:
           name: nba-short
           path: nba-edges/.out/short-*.json
           retention-days: 7
+          # .out is a dot-folder, which upload-artifact@v4 skips unless told otherwise
+          include-hidden-files: true
