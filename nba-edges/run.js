@@ -720,6 +720,10 @@ function shortLines(picks){
 // scene vary by date). Written to nba-edges/.out/short-<date>.json, uploaded as the run's "nba-short" artifact, and appended
 // to KJ's OneDrive "YYYY-MM-DD shorts.txt" by his local "NBA Short to Shorts file" task so make_audio.py voices it.
 // "retro" = the 8-bit Double Dribble-style court slide (kamal, Oct 29), so some Shorts open on it
+// one specific follow line before the comment question (kamal, Oct 30: "whatever works to get people in the door"); never generic
+const SHORT_FOLLOW=[n=>`Follow, five new picks drop ${n}.`,n=>`Follow, I'm back ${n} with five more.`,()=>"Follow, I post picks every Monday, Wednesday and Friday.",n=>`Follow, ${n}'s five are already cooking.`];
+const nextShortDay=()=>{const W=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],d=W.indexOf(etWeekday()),idx=SHORT_DAYS.map(x=>W.indexOf(x)).filter(i=>i>=0).sort((x,y)=>x-y);
+  const nx=idx.find(i=>i>d)??idx[0];return nx==null?"next time":DAYS[W[nx]];};
 const SHORT_PALETTES=["blue","crimson","purple","emerald","amber","teal","magenta"],SHORT_FIRST=["rain","led","retro","crt","track"];
 function shortData(cands,games){
   const picks=shortPicks(cands);if(picks.length<5)return null;
@@ -727,7 +731,7 @@ function shortData(cands,games){
   const hook=soft?`Five P-R-A bets tonight. Let's be real, the books left one wide open.`:`Five P-R-A bets tonight. Let's be real, this ${day} slate is loaded.`;
   const doy=Math.floor((Date.parse(TODAY)-Date.parse(TODAY.slice(0,4)+"-01-01"))/864e5),joke=SHORT_ONELINERS[doy%SHORT_ONELINERS.length];
   const overs=picks.filter(r=>r.po>=0.5).length,note=SHORT_NOTES[TODAY]?SHORT_NOTES[TODAY](overs):null;
-  const voiceover=[hook,...(note?[note]:[]),"Points, rebounds and assists, all combined.",...shortLines(picks),joke,`${lastName(picks[0].name)}: you riding or fading? Comments.`,
+  const voiceover=[hook,...(note?[note]:[]),"Points, rebounds and assists, all combined.",...shortLines(picks),joke,SHORT_FOLLOW[doy%SHORT_FOLLOW.length](nextShortDay()),`${lastName(picks[0].name)}: you riding or fading? Comments.`,
     "Twenty-one and up, bet responsible. Newsletters, link's in the bio. We out."].join(" ");
   const md=new Date(TODAY+"T12:00:00Z").toLocaleDateString("en-US",{month:"short",day:"numeric",timeZone:"UTC"});
   const side=r=>r.po>=0.5?"o":"u",LN=r=>lastName(r.name).toUpperCase();
