@@ -98,7 +98,7 @@ async function espnSeason(y){
   const val=(a,cat,name)=>{const c=a.categories.find(x=>x.name===cat);const i=idx[cat]?idx[cat].indexOf(name):-1;return c&&i>=0?+c.values[i]:0;};
   const players={},teamPts={};
   for(const a of j.athletes){const k=nk(a.athlete.displayName),team=ESPN_TO_NBA[a.athlete.teamShortName]||a.athlete.teamShortName;
-    const p={key:k,name:a.athlete.displayName,GP:val(a,"general","gamesPlayed"),MIN:val(a,"general","avgMinutes"),PTS:val(a,"offensive","avgPoints"),
+    const p={key:k,name:a.athlete.displayName,team,GP:val(a,"general","gamesPlayed"),MIN:val(a,"general","avgMinutes"),PTS:val(a,"offensive","avgPoints"),
       REB:val(a,"general","avgRebounds"),AST:val(a,"offensive","avgAssists"),FG3M:val(a,"offensive","avgThreePointFieldGoalsMade"),FTM:val(a,"offensive","avgFreeThrowsMade"),zones:null};
     players[k]=p;if(team){teamPts[team]=teamPts[team]||{pts:0,gp:0};teamPts[team].pts+=p.PTS*p.GP;teamPts[team].gp=Math.max(teamPts[team].gp,p.GP);}}
   const teams={};for(const t in teamPts)if(teamPts[t].gp)teams[t]={gp:teamPts[t].gp,ppg:teamPts[t].pts/teamPts[t].gp};
@@ -114,7 +114,7 @@ function blend(cur,prev){
     const c=cur?.players[k],p=prev?.players[k];
     if(!c||!p){const x=c||p;out.players[k]={...x,gpCur:c?c.GP:0,gpEff:x.GP};continue;}
     const w=Math.min(c.GP/15,1);
-    out.players[k]={...c,...mix(c,p,w,PKEYS),gpCur:c.GP,gpEff:c.GP+p.GP*(1-w),zones:mixZones(c.zones,p.zones,w)};
+    out.players[k]={...c,...mix(c,p,w,PKEYS),prevTeam:p.team&&c.team&&p.team!==c.team?p.team:null,gpCur:c.GP,gpEff:c.GP+p.GP*(1-w),zones:mixZones(c.zones,p.zones,w)};
   }
   for(const t of new Set([...Object.keys(cur?.teams||{}),...Object.keys(prev?.teams||{})])){
     const c=cur?.teams[t],p=prev?.teams[t];
@@ -418,6 +418,17 @@ async function meetingBox(id){
 }
 // {n, diff}: this player's PRA in his last H2H_N games vs tonight's opponent (this season and last), minus his average now
 const H2H={};
+// Revenge game (kamal, Oct 31): facing last season's team for the 1st or 2nd time, and whether it's his first game back in
+// the old building. Storyline tag + Short line only; the projection is untouched until a backtest says otherwise (LEARNINGS rule).
+async function revengeOf(g,p,me,opp){
+  if(!p||!p.prevTeam||p.prevTeam!==opp)return null;
+  let games=[];try{({games}=await ratings());}catch(e){}
+  const nb=a=>ESPN_TO_NBA[a]||a,pair=[me,opp].sort().join("|");
+  const prior=games.filter(x=>x.date<g.date&&[nb(x.home),nb(x.away)].sort().join("|")===pair);
+  if(prior.length>=2)return null;
+  return {n:prior.length+1,backIn:g.home.abbr===opp&&!prior.some(x=>nb(x.home)===opp)};
+}
+const revengeTag=r=>r?`🔥 revenge game${r.backIn?" (first game back in his old building)":r.n===1?" (1st time vs old team)":" (2nd time vs old team)"}`:null;
 async function h2hOf(g,D,key){
   const pair=[g.home.espnAbbr,g.away.espnAbbr].sort().join("|");
   if(!H2H[pair]){
@@ -614,13 +625,13 @@ async function boardRows(g,D){
       const L=best.L,price=best.price,lean=best.side,po=M.pOver(proj,L,"pra"),prob=best.bp,ev=best.ev;
       const fair=best.kp!=null?{p:best.kp,book:best.sharp.book,L:best.sharp.L}:null;
       const l5=last.map(m=>m.box[p.key]),played=l5.filter(v=>v!=null),hits=played.filter(v=>lean==="A"?v>L:v<L).length;
-      const h=await h2hOf(g,D,p.key),dv=await dvpOf(D,g,side,p.key);
+      const h=await h2hOf(g,D,p.key),dv=await dvpOf(D,g,side,p.key),rv=await revengeOf(g,p,S.me,S.opp);
       const st=x.out.status&&x.out.status.get(p.key),cg=compGap(x.book.lines,p.key,"pra");
       const tags=[...S.tags,...(R.rest===1?["b2b 2nd night"]:[]),...(dv&&dv.show?[dv.text]:[]),...(h&&h.diff<=-H2H_COLD?[`cold vs ${opp.abbr}`]:[]),...(injTag(st)?[injTag(st)]:[]),
-        ...(best.soft!=null&&best.soft>=1?[`💰 ${best.book} ${best.soft} softer than ${best.sharp.book}`]:[]),...(p.back?["first game back"]:[]),...(p.starBack?["star teammate back"]:[]),...(cg!=null&&Math.abs(cg)>=COMP_GAP?[`PRA line ${Math.abs(cg)} ${cg>0?"below":"above"} P+R+A lines`]:[])];
+        ...(best.soft!=null&&best.soft>=1?[`💰 ${best.book} ${best.soft} softer than ${best.sharp.book}`]:[]),...(p.back?["first game back"]:[]),...(rv?[revengeTag(rv)]:[]),...(p.starBack?["star teammate back"]:[]),...(cg!=null&&Math.abs(cg)>=COMP_GAP?[`PRA line ${Math.abs(cg)} ${cg>0?"below":"above"} P+R+A lines`]:[])];
       rows.push({kind:"prop",stat:"pra",name:p.name,key:p.key,team:S.me,opp:S.opp,mpg:p.MIN,minProj:pr.min,proj,projRaw:pr.pra,avg:p.PRA,line:L,po,price,
         book:best.book,prob,ev,modelP:best.mp,mktP:best.kp,mktEV:best.kev,soft:best.soft,why:best.why,fair,l5,hits,games:played.length,h2h:h,tags,
-        rest:isFinite(R.rest)?R.rest:null,dvp:dv&&{pos:dv.pos,rank:dv.rank,of:dv.of,pct:dv.pct},inj:st||null,compGap:cg,back:p.back||0,starBack:!!p.starBack,min3:p.MIN3,gameId:g.id,tip:g.date});
+        rest:isFinite(R.rest)?R.rest:null,dvp:dv&&{pos:dv.pos,rank:dv.rank,of:dv.of,pct:dv.pct},inj:st||null,compGap:cg,revenge:rv,back:p.back||0,starBack:!!p.starBack,min3:p.MIN3,gameId:g.id,tip:g.date});
     }
   }
   return rows;
@@ -699,6 +710,8 @@ const SHORT_WHY={
   out:[(r,n)=>`${n} out. Somebody's eating. It's him.`,(r,n)=>`No ${n} tonight. More touches, more everything.`],
   mins:[r=>`His minutes fell off a cliff.`,r=>`They cut his minutes, and the line didn't notice.`,r=>`He's barely playing lately. Easy.`],
   hits:[r=>`He's cleared it in ${PL.words(r.hits)} of his last ${PL.words(r.games)}.`,r=>`${PL.words(r.hits)} of his last ${PL.words(r.games)}. You see the pattern.`],
+  revenge:[r=>r.revenge.backIn?`First game back in his old building. You know he circled this one.`:`First time seeing his old team since he left. He remembers.`,
+    r=>r.revenge.backIn?`He's back in the building that let him go. Revenge game.`:r.revenge.n===2?`Second shot at his old team. He remembers.`:`Revenge game. He's been waiting on this one.`],
   proj:[r=>`I got him at ${PL.words(Math.round(r.proj))}.`,r=>`I see ${PL.words(Math.round(r.proj))} tonight. Respectfully.`]};
 // KJ owns the picks (kamal, Oct 30): never "the computer/model picked"; lead with "I'm riding with" and say his confidence,
 // the pick's chance clamped to 60-70 percent
@@ -712,7 +725,8 @@ function shortLines(picks){
     const over=r.po>=0.5,wo=r.tags.find(t=>t.startsWith("w/o "));
     const why=r.soft!=null&&r.soft>=1?take("soft",r):wo&&over?take("out",r,wo.slice(4).split(", ").join(" and ")):
       !over&&r.min3!=null&&r.mpg-r.min3>=4?take("mins",r):r.games>=4&&r.hits>=r.games-1?take("hits",r):take("proj",r);
-    return `${SHORT_LEAD[i%SHORT_LEAD.length]} ${r.name}, ${over?"over":"under"} ${PL.spokenLine(r.line)}. ${why} ${SHORT_CONF[i%SHORT_CONF.length](shortConf(r))}`;
+    const rev=r.revenge&&over?` ${take("revenge",r)}`:"";
+    return `${SHORT_LEAD[i%SHORT_LEAD.length]} ${r.name}, ${over?"over":"under"} ${PL.spokenLine(r.line)}. ${why}${rev} ${SHORT_CONF[i%SHORT_CONF.length](shortConf(r))}`;
   });
 }
 // The Short as data: the scout-format fields plus shorts.py build settings for KJ's approved "Matrix meets sports" look
