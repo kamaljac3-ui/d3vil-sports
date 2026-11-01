@@ -23,7 +23,7 @@ const MIN_PROJ=+(process.env.MIN_PROJ||10);
 const BOOST_MIN=+(process.env.BOOST_MIN||0.10);   // projection this far above the player's own average
 const P_MIN=+(process.env.P_MIN||0.58);           // model over/under probability vs a posted line
 const PREGAME_MIN=+(process.env.PREGAME_MIN||90);
-const CLOSE_LINES=process.env.CLOSE_LINES!=="0",CLOSE_WINDOW=+(process.env.CLOSE_WINDOW||45);  // closing-line capture, see captureCloses
+const CLOSE_LINES=process.env.CLOSE_LINES!=="0",CLOSE_WINDOW=+(process.env.CLOSE_WINDOW||120);  // closing-line capture, see captureCloses
 // tagged on every logged pick so results/track.js can grade each model version separately; bump it on any model change
 const MODEL_VERSION=process.env.MODEL_VERSION||"2026-10-29-market";
 const ABS_MIN={pra:3,pts:2,reb:1,ast:1,fg3m:0.5};
@@ -548,17 +548,37 @@ function logPicks(mode,secs){
   store(key,(cached(key,24*30)||[]).concat(rows.map(r=>({sport:"nba",date:TODAY,mode,at,model:MODEL_VERSION,...r}))));
 }
 // Closing line for prop picks already sent: one more Odds API pull per game in the last CLOSE_WINDOW minutes before
-// tip, saved as `close` on those picks (results/track.js reports how often picks beat it). CLOSE_LINES=0 turns it off.
+// tip, saved on those picks (results/track.js reports how often picks beat it). CLOSE_LINES=0 turns it off.
+// `close` = the market's median line; for picks made at a book (board, 💰) also that book's own line and price on our
+// side (closeL, closePrice), so a move in the juice counts too: prop lines often sit on the same number while the price
+// moves. A pick must be CLOSE_MIN_AGE+ minutes old (until 2026-10-31 the close was pulled in the same run as a pregame
+// pick, so it always equalled the line). The window is wide because GitHub runs the 30-minute cron only a few times a day.
+// A big move against a pick (MOVE_ALERT+ points) or a prop the books pulled (often a late scratch) gets one push.
+const CLOSE_MIN_AGE=+(process.env.CLOSE_MIN_AGE||15),MOVE_ALERT=+(process.env.MOVE_ALERT||1.5);
+const sideOf=p=>p.kind==="ev"?(p.side==="over"?"A":"B"):(p.po>=0.5?"A":"B");
 async function captureCloses(games){
   if(!ODDS_KEY||!CLOSE_LINES||DRY)return;
   const key=`picks-${TODAY}.json`,picks=cached(key,24*30);if(!picks)return;
   let changed=false;
   for(const g of games){
     const mins=(new Date(g.date)-Date.now())/6e4;if(mins>CLOSE_WINDOW||mins<0)continue;
-    const mine=picks.filter(p=>p.gameId===g.id&&(p.kind==="prop"||p.kind==="ev")&&p.close==null);if(!mine.length)continue;
+    const mine=picks.filter(p=>p.gameId===g.id&&(p.kind==="prop"||p.kind==="ev")&&p.close==null&&(Date.now()-new Date(p.at))/6e4>=CLOSE_MIN_AGE);
+    if(!mine.length)continue;
     const b=await propBook(g,true),lines=b&&b.lines;if(!lines)continue;
-    for(const p of mine){const c=lines[p.key]&&lines[p.key][p.stat];if(c!=null){p.close=c;p.closeAt=new Date().toISOString();changed=true;}}
+    const now=new Date().toISOString(),warn=[];
+    for(const p of mine){
+      const c=lines[p.key]&&lines[p.key][p.stat];
+      if(c==null){if(p.book&&!p.pulledAt){p.pulledAt=now;changed=true;warn.push(`${p.name} ${LABEL[p.stat]}: prop pulled (possible scratch)`);}continue;}
+      p.close=c;p.closeAt=now;changed=true;
+      if(!p.book)continue;
+      const sd=sideOf(p),mine2=((b.offers[p.key]||{})[p.stat]||[]).filter(o=>o.title===p.book&&o.side===sd);
+      const o=mine2.find(o=>o.L===p.line)||mine2[0];if(!o)continue;
+      p.closeL=o.L;p.closePrice=o.price;
+      const moved=(sd==="A"?1:-1)*(o.L-p.line);   // + = the line moved our way
+      if(moved<=-MOVE_ALERT)warn.push(`${p.name} ${LABEL[p.stat]} ${sd==="A"?"o":"u"}${p.line} → ${o.L} ${SH.fmt(o.price)} at ${p.book}`);
+    }
     log(`${label(g)}: closing lines for ${mine.filter(p=>p.close!=null).length}/${mine.length} props`);
+    if(warn.length&&NTFY_TOPIC)await ntfy(`⚠️ ${label(g)}: line moved against your pick`,warn.join("\n")+"\n\nCheck injury/lineup news before tip.",4,["warning","basketball"]);
   }
   if(changed)store(key,picks);
 }

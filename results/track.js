@@ -49,7 +49,8 @@ function ingest(L){
         if(!SPORTS.includes(p.sport))continue;
         const id=ID[p.sport](p),have=idx[p.sport].get(id);
         // a later run can add the closing line to a pick already in the ledger
-        if(have){if(!have.modes.includes(p.mode))have.modes.push(p.mode);if(p.close!=null&&have.close==null){have.close=p.close;have.closeAt=p.closeAt;}continue;}
+        if(have){if(!have.modes.includes(p.mode))have.modes.push(p.mode);if(p.close!=null&&have.close==null){have.close=p.close;have.closeAt=p.closeAt;}
+          for(const f of ["closeL","closePrice","pulledAt"])if(p[f]!=null&&have[f]==null)have[f]=p[f];continue;}
         const {mode,...rest}=p,rec={id,...rest,modes:[mode],result:null};
         L[p.sport].push(rec);idx[p.sport].set(id,rec);added++;
       }
@@ -149,6 +150,20 @@ async function grade(L){
 const pct=v=>isFinite(v)?Math.round(v*100)+"%":"–";
 const sg=v=>(v>=0?"+":"")+v.toFixed(1);
 const mean=a=>a.length?a.reduce((s,x)=>s+x,0)/a.length:NaN;
+// closing-line value for a player pick, in points (+ = the line moved our way). Picks made at a book (board, 💰) are
+// judged on that book's own closing line (closeL); the others on the market's median close.
+const overOf=r=>r.kind==="ev"?r.side==="over":r.po>=0.5;
+const clvPts=r=>(overOf(r)?1:-1)*((r.closeL??r.close)-r.line);
+// price CLV: same book, same line, our side's implied chance at the close minus when we bet it (+ = it got pricier = good)
+const impl=ml=>ml<0?-ml/(-ml+100):100/(ml+100);
+const clvPrice=r=>r.closeL!=null&&r.closeL===r.line&&r.closePrice!=null&&r.price!=null?impl(r.closePrice)-impl(r.price):null;
+function clvText(g){
+  const c=g.filter(r=>r.close!=null);if(!c.length)return "";
+  const pts=c.map(clvPts),pr=c.map(clvPrice).filter(x=>x!=null);
+  // a pick beats the close if the number moved our way, or it stayed and the price moved our way
+  const beat=c.filter(r=>clvPts(r)>0||(clvPts(r)===0&&(clvPrice(r)||0)>0.005)).length,lost=c.filter(r=>clvPts(r)<0||(clvPts(r)===0&&(clvPrice(r)||0)<-0.005)).length;
+  return `close our way ${beat}, against ${lost} of ${c.length} (line avg ${sg(mean(pts))}`+(pr.length?`, price ${sg(100*mean(pr))} pts of implied chance on ${pr.length}`:"")+")";
+}
 const small=n=>n<SMALL?` (small sample: noise until ~${SMALL}+)`:"";
 function liveCard(recs){
   const f=recs.filter(r=>r.kind==="live"&&r.result&&r.result.status==="final");if(!f.length)return [];
@@ -185,9 +200,8 @@ function nbaCard(recs){
       let w=0,l=0,p=0;for(const r of g){const a=r.result[r.stat],over=r.po>=0.5;if(a===r.line)p++;else if((a>r.line)===over)w++;else l++;}
       out.push(`- ${names[k]}: ${w}-${l}${p?`-${p}`:""} (${pct(w/(w+l))}), ${sg(w*0.909-l)} units at -110 (break-even 52.4%)`);
       // closing-line value: did the line move our way after the alert? (over: close above our line is good)
-      const c=g.filter(r=>r.close!=null);
-      if(c.length){const clv=c.map(r=>(r.po>=0.5?1:-1)*(r.close-r.line)),beat=clv.filter(x=>x>0).length,lost=clv.filter(x=>x<0).length;
-        out.push(`  - Closing line: ${c.length} with a close; it moved our way ${beat}, against us ${lost}, avg ${sg(mean(clv))} (beating the close is the early sign of a real edge)`);}
+      const ct=clvText(g);if(ct)out.push(`  - Closing line: ${ct} (beating the close is the early sign of a real edge; closes before 2026-11-01 were taken in the same run as the pick, so they read 0)`);
+      const pulled=g.filter(r=>r.pulledAt).length;if(pulled)out.push(`  - Props pulled before tip (late scratch?): ${pulled}`);
     }else{
       const beat=g.filter(r=>r.result[r.stat]>r.avg).length;
       out.push(`- ${names[k]}: ${beat}/${g.length} beat their average (${pct(beat/g.length)}); model said ${sg(mean(g.map(r=>r.proj-r.avg)))}, got ${sg(mean(g.map(r=>r.result[r.stat]-r.avg)))} per pick`);
@@ -271,16 +285,15 @@ const NBA_FAMILIES=[
 const payout=ml=>ml>0?ml/100:100/-ml;
 function evSummary(g){
   let w=0,l=0,p=0,u=0;for(const r of g){const a=r.result[r.stat];if(a===r.line){p++;continue;}if((a>r.line)===(r.side==="over")){w++;u+=payout(r.price);}else{l++;u-=1;}}
-  const c=g.filter(r=>r.close!=null),clv=c.map(r=>(r.side==="over"?1:-1)*(r.close-r.line));
-  return `${w}-${l}${p?`-${p}`:""} (${pct(w/(w+l))}), ${sg(u)} units at the prices taken, promised +${(100*mean(g.map(r=>r.ev))).toFixed(1)}% EV a bet`+
-    (c.length?`; vs the close: our way ${clv.filter(x=>x>0).length}, against ${clv.filter(x=>x<0).length}, avg ${sg(mean(clv))}`:"");
+  const ct=clvText(g);
+  return `${w}-${l}${p?`-${p}`:""} (${pct(w/(w+l))}), ${sg(u)} units at the prices taken, promised +${(100*mean(g.map(r=>r.ev))).toFixed(1)}% EV a bet`+(ct?`; ${ct}`:"");
 }
 // one line for a group of player picks: props by W-L/units/closing line, boosts by beat-their-average
 function nbaGroup(g){
   const parts=[],pr=g.filter(r=>r.kind==="prop"),bo=g.filter(r=>r.kind==="boost"||r.kind==="zone");
   if(pr.length){let w=0,l=0,p=0;for(const r of pr){const a=r.result[r.stat];if(a===r.line)p++;else if((a>r.line)===(r.po>=0.5))w++;else l++;}
-    const c=pr.filter(r=>r.close!=null),clv=c.map(r=>(r.po>=0.5?1:-1)*(r.close-r.line));
-    parts.push(`props ${w}-${l}${p?`-${p}`:""} ${sg(w*0.909-l)}u`+(c.length?`, close our way ${clv.filter(x=>x>0).length}/${c.length} (avg ${sg(mean(clv))})`:""));}
+    const ct=clvText(pr);
+    parts.push(`props ${w}-${l}${p?`-${p}`:""} ${sg(w*0.909-l)}u`+(ct?`, ${ct}`:""));}
   const ev=g.filter(r=>r.kind==="ev");if(ev.length)parts.push(`💰 ${evSummary(ev)}`);
   if(bo.length){const beat=bo.filter(r=>r.result[r.stat]>r.avg).length;
     parts.push(`boosts ${beat}/${bo.length} beat avg (${pct(beat/bo.length)}), said ${sg(mean(bo.map(r=>r.proj-r.avg)))} got ${sg(mean(bo.map(r=>r.result[r.stat]-r.avg)))}`);}
