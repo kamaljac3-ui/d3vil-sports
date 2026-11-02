@@ -25,7 +25,13 @@ const P_MIN=+(process.env.P_MIN||0.58);           // model over/under probabilit
 const PREGAME_MIN=+(process.env.PREGAME_MIN||90);
 const CLOSE_LINES=process.env.CLOSE_LINES!=="0",CLOSE_WINDOW=+(process.env.CLOSE_WINDOW||120);  // closing-line capture, see captureCloses
 // tagged on every logged pick so results/track.js can grade each model version separately; bump it on any model change
-const MODEL_VERSION=process.env.MODEL_VERSION||"2026-10-29-market";
+const MODEL_VERSION=process.env.MODEL_VERSION||"2026-11-02-under-filter";
+// Unders need an injury reason (kamal, Nov 2): through Oct 31, overs went 64-37 and injury-driven unders 12-9, but plain
+// unders (projection under the line, no injury story) went 20-21. Those are held back now and logged as kind "shadow",
+// so results/track.js shows whether cutting them helped. UNDER_FILTER=0 turns it off.
+const UNDER_FILTER=process.env.UNDER_FILTER!=="0";
+const injuryReason=r=>(r.tags||[]).some(t=>t.startsWith("w/o ")||t==="star teammate back"||t==="first game back")||!!r.starBack||(r.back||0)>0;
+const heldUnder=r=>UNDER_FILTER&&r.kind==="prop"&&r.po<0.5&&!injuryReason(r);
 const ABS_MIN={pra:3,pts:2,reb:1,ast:1,fg3m:0.5};
 // PRA (points + rebounds + assists) first: it's Kamal's main bet. Its average is the PRA field (withPRA below).
 const STATS=["pra","pts","reb","ast","fg3m"],AVG={pra:"PRA",pts:"PTS",reb:"REB",ast:"AST",fg3m:"FG3M"},LABEL={pra:"PRA",pts:"PTS",reb:"REB",ast:"AST",fg3m:"3PM"};
@@ -536,7 +542,10 @@ const LINE={
 const rank={zone:r=>r.delta,boost:r=>r.proj/r.avg-1,prop:r=>Math.abs(r.po-0.5)};
 // the rows that make it into an alert: top n of each section
 const SECTIONS=[["Shot-zone edges","zone"],["Prop lines","prop"],["Projection boosts","boost"]];
-const shown=(rows,n)=>SECTIONS.map(([t,k])=>[t,k,rows.filter(r=>r.kind===k).sort((a,b)=>rank[k](b)-rank[k](a)).slice(0,n)]).filter(s=>s[2].length);
+const shownAll=(rows,n)=>SECTIONS.map(([t,k])=>[t,k,rows.filter(r=>r.kind===k).sort((a,b)=>rank[k](b)-rank[k](a)).slice(0,n)]).filter(s=>s[2].length);
+const shown=(rows,n)=>shownAll(rows.filter(r=>!heldUnder(r)),n);
+// the plain unders that would have been sent without the filter
+const heldOf=(rows,n)=>shownAll(rows,n).flatMap(s=>s[2]).filter(heldUnder);
 const EV_TOP=+(process.env.EV_TOP||5);
 const evLine=r=>`${r.name}${r.team?` (${r.team})`:""} ${LABEL[r.stat]} ${r.side==="over"?"o":"u"}${r.line} ${SH.fmt(r.price)} at ${r.book}: fair ${pct(r.fair)}, +${(r.ev*100).toFixed(1)}% EV vs ${r.sharp.book} ${r.sharp.L} ${SH.fmt(r.sharp.over)}/${SH.fmt(r.sharp.under)}${r.model!=null?`; model ${pct(r.model)}`:""}`;
 const evMessage=rows=>rows.length?`💰 ${SH.MINE.length===1?rows[0].book:"Your books"} vs sharp no-vig\n`+rows.slice(0,EV_TOP).map((r,i)=>`${i+1}. ${evLine(r)}`).join("\n"):"";
@@ -547,6 +556,7 @@ function logPicks(mode,secs){
   const key=`picks-${TODAY}.json`,at=new Date().toISOString();
   store(key,(cached(key,24*30)||[]).concat(rows.map(r=>({sport:"nba",date:TODAY,mode,at,model:MODEL_VERSION,...r}))));
 }
+function logShadow(mode,held){if(held.length)logPicks(mode,[["held","shadow",held.map(r=>({...r,kind:"shadow"}))]]);}
 // Closing line for prop picks already sent: one more Odds API pull per game in the last CLOSE_WINDOW minutes before
 // tip, saved on those picks (results/track.js reports how often picks beat it). CLOSE_LINES=0 turns it off.
 // `close` = the market's median line; for picks made at a book (board, 💰) also that book's own line and price on our
@@ -803,8 +813,10 @@ async function board(games,D){
   if(!ODDS_KEY){log("PRA board needs ODDS_API_KEY");return;}
   let rows=[];for(const g of games)rows=rows.concat(await boardRows(g,D));
   // one bet per player (his best side/number), best EV first
-  const seen=new Set(),top=rows.sort((a,b)=>b.ev-a.ev).filter(r=>!seen.has(r.key)&&seen.add(r.key)).slice(0,BOARD_N);
-  const msg=top.length?top.map(boardLine).join("\n")+`\n\nRanked by EV at your book's price, from a ${Math.round(BOARD_MARKET_W*100)}/${Math.round((1-BOARD_MARKET_W)*100)} blend of the model and the market's no-vig chance (Pinnacle, else the other US books without yours). 💰 = your book's number is softer than the market's. The model alone isn't proven vs closing lines yet.`
+  const best=list=>{const seen=new Set();return list.slice().sort((a,b)=>b.ev-a.ev).filter(r=>!seen.has(r.key)&&seen.add(r.key)).slice(0,BOARD_N);};
+  const held=best(rows).filter(heldUnder);rows=rows.filter(r=>!heldUnder(r));
+  const top=best(rows);
+  const msg=top.length?top.map(boardLine).join("\n")+`\n\nRanked by EV at your book's price, from a ${Math.round(BOARD_MARKET_W*100)}/${Math.round((1-BOARD_MARKET_W)*100)} blend of the model and the market's no-vig chance (Pinnacle, else the other US books without yours). 💰 = your book's number is softer than the market's. Unders only with an injury reason (w/o, star back, first game back). The model alone isn't proven vs closing lines yet.`
     :"No PRA bet clears the bar on this slate.";
   const pl=parlayOf(rows);
   if(PARLAY_DAYS.includes(etWeekday())||process.env.PARLAY_FORCE==="1")log(pl?`parlay: ${pl.n} legs, ${pl.american}, chance ${(pl.p*100).toFixed(1)}%`:`parlay: fewer than ${PARLAY_LEGS} games with a candidate leg`);
@@ -813,7 +825,7 @@ async function board(games,D){
   if(SHORT_DAYS.includes(etWeekday())||process.env.SHORT_FORCE==="1"){const one=new Set(),cands=rows.slice().sort((x,y)=>y.ev-x.ev).filter(r=>!one.has(r.key)&&one.add(r.key));const d=shortData(cands,games),sc=d&&shortText(d);
     if(d){fs.mkdirSync(OUT,{recursive:true});fs.writeFileSync(path.join(OUT,`short-${TODAY}.json`),JSON.stringify(d,null,1));}   // every qualifying bet, not just the top 10, so it can reach names people know
     if(sc)await ntfy(`🎬 NBA Short script: ${DAYS[etWeekday()]||etWeekday()}`,sc,3,["clapper"]);else log("Short script: fewer than 5 board picks");}
-  logPicks("board",[["PRA board","prop",top]]);await publishBoard(top);
+  logPicks("board",[["PRA board","prop",top]]);logShadow("board",held);await publishBoard(top);
   // the parlay is logged as one pick (kind "parlay") with its legs; results/track.js grades it leg by leg
   if(pl)logPicks("board",[["parlay","parlay",[{kind:"parlay",key:"parlay",gameId:"multi",stat:String(pl.n),name:`${pl.n}-leg PRA parlay`,
     legs:pl.legs.map(l=>({key:l.key,name:l.name,team:l.team,gameId:l.gameId,stat:"pra",side:l.po>=0.5?"o":"u",line:l.line,price:l.price,p:+l.prob.toFixed(3)})),
@@ -860,7 +872,7 @@ if(require.main===module)(async()=>{
     const secs=shown(all,TOP_N),ticks=lineRows.some(r=>r.picks.some(p=>p.tick));
     const msg=[message(secs)||"No player edges clear the bar today.",linesMessage(lineRows)].filter(Boolean).join("\n\n");
     await ntfy(`NBA Edges ${TODAY} (${games.length} games)`,msg,all.length||ticks?4:2,["basketball","chart_with_upwards_trend"]);
-    logPicks("morning",secs);logLinePicks("morning",lineRows);
+    logPicks("morning",secs);logShadow("morning",heldOf(all,TOP_N));logLinePicks("morning",lineRows);
     if(!DRY&&NTFY_TOPIC)store(sentKey,true);
   }else{
     // the PRA board goes out once a day, from the first pregame run after BOARD_HOUR ET (crons can run late, so no own cron)
@@ -874,6 +886,7 @@ if(require.main===module)(async()=>{
       const ln=x.line&&(pm||em||x.line.picks.some(p=>p.tick))?x.line:null,msg=[em,pm,ln?linesMessage([ln]):""].filter(Boolean).join("\n\n");
       if(msg){await ntfy(`${label(g)} ${tip(g)} ET: NBA edges${em?" 💰":""}`,msg,4,["basketball"]);
         logPicks("pregame",[...secs,...(x.ev.length?[["💰","ev",x.ev.slice(0,EV_TOP)]]:[])]);if(ln)logLinePicks("pregame",[ln]);}else log(`${label(g)}: no edges`);
+      logShadow("pregame",heldOf(x.rows,4));
       sent[g.id]=true;
     }
     if(!DRY&&NTFY_TOPIC)store(`pregame-${TODAY}.json`,sent);

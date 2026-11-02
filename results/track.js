@@ -192,7 +192,7 @@ function nbaCard(recs){
   // one block per model version, newest first, so a model change is judged on its own picks
   const versions=[...new Set(f.map(modelOf))].sort().reverse();
   if(versions.length>1)return versions.flatMap(v=>{const c=nbaCard(f.filter(r=>modelOf(r)===v));c[0]=c[0].replace(/^NBA:/,`NBA (model ${v}):`);return c;});
-  const out=[`NBA: ${f.length} picks${small(f.length)}`];
+  const sent=f.filter(r=>r.kind!=="shadow").length,out=[`NBA: ${sent} picks${small(sent)}`];
   const names={zone:"Shot-zone edges",boost:"Projection boosts",prop:"Prop lines"};
   for(const k of ["zone","boost","prop"]){
     const g=f.filter(r=>r.kind===k);if(!g.length)continue;
@@ -207,6 +207,10 @@ function nbaCard(recs){
       out.push(`- ${names[k]}: ${beat}/${g.length} beat their average (${pct(beat/g.length)}); model said ${sg(mean(g.map(r=>r.proj-r.avg)))}, got ${sg(mean(g.map(r=>r.result[r.stat]-r.avg)))} per pick`);
     }
   }
+  // plain unders the bot held back since 2026-11-02 (nba-edges heldUnder): never sent, graded to check the filter
+  const sh=f.filter(r=>r.kind==="shadow");
+  if(sh.length){let w=0,l=0;for(const r of sh){const x=r.result[r.stat];if(x!==r.line){if(x<r.line)w++;else l++;}}
+    out.push(`- Held-back unders (not sent): ${w}-${l} (${pct(w/(w+l))}). Under 52.4% means cutting them helped.`);}
   const evp=f.filter(r=>r.kind==="ev");if(evp.length)out.push(`- 💰 Stale prices (your book vs the sharp no-vig line): ${evSummary(evp)}`);
   const par=f.filter(r=>r.kind==="parlay");
   if(par.length){const w=par.filter(r=>r.result.won).length,u=par.reduce((a,r)=>a+r.result.units,0);
@@ -235,7 +239,7 @@ function recentLines(L,since){
     if(r.kind==="spread"||r.kind==="total"){
       const what=r.kind==="spread"?`${r.team} ${r.line>0?"+":""}${r.line}`:`${r.side} ${r.line}`,cl=r.close!=null?`, closed ${r.close}`:"";
       out.push(r.result.status==="void"?`${r.date} ${r.name} ${what}: void (${r.result.why})`:`${r.date} ${r.name} ${what} (${r.kind}${cl}): ${r.result.as}-${r.result.hs}`);continue;}
-    const tgt=r.kind==="prop"?`${r.po>=0.5?"o":"u"}${r.line}`:r.kind==="ev"?`${r.side==="over"?"o":"u"}${r.line} ${r.price>0?"+":""}${r.price} ${r.book}, +${(100*r.ev).toFixed(1)}% EV`:`proj ${r.proj.toFixed(1)}, avg ${r.avg.toFixed(1)}`;
+    const tgt=r.kind==="prop"||r.kind==="shadow"?`${r.po>=0.5?"o":"u"}${r.line}`:r.kind==="ev"?`${r.side==="over"?"o":"u"}${r.line} ${r.price>0?"+":""}${r.price} ${r.book}, +${(100*r.ev).toFixed(1)}% EV`:`proj ${r.proj.toFixed(1)}, avg ${r.avg.toFixed(1)}`;
     out.push(r.result.status==="void"?`${r.date} ${r.name} ${LBL[r.stat]} (${r.kind}): void (${r.result.why})`:
       `${r.date} ${r.name} ${LBL[r.stat]} (${r.kind}, ${tgt}): ${r.result[r.stat]}`);
   }
@@ -300,7 +304,7 @@ function nbaGroup(g){
   return parts.join("; ");
 }
 function nbaTagCard(recs){
-  const all=recs.filter(r=>r.result&&Array.isArray(r.tags)&&!["spread","total"].includes(r.kind)),f=all.filter(r=>r.result.status==="final");
+  const all=recs.filter(r=>r.result&&Array.isArray(r.tags)&&!["spread","total","shadow"].includes(r.kind)),f=all.filter(r=>r.result.status==="final");
   if(!f.length)return [];
   const out=[`NBA by tag: ${f.length} graded picks with tags logged${small(f.length)}`];
   for(const [name,fn] of NBA_FAMILIES){const g=f.filter(fn);if(g.length)out.push(`- ${name} (${g.length}): ${nbaGroup(g)}`);}
