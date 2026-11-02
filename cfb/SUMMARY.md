@@ -1,4 +1,4 @@
-# CFB Lines: weekly review (2026, updated 2026-10-26)
+# CFB Lines: weekly review (2026, updated 2026-11-02)
 
 Every pick the bot sent, graded by `cfb-lines/review.js`. Ledger: `cfb/picks.json`. Lessons so far: `cfb-lines/LEARNINGS.md` on main.
 
@@ -6,12 +6,15 @@ Every pick the bot sent, graded by `cfb-lines/review.js`. Ledger: `cfb/picks.jso
 - Units assume -110 (CFBD has no prices). Breakeven 52.4%.
 - **CLV** = points the closing consensus line moved toward our side (positive = beat the close). It's the early signal: about 50 bets show whether there's an edge, W-L needs hundreds.
 
-## Week 8
+## Week 9
 
 | | graded | W-L-P | win % | units (-110) | beat the close | avg CLV (pts) |
 |---|---|---|---|---|---|---|
-| bets (first-look ✅ spreads) | 22 | 12-10 | 54.5% | +0.91u | 68% (15/22) | +1.19 ± 0.47 |
-| all first-look leans | 53 | 24-29 | 45.3% | -7.18u | 60% (32/53) | +0.56 ± 0.30 |
+| bets (first-look ✅ spreads) | 0 | 0-0 | - | +0.00u | - (0/0) | - |
+| all first-look leans | 0 | 0-0 | - | +0.00u | - (0/0) | - |
+| update card ✅ | 22 | 13-9 | 59.1% | +2.82u | 59% (13/22) | +0.60 ± 0.26 |
+| final card ✅ | 23 | 14-9 | 60.9% | +3.73u | 57% (13/23) | +0.59 ± 0.24 |
+| gameday card ✅ | 2 | 1-1 | 50.0% | -0.09u | 50% (1/2) | +1.00 ± 1.00 |
 
 ## Season to date
 
@@ -19,6 +22,9 @@ Every pick the bot sent, graded by `cfb-lines/review.js`. Ledger: `cfb/picks.jso
 |---|---|---|---|---|---|---|
 | **bets (first-look ✅ spreads)** | 81 | 42-37-2 | 53.2% | +1.18u | 59% (48/81) | +0.75 ± 0.23 |
 | all first-look leans | 194 | 91-101-2 | 47.4% | -18.28u | 52% (100/194) | +0.36 ± 0.14 |
+| update card ✅ | 22 | 13-9 | 59.1% | +2.82u | 59% (13/22) | +0.60 ± 0.26 |
+| final card ✅ | 23 | 14-9 | 60.9% | +3.73u | 57% (13/23) | +0.59 ± 0.24 |
+| gameday card ✅ | 2 | 1-1 | 50.0% | -0.09u | 50% (1/2) | +1.00 ± 1.00 |
 | totals leans, edge 4+ (no ✅: totals are off) | 86 | 48-38 | 55.8% | +5.63u | 69% (59/86) | +1.05 ± 0.22 |
 
 ### By model version
@@ -95,30 +101,10 @@ Rare tags (under 10 graded): altitude climb: helps us (7-1); altitude climb: hur
 | 6 | 6-6-1 | -0.55u | 62% | +0.63 ± 0.71 | 56% |
 | 7 | 13-14-1 | -2.18u | 57% | +0.68 ± 0.33 | 49% |
 | 8 | 12-10 | +0.91u | 68% | +1.19 ± 0.47 | 60% |
+| 9 | 0-0 | +0.00u | - | - | - |
 
-## Week 8 bets
+## Week 9 bets
 
-- L COLO @ OKST: COLO +13.5 (edge 11.2), final COLO 24-57 OKST, CLV +0.5 [coming down from altitude: hurts us]
-- W M-OH @ CMU: M-OH +1.5 (edge 10), final M-OH 28-27 CMU, CLV +5 [small home crowd: we're the visitor]
-- W UNT @ NAVY: UNT -2.5 (edge 9.2), final UNT 49-39 NAVY, CLV +0.5 [rest: we're off a bye, they aren't, travel (1,000+ mi more): hurts us]
-- L RUTG @ NU: RUTG +16.5 (edge 8.4), final RUTG 14-42 NU, CLV +1
-- W ECU @ MEM: ECU +9.5 (edge 8.1), final ECU 34-41 MEM, CLV -1 [weeknight (Thu)]
-- L SJSU @ NEV: SJSU +5.5 (edge 7.8), final SJSU 13-28 NEV, CLV -0.25 [altitude climb: hurts us, small home crowd: we're the visitor]
-- L ODU @ LT: ODU +8.5 (edge 7.4), final ODU 0-26 LT, CLV -5 [travel (1,000+ mi more): hurts us, small home crowd: we're the visitor]
-- L WVU @ TCU: TCU -7 (edge 6.5), final WVU 24-20 TCU, CLV +3 [travel (1,000+ mi more): helps us]
-- W IU @ MICH: MICH +8.5 (edge 6.1), final IU 13-6 MICH, CLV +1
-- W SDSU @ CSU: CSU +3 (edge 5.6), final SDSU 49-56 CSU, CLV +2.75 [altitude climb: helps us]
-- L MASS @ CONN: MASS +16.5 (edge 5.1), final MASS 16-35 CONN, CLV +3.75 [rest: they're off a bye, we aren't, weeknight (Fri)]
-- L LIB @ KENN: KENN +10.5 (edge 5), final LIB 34-6 KENN, CLV +2 [rest: they're off a bye, we aren't, small home crowd: we're home, weeknight (Thu)]
-- W ULM @ TROY: ULM +17.5 (edge 5), final ULM 21-14 TROY, CLV +4 [small home crowd: we're the visitor]
-- W MSU @ UCLA: UCLA -13.5 (edge 4.9), final MSU 10-28 UCLA, CLV +3 [travel (1,000+ mi more): helps us, time zones (2+): helps us]
-- L VAN @ UK: VAN +11.5 (edge 4.9), final VAN 17-34 UK, CLV +1.5
-- W MISS @ TEX: TEX -3 (edge 4.9), final MISS 27-34 TEX, CLV +0
-- W UL @ USM: USM +10.5 (edge 4.8), final UL 31-35 USM, CLV -1
-- W AF @ WYO: WYO +7 (edge 4.7), final AF 14-28 WYO, CLV +0 [small home crowd: we're home, weather: wind 15+ mph, weeknight (Fri)]
-- L IOWA @ MINN: IOWA -6 (edge 4.7), final IOWA 10-13 MINN, CLV +1.75
-- L BOIS @ WSU: WSU +14 (edge 4.7), final BOIS 31-10 WSU, CLV -0.75 [rest: they're off a bye, we aren't]
-- W USA @ MRSH: MRSH +3 (edge 4.1), final USA 13-20 MRSH, CLV +1.5 [rest: they're off a bye, we aren't, weeknight (Tue)]
-- W BAY @ KU: KU +1.5 (edge 4), final BAY 24-25 KU, CLV +3
+None.
 
 Weeks with "seeded" picks were rebuilt from run logs (our number rounded to 0.5, no availability or kickoff-weather fields).
