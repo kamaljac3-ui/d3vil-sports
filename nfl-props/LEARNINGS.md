@@ -36,6 +36,7 @@ Logged as `ctx.model_version` on every pick since Oct 25, 2026 (`nfl-props/conte
 | Man/zone coverage split (2025 participation) | Built in | Effects are tiny (mz ≈ 1.00) | — | In model; contributes almost nothing |
 | Defense missing a starting CB → opposing top WR/TE | `nfl-lines/research/cb-replacement.js` | +2 yds over baseline, noise | — | **Rejected** for props |
 | Probability calibration by side (open question 2) | 2026 wk 4–7 backtest buckets | P(over) 0.30–0.42 → 34.7% overs; 0.58–0.70 → 64.8%. Calibrated on both sides | 2026 is out of sample for the calibration | The under lean is structural (skewed stats: medians sit below means), not miscalibration. Keep |
+| Drop injury-shortened games (snap share under half his median) from the snap-share average (Nov 3 review, after McConkey 39% projected → 90% actual) | Test switch `PARTIAL_SNAP=0.5`, all players and starters-only (median 60%+) | Worse on changed players in 2025 wk 4–18 (rec yds MAE 13.51 → 14.01; starters 15.57 → 16.11) | 2026 wk 4–8 also worse or flat (15.74 → 16.02; starters 18.79 → 18.96) | **Rejected** as a model change: partial games carry real role information. Proposed as a ⚠️ "snap dip" tag (info only) |
 | A CB who got torched the last 2 games | 2023–25 proxy (PBU/tackler) | Regresses almost fully next game (58.5 → 28.3 vs 26.0 average) | — | **Rejected** |
 
 ## Live record (graded by `nfl-lines/grade.js`, ledger `bot-results:nfl/`)
@@ -54,16 +55,27 @@ Backtest 2026 wk 4–7 (Oct 27): rec yds MAE 22.5 vs 24.2 recent avg, rec 1.57 v
 67.0. Pass-yds bias −6.8 (was −11.6 on Oct 24): improving as the baselines catch up. Edge-call hit rates 60–64%
 (vs the recent average, not real lines).
 
+**Nov 3 review (week 8, first week with `ctx`):** ledger 24-23 (−2.77u), counted once per game **22-19 (−0.48u)**.
+Season once per game **51-44 (+0.09u)**; FanDuel-priced only **35-33 (−3.24u)**. Every week-8 model pick showed FanDuel.
+Unders 16-15, overs 6-4. Role misreads (snap share off 15+ points) 7-8, the rest 15-11. Tags (game day): teammate_out
+7-6 (overs on the gaining player 5-4, unders 2-4), questionable 2-3, no tags 14-11. 💰 stale props 1-5 (season 4-10): the
+fair price may now come from SportsGameOdds' own consensus (no Pinnacle on SGO since Oct 29); the ledger doesn't keep
+which. Mayfield 0 pass yds / Godwin 0 rec were real (TB threw 3 passes).
+
+Backtest 2026 wk 4–8 (Nov 3): rec yds 22.45 vs 23.98, rec 1.56 vs 1.63, rush 22.41 vs 23.42 (bias +0.2), pass 63.9 vs
+69.8 (bias **−2.7**, was −6.8). Edge-call hit rates 63–78%. Buckets still calibrated (0.58–0.70 → 62.8%).
+
 ## Open questions for the weekly review
 
 1. **Wind direction:** still in the model; the Oct 27 review proposed turning it off unless an ERA5-direction backtest supports it. Wind threshold:
    8 mph is not confirmed on 2026 (tie with 12 mph); re-check at week 10.
-2. **Your book only:** from Oct 30 every model pick should show FanDuel. Any other book = bug.
-3. **Duplicates:** count a Friday + game-day repeat once (Oct 27 proposal); until then dedupe by hand.
-4. **Teammate out / role reads:** `ctx` starts with week 8. Compare `teammate_out` picks to the no-tag baseline at 50+
-   picks, and projected vs actual snap share (returning vs new players).
-5. **Passing yards:** bias −6.8 and shrinking; check again at week 10 whether it's new starters or league-wide.
-6. **Rushing yards:** live picks 5-4 but week 7 over-projected rush yards by 17 yds on 4 picks (Bijan, Chase Brown).
-   Backtest bias is +1.3, so watch, not fix.
+2. **Your book only:** confirmed fixed in week 8 (every model pick FanDuel). Keep checking; the `atMyBook===true` safety fix is still optional.
+3. **Duplicates:** still counted twice (week 8: 24-23 → 22-19). Re-proposed Nov 3; dedupe by hand until applied.
+4. **Teammate out / role reads:** week 8 teammate_out 13 picks 7-6; role misreads 7-8. Grade at 50+ picks. If the
+   "snap dip" tag goes in, grade it the same way. Split teammate_out into overs on the gaining player vs unders.
+5. **Passing yards:** bias −2.7 at week 8 (−11.6 → −6.8 → −2.7). Basically resolved by the Oct 24 baseline change; re-check at week 10, then drop this question.
+6. **Rushing yards:** backtest bias +0.2 (week 8); live rush picks 4-4. Watch.
+7. **💰 stale props:** 4-10 on 14 picks. Once the graded ledger keeps the reference book (`sharp`), split SGO-consensus
+   vs real sharp references. Watch until 50 picks; QB "Over 0.5 rush yds" offers look like a weak reference.
 
 - **🎯 Parlays (2026-10-29):** Sunday 5-leg props parlay at 11:45 AM ET. Legs are treated as independent (one per game). Grade on the legs first (do the legs win at their blended chance?) and on the price: a parlay only pays if each leg's edge beats the book's cut five times over. Under ~50 parlays the W-L is pure luck (a fair 5-leg hits ~5-10%); judge the legs, not the tickets.
