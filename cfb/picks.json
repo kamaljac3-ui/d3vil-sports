@@ -20368,6 +20368,64 @@
    "graded": "2026-11-02"
   },
   {
+   "key": "final|401866453",
+   "S": 2026,
+   "wk": 10,
+   "gid": 401866453,
+   "card": "final",
+   "ver": "v1",
+   "params": "2026-09-27",
+   "sentAt": "2026-11-03T10:46:59.117Z",
+   "mins": 793,
+   "kick": "2026-11-04T00:00:00.000Z",
+   "away": "OHIO",
+   "home": "AKR",
+   "conf": true,
+   "neutral": false,
+   "lm": -14,
+   "lt": 51.5,
+   "lmOpen": -12.75,
+   "ltOpen": 50.25,
+   "src": "DraftKings",
+   "om": -9.9,
+   "ot": 54.9,
+   "se": 4.1,
+   "te": 3.4,
+   "spick": true,
+   "tpick": false,
+   "swild": false,
+   "min": {
+    "spread": 4,
+    "total": 8,
+    "week": 4
+   },
+   "f": {
+    "home": 1,
+    "capZ": -0.8,
+    "travel": 0.1,
+    "tz": 0,
+    "rest": 0.1,
+    "climb": 0,
+    "descend": 0,
+    "humid": 0,
+    "heat": 0,
+    "dome": false
+   },
+   "rest": {
+    "home": 10.3,
+    "away": 10.2
+   },
+   "wx": {
+    "wind": 5.3,
+    "gust": 15,
+    "precip": 0,
+    "temp": 62,
+    "dew": 52
+   },
+   "outs": {},
+   "why": "home field AKR +1.6; small crowd OHIO +1.1"
+  },
+  {
    "key": "first|401866453",
    "S": 2026,
    "wk": 10,
@@ -20482,6 +20540,64 @@
    },
    "outs": {},
    "why": "home field AKR +1.6; small crowd OHIO +1.1"
+  },
+  {
+   "key": "final|401866454",
+   "S": 2026,
+   "wk": 10,
+   "gid": 401866454,
+   "card": "final",
+   "ver": "v1",
+   "params": "2026-09-27",
+   "sentAt": "2026-11-03T10:46:59.117Z",
+   "mins": 853,
+   "kick": "2026-11-04T01:00:00.000Z",
+   "away": "BUF",
+   "home": "M-OH",
+   "conf": true,
+   "neutral": false,
+   "lm": 6,
+   "lt": 44.5,
+   "lmOpen": 6.75,
+   "ltOpen": 44.75,
+   "src": "DraftKings",
+   "om": 11.8,
+   "ot": 49.4,
+   "se": 5.8,
+   "te": 4.9,
+   "spick": true,
+   "tpick": false,
+   "swild": false,
+   "min": {
+    "spread": 4,
+    "total": 8,
+    "week": 4
+   },
+   "f": {
+    "home": 1,
+    "capZ": -1,
+    "travel": 0.4,
+    "tz": 0,
+    "rest": 0.1,
+    "climb": 0,
+    "descend": 0,
+    "humid": 0,
+    "heat": 0,
+    "dome": false
+   },
+   "rest": {
+    "home": 10.3,
+    "away": 10.2
+   },
+   "wx": {
+    "wind": 6.3,
+    "gust": 15,
+    "precip": 0,
+    "temp": 62,
+    "dew": 53
+   },
+   "outs": {},
+   "why": "home field M-OH +1.6; small crowd BUF +1.4"
   },
   {
    "key": "first|401866454",
