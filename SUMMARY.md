@@ -1,6 +1,6 @@
 # Bot results
 
-Updated 2026-11-03. 0 picks waiting on games to finish.
+Updated 2026-11-04. 0 picks waiting on games to finish.
 
 ## Last 7 days
 
@@ -18,11 +18,11 @@ NBA (model 2026-10-29-market): 70 picks (small sample: noise until ~100+)
 - Prop lines: 24-18 (57%), +3.8 units at -110 (break-even 52.4%)
   - Closing line: close our way 2, against 0 of 5 (line avg +0.2, price +1.3 pts of implied chance on 1) (beating the close is the early sign of a real edge; closes before 2026-11-01 were taken in the same run as the pick, so they read 0)
 - Game spreads (model 4+ pts off the line): 4-2 (67%), +1.6 units at -110; vs the close: our way 0, against 1, avg -0.2
-NBA (model 2026-10-24-rosters): 15 picks (small sample: noise until ~100+)
+NBA (model 2026-10-24-rosters): 13 picks (small sample: noise until ~100+)
 - Projection boosts: 1/3 beat their average (33%); model said +1.6, got +0.4 per pick
 - Prop lines: 3-5 (38%), -2.3 units at -110 (break-even 52.4%)
   - Closing line: close our way 0, against 0 of 8 (line avg +0.0) (beating the close is the early sign of a real edge; closes before 2026-11-01 were taken in the same run as the pick, so they read 0)
-- Game spreads (model 4+ pts off the line): 0-4 (0%), -4.0 units at -110; vs the close: our way 1, against 0, avg +0.3
+- Game spreads (model 6+ pts off the line): 0-2 (0%), -2.0 units at -110; vs the close: our way 0, against 0, avg +0.0
 NBA (model 0.6336694322992042): 1 picks (small sample: noise until ~100+)
 - 💰 Stale prices (your book vs the sharp no-vig line): 0-1 (0%), -1.0 units at the prices taken, promised +5.1% EV a bet
 NBA (model 0.6082723306078905): 1 picks (small sample: noise until ~100+)
@@ -290,5 +290,3 @@ NBA by tag: 149 graded picks with tags logged
 - 2026-10-28 Clint Capela REB (boost, proj 5.4, avg 4.2): 8
 - 2026-10-28 Anthony Davis PTS (boost, proj 23.1, avg 21.0): 18
 - 2026-10-28 Alex Sarr PTS (boost, proj 16.3, avg 14.3): 18
-- 2026-10-27 DET @ NYK DET +4.5 (spread, closed 4.5): 97-111
-- 2026-10-27 BKN @ BOS BOS -12.5 (spread, closed -13.5): 124-125
