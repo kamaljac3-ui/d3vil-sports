@@ -1,0 +1,63 @@
+name: Security Watch
+
+# Defensive monitor: leaked secrets, workflow/script tampering, unusual Actions runs, injected scripts on the live
+# site, and world threat intel (CISA KEV exploited-now list, GitHub Actions advisories, URLhaus malware hosts).
+# Alert-only, ntfy only. Every 4 h; the 13:23 UTC run (8:23 AM EST / 9:23 AM EDT) also sends the daily brief.
+on:
+  schedule:
+    - cron: "23 1-23/4 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "1 = print instead of sending"
+        default: "0"
+
+concurrency:
+  group: security-watch
+  cancel-in-progress: false
+
+# read-only: this bot never changes anything
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history, so keys that were committed and later deleted are still found
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Restore cache
+        uses: actions/cache/restore@v4
+        with:
+          path: security-watch/.cache
+          key: security-watch-${{ github.run_id }}
+          restore-keys: security-watch-
+      - name: Watch
+        env:
+          DRY_RUN: ${{ github.event.inputs.dry_run || '0' }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          NTFY_SERVER: ${{ secrets.NTFY_SERVER }}
+          NTFY_TOKEN: ${{ secrets.NTFY_TOKEN }}
+          ABUSECH_AUTH_KEY: ${{ secrets.ABUSECH_AUTH_KEY }}
+          # the real secret values, matched exactly against the repo, its history and the live site (never printed)
+          NTFY_TOPIC_NFL: ${{ secrets.NTFY_TOPIC_NFL }}
+          NTFY_TOPIC_CFB: ${{ secrets.NTFY_TOPIC_CFB }}
+          KIT_API_KEY: ${{ secrets.KIT_API_KEY }}
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+          ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+          SPORTSGAMEODDS_KEY: ${{ secrets.SPORTSGAMEODDS_KEY }}
+          CFBD_API_KEY: ${{ secrets.CFBD_API_KEY }}
+        run: node security-watch/run.js
+      - name: Save cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: security-watch/.cache
+          key: security-watch-${{ github.run_id }}

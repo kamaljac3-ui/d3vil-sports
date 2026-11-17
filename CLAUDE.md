@@ -20,6 +20,7 @@ It's served by GitHub Pages from `main`.
   read-only, so changes to those exports must keep both bots working. See `nba-news/README.md`.
 - `mlb-live/` sends in-game pitching-change alerts. It reuses `launch-angle/model.js` read-only, and runs two
   long-polling windows a day. See `mlb-live/README.md`.
+- `security-watch/` is the defensive monitor. It alerts only and never changes anything. See `security-watch/README.md`.
 - `results/` is the results tracker. It grades the picks `launch-angle/`, `nba-edges/`, `nba-news/` and `mlb-live/` actually sent (each writes
   `.cache/picks-<date>.json` on real sends) and keeps the ledger on the **`bot-results` branch**, never `main`. See `results/README.md`.
 
@@ -37,6 +38,7 @@ It's served by GitHub Pages from `main`.
 | `nfl-props-alerts.yml` | NFL Props Edges | cron every 2 h, each run looping up to 5 h + manual | NFL props bot, ntfy only. |
 | `nfl-lines-alerts.yml` | NFL Lines | cron every 2 h, each run looping up to 5 h + manual | NFL game-lines bot, ntfy only. |
 | `cfb-lines-alerts.yml` | CFB Lines | cron every 15 min (Aug–Jan) + manual | College football spread/total bot. Sends to its **own** ntfy topic (`NTFY_TOPIC_CFB`), not the shared one. |
+| `security-watch.yml` | Security Watch | cron every 4 h + manual | Alert-only, read-only permissions. Secret leaks, workflow changes, unusual Actions runs, injected scripts on the live site, and world threat intel (CISA KEV, Actions advisories, URLhaus). Daily brief after 8 AM ET. ntfy only. |
 
 **Consequences of every push to `main`:**
 - The Pages deploy re-runs.
