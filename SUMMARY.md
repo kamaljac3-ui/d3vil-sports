@@ -1,6 +1,6 @@
 # Bot results
 
-Updated 2026-11-19. 0 picks waiting on games to finish.
+Updated 2026-11-20. 0 picks waiting on games to finish.
 
 ## Last 7 days
 
@@ -8,12 +8,12 @@ MLB: no graded picks yet.
 
 NBA (model nba-news): 31 picks (small sample: noise until ~100+)
 - Projection boosts: 21/31 beat their average (68%); model said +3.0, got +2.5 per pick
-NBA (model 2026-11-02-under-filter): 173 picks
-- Projection boosts: 57/89 beat their average (64%); model said +3.1, got +4.0 per pick
-- Prop lines: 45-28 (62%), +12.9 units at -110 (break-even 52.4%)
+NBA (model 2026-11-02-under-filter): 174 picks
+- Projection boosts: 55/89 beat their average (62%); model said +3.2, got +3.7 per pick
+- Prop lines: 45-29 (61%), +11.9 units at -110 (break-even 52.4%)
   - Closing line: close our way 3, against 2 of 5 (line avg +0.2) (beating the close is the early sign of a real edge; closes before 2026-11-01 were taken in the same run as the pick, so they read 0)
-- Held-back unders (not sent): 3-4 (43%). Under 52.4% means cutting them helped.
-- Game spreads (model 4+ pts off the line): 3-8 (27%), -5.3 units at -110; vs the close: our way 4, against 1, avg +0.6
+- Held-back unders (not sent): 3-3 (50%). Under 52.4% means cutting them helped.
+- Game spreads (model 4+ pts off the line): 3-8 (27%), -5.3 units at -110; vs the close: our way 4, against 2, avg +0.5
 NBA (model 0.5153998164839513): 1 picks (small sample: noise until ~100+)
 - 💰 Stale prices (your book vs the sharp no-vig line): 0-1 (0%), -1.0 units at the prices taken, promised +4.6% EV a bet
 NBA (model 0.45810050912781486): 1 picks (small sample: noise until ~100+)
@@ -25,36 +25,37 @@ NBA (model 0.4141709695873458): 1 picks (small sample: noise until ~100+)
 NBA (model 0.34970852170479616): 1 picks (small sample: noise until ~100+)
 - 💰 Stale prices (your book vs the sharp no-vig line): 0-1 (0%), -1.0 units at the prices taken, promised +3.2% EV a bet
 
-NBA by tag: 195 graded picks with tags logged
+NBA by tag: 196 graded picks with tags logged
 - no tags (9): 💰 2-3 (40%), -1.3 units at the prices taken, promised +4.4% EV a bet; boosts 3/4 beat avg (75%), said +2.1 got +8.6
-- teammate out (w/o) (147): props 36-16 +16.7u, close our way 2, against 2 of 4 (line avg +0.0); boosts 64/95 beat avg (67%), said +3.1 got +4.0
-- b2b 2nd night (35): props 10-7 +2.1u, close our way 0, against 2 of 2 (line avg -1.0); boosts 12/18 beat avg (67%), said +3.9 got +4.3
-- 2+ days rest (40): props 13-6 +5.8u; boosts 14/21 beat avg (67%), said +2.7 got +3.6
+- teammate out (w/o) (149): props 37-17 +16.6u, close our way 2, against 2 of 4 (line avg +0.0); boosts 62/95 beat avg (65%), said +3.1 got +3.8
+- b2b 2nd night (37): props 11-5 +5.0u, close our way 0, against 2 of 2 (line avg -1.0); boosts 13/21 beat avg (62%), said +4.0 got +3.4
+- 2+ days rest (37): props 10-6 +3.1u; boosts 14/21 beat avg (67%), said +2.7 got +3.6
 - soft D vs position (bottom 3) (29): props 8-3 +4.3u, close our way 1, against 0 of 1 (line avg +1.0); boosts 10/18 beat avg (56%), said +3.6 got +1.7
-- tough D vs position (top 3) (10): props 5-2 +2.5u; boosts 2/3 beat avg (67%), said +2.4 got +1.4
-- D vs position: bottom half (97): props 24-16 +5.8u, close our way 1, against 1 of 2 (line avg +0.0); boosts 38/57 beat avg (67%), said +3.1 got +3.4
-- D vs position: top half (62): props 19-11 +6.3u, close our way 2, against 1 of 3 (line avg +0.3); boosts 19/32 beat avg (59%), said +3.3 got +5.0
-- high team total (104): props 23-16 +4.9u, close our way 1, against 2 of 3 (line avg -0.3); boosts 31/65 beat avg (48%), said +3.4 got +1.9
-- blowout risk (32): props 4-5 -1.4u, close our way 2, against 0 of 2 (line avg +1.0); boosts 11/23 beat avg (48%), said +3.5 got +2.1
-- 8+ pt underdog (57): props 13-7 +4.8u, close our way 3, against 0 of 3 (line avg +1.0); boosts 21/37 beat avg (57%), said +3.4 got +3.2
-- cold H2H (5+ PRA under avg vs this opp) (20): props 4-4 -0.4u, close our way 1, against 0 of 1 (line avg +1.0); boosts 4/12 beat avg (33%), said +2.7 got -0.3
-- hot H2H (5+ PRA over avg vs this opp) (15): props 7-3 +3.4u; boosts 5/5 beat avg (100%), said +3.8 got +18.1
-- PRA picks (117): props 43-27 +12.1u, close our way 3, against 2 of 5 (line avg +0.2); 💰 2-3 (40%), -1.3 units at the prices taken, promised +4.4% EV a bet; boosts 30/42 beat avg (71%), said +4.5 got +5.6
-- PRA board (top 10 of the slate) (58): props 34-24 +6.9u, close our way 3, against 2 of 5 (line avg +0.2)
+- tough D vs position (top 3) (9): props 4-2 +1.6u; boosts 2/3 beat avg (67%), said +2.4 got +1.4
+- D vs position: bottom half (94): props 25-16 +6.7u, close our way 1, against 1 of 2 (line avg +0.0); boosts 34/53 beat avg (64%), said +3.2 got +3.1
+- D vs position: top half (66): props 18-12 +4.4u, close our way 2, against 1 of 3 (line avg +0.3); boosts 21/36 beat avg (58%), said +3.2 got +4.5
+- high team total (104): props 22-17 +3.0u, close our way 1, against 2 of 3 (line avg -0.3); boosts 31/65 beat avg (48%), said +3.4 got +1.9
+- blowout risk (36): props 6-7 -1.5u, close our way 2, against 0 of 2 (line avg +1.0); boosts 11/23 beat avg (48%), said +3.5 got +2.1
+- 8+ pt underdog (56): props 12-7 +3.9u, close our way 3, against 0 of 3 (line avg +1.0); boosts 21/37 beat avg (57%), said +3.4 got +3.2
+- cold H2H (5+ PRA under avg vs this opp) (16): props 4-3 +0.6u, close our way 1, against 0 of 1 (line avg +1.0); boosts 1/9 beat avg (11%), said +2.9 got -1.7
+- hot H2H (5+ PRA over avg vs this opp) (18): props 8-3 +4.3u; boosts 7/7 beat avg (100%), said +4.0 got +13.3
+- PRA picks (118): props 43-28 +11.1u, close our way 3, against 2 of 5 (line avg +0.2); 💰 2-3 (40%), -1.3 units at the prices taken, promised +4.4% EV a bet; boosts 30/42 beat avg (71%), said +4.6 got +5.3
+- PRA board (top 10 of the slate) (59): props 34-25 +5.9u, close our way 3, against 2 of 5 (line avg +0.2)
 - PRA board: your book softer than the market (💰) (16): props 12-4 +6.9u, close our way 1, against 1 of 2 (line avg +0.0)
 - PRA board: market-only pick (1): props 1-0 +0.9u
-- PRA board: market agrees (its chance 50%+) (31): props 21-10 +9.1u, close our way 3, against 0 of 3 (line avg +1.0)
-- PRA board: market disagrees (under 50%) (23): props 13-10 +1.8u, close our way 0, against 2 of 2 (line avg -1.0)
-- PRA over, star (avg 30+) (3): props 2-1 +0.8u
+- PRA board: market agrees (its chance 50%+) (33): props 23-10 +10.9u, close our way 3, against 0 of 3 (line avg +1.0)
+- PRA board: market disagrees (under 50%) (22): props 11-11 -1.0u, close our way 0, against 2 of 2 (line avg -1.0)
+- PRA over, star (avg 30+) (4): props 3-1 +1.7u
 - PRA under, star (avg 30+) (9): props 6-3 +2.5u, close our way 0, against 1 of 1 (line avg -1.0)
-- PRA over, role player (avg < 20) (10): props 6-4 +1.5u
+- PRA over, role player (avg < 20) (11): props 6-5 +0.5u
 - PRA under, role player (avg < 20) (13): props 7-6 +0.4u, close our way 1, against 1 of 2 (line avg +0.0)
-- listed questionable / day-to-day / probable (5): props 2-0 +1.8u; boosts 1/3 beat avg (33%), said +2.2 got -0.7
-- sent < 2h before tip (134): props 26-15 +8.6u; 💰 2-3 (40%), -1.3 units at the prices taken, promised +4.4% EV a bet; boosts 57/88 beat avg (65%), said +2.9 got +2.4
-- sent 2h+ before tip (61): props 17-12 +3.5u, close our way 3, against 2 of 5 (line avg +0.2); boosts 21/32 beat avg (66%), said +3.6 got +6.9
-- Model vs market on 54 picks (log loss, lower = better): market only 0.680, 25% model 0.667, 50% model 0.662, 75% model 0.665, model only 0.677; best 50% model (small sample)
-- Minutes: projected 23.8, played 24.5 (avg miss 5.8, 16 picks 8+ min short); per-minute rate 98% of projected
-- Didn't play (void): 5/200 (3%); on a b2b 2nd night 3/38 (8%)
+- listed questionable / day-to-day / probable (8): props 1-0 +0.9u; boosts 3/7 beat avg (43%), said +2.6 got -0.0
+- star teammate back (2): props 1-1 -0.1u
+- sent < 2h before tip (128): props 22-13 +7.0u; 💰 2-3 (40%), -1.3 units at the prices taken, promised +4.4% EV a bet; boosts 57/88 beat avg (65%), said +2.9 got +2.4
+- sent 2h+ before tip (68): props 21-15 +4.1u, close our way 3, against 2 of 5 (line avg +0.2); boosts 19/32 beat avg (59%), said +3.8 got +6.1
+- Model vs market on 55 picks (log loss, lower = better): market only 0.682, 25% model 0.668, 50% model 0.661, 75% model 0.663, model only 0.675; best 50% model (small sample)
+- Minutes: projected 23.7, played 24.1 (avg miss 5.7, 15 picks 8+ min short); per-minute rate 96% of projected
+- Didn't play (void): 5/201 (2%); on a b2b 2nd night 3/40 (8%)
 
 ## All time
 
@@ -70,13 +71,13 @@ NBA (model pre-2026-10-24): 130 picks
 - Prop lines: 65-46 (59%), +13.1 units at -110 (break-even 52.4%)
 NBA (model nba-news): 83 picks (small sample: noise until ~100+)
 - Projection boosts: 52/83 beat their average (63%); model said +2.8, got +2.3 per pick
-NBA (model 2026-11-02-under-filter): 384 picks
-- Projection boosts: 97/168 beat their average (58%); model said +3.0, got +2.3 per pick
-- Prop lines: 95-89 (52%), -2.6 units at -110 (break-even 52.4%)
+NBA (model 2026-11-02-under-filter): 402 picks
+- Projection boosts: 101/174 beat their average (58%); model said +3.0, got +2.2 per pick
+- Prop lines: 102-92 (53%), +0.7 units at -110 (break-even 52.4%)
   - Closing line: close our way 10, against 7 of 18 (line avg +0.4, price -0.7 pts of implied chance on 6) (beating the close is the early sign of a real edge; closes before 2026-11-01 were taken in the same run as the pick, so they read 0)
 - Held-back unders (not sent): 14-12 (54%). Under 52.4% means cutting them helped.
 - 🎯 Parlays: 0-1, -1.0 units (promised chance 7% a parlay); legs won 3/5
-- Game spreads (model 4+ pts off the line): 13-18 (42%), -6.2 units at -110; vs the close: our way 8, against 7, avg +0.2
+- Game spreads (model 4+ pts off the line): 13-20 (39%), -8.2 units at -110; vs the close: our way 8, against 8, avg +0.1
 NBA (model 2026-10-29-market): 70 picks (small sample: noise until ~100+)
 - Projection boosts: 16/22 beat their average (73%); model said +2.8, got +2.3 per pick
 - Prop lines: 24-18 (57%), +3.8 units at -110 (break-even 52.4%)
@@ -114,38 +115,38 @@ NBA (model 0.3960964439401262): 1 picks (small sample: noise until ~100+)
 NBA (model 0.34970852170479616): 1 picks (small sample: noise until ~100+)
 - 💰 Stale prices (your book vs the sharp no-vig line): 0-1 (0%), -1.0 units at the prices taken, promised +3.2% EV a bet
 
-NBA by tag: 518 graded picks with tags logged
+NBA by tag: 534 graded picks with tags logged
 - no tags (40): props 8-11 -3.7u, close our way 0, against 0 of 1 (line avg +0.0); 💰 3-10 (23%), -7.4 units at the prices taken, promised +4.6% EV a bet; boosts 6/8 beat avg (75%), said +2.1 got +5.3
-- teammate out (w/o) (383): props 92-79 +4.6u, close our way 7, against 6 of 29 (line avg +0.2, price -0.6 pts of implied chance on 5); boosts 141/212 beat avg (67%), said +2.9 got +3.0
-- b2b 2nd night (94): props 31-22 +6.2u, close our way 1, against 3 of 10 (line avg -0.1, price -1.0 pts of implied chance on 1); boosts 24/41 beat avg (59%), said +3.2 got +2.2
+- teammate out (w/o) (396): props 97-81 +7.2u, close our way 7, against 6 of 29 (line avg +0.2, price -0.6 pts of implied chance on 5); boosts 145/218 beat avg (67%), said +2.9 got +2.9
+- b2b 2nd night (103): props 34-22 +8.9u, close our way 1, against 3 of 10 (line avg -0.1, price -1.0 pts of implied chance on 1); boosts 28/47 beat avg (60%), said +3.2 got +2.0
 - 2+ days rest (102): props 28-18 +7.5u, close our way 1, against 1 of 2 (line avg +0.5, price -0.6 pts of implied chance on 1); boosts 39/56 beat avg (70%), said +2.9 got +2.7
-- soft D vs position (bottom 3) (38): props 8-7 +0.3u, close our way 3, against 1 of 4 (line avg +1.0, price -1.0 pts of implied chance on 2); boosts 12/23 beat avg (52%), said +3.5 got +1.4
+- soft D vs position (bottom 3) (39): props 9-7 +1.2u, close our way 3, against 1 of 4 (line avg +1.0, price -1.0 pts of implied chance on 2); boosts 12/23 beat avg (52%), said +3.5 got +1.4
 - tough D vs position (top 3) (16): props 7-3 +3.4u; boosts 2/6 beat avg (33%), said +2.4 got -0.3
-- D vs position: bottom half (119): props 29-23 +3.4u, close our way 3, against 2 of 5 (line avg +0.6, price -1.0 pts of implied chance on 2); boosts 43/67 beat avg (64%), said +3.0 got +2.9
-- D vs position: top half (90): props 27-19 +5.5u, close our way 2, against 1 of 3 (line avg +0.3); boosts 24/44 beat avg (55%), said +3.1 got +3.6
-- high team total (207): props 48-33 +10.6u, close our way 4, against 3 of 10 (line avg +0.2, price -0.6 pts of implied chance on 1); boosts 62/126 beat avg (49%), said +3.1 got +1.3
-- blowout risk (67): props 11-12 -2.0u, close our way 2, against 1 of 8 (line avg +0.3, price -1.3 pts of implied chance on 1); boosts 20/44 beat avg (45%), said +3.1 got +0.8
-- 8+ pt underdog (130): props 29-20 +6.4u, close our way 6, against 2 of 10 (line avg +0.7, price -1.1 pts of implied chance on 3); boosts 45/81 beat avg (56%), said +3.1 got +2.8
+- D vs position: bottom half (127): props 33-25 +5.0u, close our way 3, against 2 of 5 (line avg +0.6, price -1.0 pts of implied chance on 2); boosts 45/69 beat avg (65%), said +3.1 got +2.9
+- D vs position: top half (98): props 30-20 +7.3u, close our way 2, against 1 of 3 (line avg +0.3); boosts 26/48 beat avg (54%), said +3.1 got +3.4
+- high team total (209): props 49-34 +10.5u, close our way 4, against 3 of 10 (line avg +0.2, price -0.6 pts of implied chance on 1); boosts 62/126 beat avg (49%), said +3.1 got +1.3
+- blowout risk (71): props 13-14 -2.2u, close our way 2, against 1 of 8 (line avg +0.3, price -1.3 pts of implied chance on 1); boosts 20/44 beat avg (45%), said +3.1 got +0.8
+- 8+ pt underdog (132): props 30-21 +6.3u, close our way 6, against 2 of 10 (line avg +0.7, price -1.1 pts of implied chance on 3); boosts 45/81 beat avg (56%), said +3.1 got +2.8
 - cold H2H (5+ PRA under avg vs this opp) (47): props 12-12 -1.1u, close our way 2, against 0 of 3 (line avg +0.3, price +1.3 pts of implied chance on 1); boosts 12/23 beat avg (52%), said +2.6 got +1.3
-- hot H2H (5+ PRA over avg vs this opp) (40): props 14-16 -3.3u, close our way 1, against 0 of 2 (line avg +1.5); boosts 7/10 beat avg (70%), said +3.4 got +8.3
-- PRA picks (322): props 116-106 -0.6u, close our way 12, against 7 of 23 (line avg +0.4, price -0.5 pts of implied chance on 7); 💰 3-10 (23%), -7.4 units at the prices taken, promised +4.6% EV a bet; boosts 61/87 beat avg (70%), said +4.4 got +4.2
-- PRA board (top 10 of the slate) (167): props 87-80 -0.9u, close our way 12, against 7 of 21 (line avg +0.4, price -0.5 pts of implied chance on 7)
-- PRA board: your book softer than the market (💰) (35): props 20-15 +3.2u, close our way 3, against 2 of 6 (line avg +0.3, price -2.7 pts of implied chance on 1)
+- hot H2H (5+ PRA over avg vs this opp) (44): props 16-16 -1.5u, close our way 1, against 0 of 2 (line avg +1.5); boosts 9/12 beat avg (75%), said +3.6 got +7.2
+- PRA picks (334): props 123-109 +2.8u, close our way 12, against 7 of 23 (line avg +0.4, price -0.5 pts of implied chance on 7); 💰 3-10 (23%), -7.4 units at the prices taken, promised +4.6% EV a bet; boosts 63/89 beat avg (71%), said +4.4 got +4.1
+- PRA board (top 10 of the slate) (177): props 94-83 +2.4u, close our way 12, against 7 of 21 (line avg +0.4, price -0.5 pts of implied chance on 7)
+- PRA board: your book softer than the market (💰) (38): props 23-15 +5.9u, close our way 3, against 2 of 6 (line avg +0.3, price -2.7 pts of implied chance on 1)
 - PRA board: market-only pick (2): props 2-0 +1.8u
-- PRA board: market agrees (its chance 50%+) (98): props 56-42 +8.9u, close our way 9, against 3 of 13 (line avg +0.6, price -0.8 pts of implied chance on 4)
-- PRA board: market disagrees (under 50%) (64): props 31-33 -4.8u, close our way 3, against 4 of 8 (line avg +0.1, price +0.1 pts of implied chance on 3)
-- PRA over, star (avg 30+) (10): props 5-5 -0.5u
-- PRA under, star (avg 30+) (30): props 15-15 -1.4u, close our way 1, against 2 of 3 (line avg -0.3)
-- PRA over, role player (avg < 20) (32): props 15-17 -3.4u, close our way 1, against 2 of 4 (line avg +0.3, price -0.8 pts of implied chance on 2)
+- PRA board: market agrees (its chance 50%+) (106): props 62-44 +12.4u, close our way 9, against 3 of 13 (line avg +0.6, price -0.8 pts of implied chance on 4)
+- PRA board: market disagrees (under 50%) (66): props 32-34 -4.9u, close our way 3, against 4 of 8 (line avg +0.1, price +0.1 pts of implied chance on 3)
+- PRA over, star (avg 30+) (11): props 6-5 +0.5u
+- PRA under, star (avg 30+) (32): props 17-15 +0.5u, close our way 1, against 2 of 3 (line avg -0.3)
+- PRA over, role player (avg < 20) (33): props 15-18 -4.4u, close our way 1, against 2 of 4 (line avg +0.3, price -0.8 pts of implied chance on 2)
 - PRA under, role player (avg < 20) (45): props 25-20 +2.7u, close our way 4, against 1 of 6 (line avg +0.8, price +0.5 pts of implied chance on 1)
-- listed questionable / day-to-day / probable (9): props 3-3 -0.3u; boosts 1/3 beat avg (33%), said +2.2 got -0.7
+- listed questionable / day-to-day / probable (13): props 3-3 -0.3u; boosts 3/7 beat avg (43%), said +2.6 got -0.0
 - first game back (3): props 2-1 +0.8u, close our way 1, against 0 of 1 (line avg +1.0)
-- star teammate back (8): props 1-5 -4.1u; boosts 0/2 beat avg (0%), said +2.2 got -2.2
+- star teammate back (10): props 2-6 -4.2u; boosts 0/2 beat avg (0%), said +2.2 got -2.2
 - sent < 2h before tip (308): props 69-62 +0.7u, close our way 0, against 0 of 18 (line avg +0.0); 💰 3-10 (23%), -7.4 units at the prices taken, promised +4.6% EV a bet; boosts 102/164 beat avg (62%), said +2.8 got +2.1
-- sent 2h+ before tip (210): props 59-52 +1.6u, close our way 12, against 7 of 21 (line avg +0.4, price -0.5 pts of implied chance on 7); boosts 61/99 beat avg (62%), said +3.1 got +3.2
-- Model vs market on 162 picks (log loss, lower = better): market only 0.689, 25% model 0.693, 50% model 0.707, 75% model 0.732, model only 0.772; best market only
-- Minutes: projected 24.4, played 25.3 (avg miss 5.3, 42 picks 8+ min short); per-minute rate 96% of projected
-- Didn't play (void): 16/534 (3%); on a b2b 2nd night 9/103 (9%)
+- sent 2h+ before tip (226): props 66-55 +5.0u, close our way 12, against 7 of 21 (line avg +0.4, price -0.5 pts of implied chance on 7); boosts 65/105 beat avg (62%), said +3.2 got +3.0
+- Model vs market on 172 picks (log loss, lower = better): market only 0.689, 25% model 0.691, 50% model 0.702, 75% model 0.725, model only 0.763; best market only
+- Minutes: projected 24.4, played 25.2 (avg miss 5.2, 42 picks 8+ min short); per-minute rate 96% of projected
+- Didn't play (void): 16/550 (3%); on a b2b 2nd night 9/112 (8%)
 
 ## How to read this
 
@@ -155,6 +156,24 @@ NBA by tag: 518 graded picks with tags logged
 
 ## Recent picks
 
+- 2026-11-19 Yaxel Lendeborg PRA (prop, u34.5): 26
+- 2026-11-19 Taylor Hendricks PTS (boost, proj 11.8, avg 8.1): 11
+- 2026-11-19 Taylor Hendricks PRA (boost, proj 18.3, avg 12.7): 13
+- 2026-11-19 Stephon Castle PRA (prop, u30.5): 39
+- 2026-11-19 POR @ MIL POR -11.5 (spread, closed -9.5): 124-114
+- 2026-11-19 NYK @ MIN MIN +1.5 (spread, closed 1.5): 102-99
+- 2026-11-19 LJ Cryer PTS (boost, proj 10.9, avg 6.8): 9
+- 2026-11-19 LJ Cryer PRA (boost, proj 14.7, avg 9.2): 10
+- 2026-11-19 LJ Cryer AST (boost, proj 2.7, avg 1.7): 1
+- 2026-11-19 LJ Cryer 3PM (boost, proj 2.7, avg 1.7): 1
+- 2026-11-19 Keaton Wagler PRA (prop, o15.5): 14
+- 2026-11-19 Karl-Anthony Towns PRA (prop, o37.5): 38
+- 2026-11-19 Donovan Clingan PRA (prop, u28.5): 22
+- 2026-11-19 De'Aaron Fox PRA (prop, u25.5): 17
+- 2026-11-19 Damian Lillard PRA (prop, u31.5): 39
+- 2026-11-19 Cameron Boozer PRA (prop, u33.5): 27
+- 2026-11-19 Brook Lopez PRA (prop, o17.5): 30
+- 2026-11-19 Brandin Podziemski PRA (prop, u25.5): 20
 - 2026-11-18 Yaxel Lendeborg PRA (prop, u35.5): 22
 - 2026-11-18 Tyrese Proctor PTS (boost, proj 15.2, avg 9.6): 8
 - 2026-11-18 Tyrese Proctor PRA (prop, o20.5): 10
@@ -358,21 +377,3 @@ NBA by tag: 518 graded picks with tags logged
 - 2026-11-13 Andrew Nembhard PRA (prop, o25.5): 22
 - 2026-11-13 Aday Mara PTS (boost, proj 10.5, avg 8.5): 10
 - 2026-11-13 Aday Mara PRA (boost, proj 19.5, avg 16.2): 13
-- 2026-11-12 Trae Young PRA (prop, o26.5): 53
-- 2026-11-12 TOR @ PHI TOR +7.5 (spread, closed 7.5): 112-123
-- 2026-11-12 RJ Barrett PRA (prop, u32.5): 50
-- 2026-11-12 Naz Reid PRA (prop, u31.5): 27
-- 2026-11-12 Naji Marshall PRA (prop, o15.5): 18
-- 2026-11-12 Kyshawn George PRA (prop, o22.5): 20
-- 2026-11-12 Joel Embiid PRA (prop, u35.5): 27
-- 2026-11-12 Jaylen Brown PRA (prop, u35.5): 26
-- 2026-11-12 Jamison Battle PTS (boost, proj 10.4, avg 7.7): 13
-- 2026-11-12 Jamison Battle PRA (boost, proj 13.1, avg 9.7): 15
-- 2026-11-12 Jamison Battle 3PM (boost, proj 2.2, avg 1.7): 3
-- 2026-11-12 Jabari Walker REB (boost, proj 4.7, avg 3.4): 8
-- 2026-11-12 Jabari Walker PTS (boost, proj 6.9, avg 4.6): 9
-- 2026-11-12 Jabari Walker PRA (boost, proj 12.3, avg 8.5): 18
-- 2026-11-12 Grayson Allen PRA (prop, u25.5): 24
-- 2026-11-12 Daniss Jenkins PRA (shadow, u24.5): 27
-- 2026-11-12 CHA @ PHX PHX -6.5 (spread, closed -6.5): 96-101
-- 2026-11-12 Alex Sarr PRA (prop, o18.5): 41
