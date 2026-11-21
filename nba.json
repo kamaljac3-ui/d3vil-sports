@@ -39586,5 +39586,1676 @@
    "fg3m": 2,
    "gradedOn": "2026-11-20"
   }
+ },
+ {
+  "id": "2026-11-20|401909311|svimykhailiuk|boost|pts",
+  "sport": "nba",
+  "date": "2026-11-20",
+  "at": "2026-11-20T22:07:48.733Z",
+  "model": "2026-11-02-under-filter",
+  "kind": "boost",
+  "name": "Svi Mykhailiuk",
+  "key": "svimykhailiuk",
+  "team": "UTA",
+  "opp": "PHX",
+  "tags": [
+   "high team total"
+  ],
+  "mpg": 18.0625,
+  "minProj": 24.91314583333333,
+  "stat": "pts",
+  "proj": 6.988462896470588,
+  "projRaw": 6.951543529411764,
+  "avg": 4.5,
+  "back": 0,
+  "starBack": false,
+  "min3": 29.333333333333332,
+  "rest": 2,
+  "dvp": {
+   "pos": "G",
+   "rank": 26,
+   "of": 30,
+   "pct": 5
+  },
+  "h2h": {
+   "n": 3,
+   "diff": 4.5
+  },
+  "inj": null,
+  "compGap": null,
+  "gameId": "401909311",
+  "tip": "2026-11-21T02:30Z",
+  "modes": [
+   "morning"
+  ],
+  "result": {
+   "status": "final",
+   "min": 28,
+   "pts": 11,
+   "reb": 7,
+   "ast": 2,
+   "pra": 20,
+   "fg3m": 3,
+   "gradedOn": "2026-11-21"
+  }
+ },
+ {
+  "id": "2026-11-20|401909311|svimykhailiuk|boost|fg3m",
+  "sport": "nba",
+  "date": "2026-11-20",
+  "at": "2026-11-20T22:07:48.733Z",
+  "model": "2026-11-02-under-filter",
+  "kind": "boost",
+  "name": "Svi Mykhailiuk",
+  "key": "svimykhailiuk",
+  "team": "UTA",
+  "opp": "PHX",
+  "tags": [
+   "high team total"
+  ],
+  "mpg": 18.0625,
+  "minProj": 24.91314583333333,
+  "stat": "fg3m",
+  "proj": 1.5033107929411764,
+  "projRaw": 1.544787450980392,
+  "avg": 1,
+  "back": 0,
+  "starBack": false,
+  "min3": 29.333333333333332,
+  "rest": 2,
+  "dvp": {
+   "pos": "G",
+   "rank": 26,
+   "of": 30,
+   "pct": 5
+  },
+  "h2h": {
+   "n": 3,
+   "diff": 4.5
+  },
+  "inj": null,
+  "compGap": null,
+  "gameId": "401909311",
+  "tip": "2026-11-21T02:30Z",
+  "modes": [
+   "morning"
+  ],
+  "result": {
+   "status": "final",
+   "min": 28,
+   "pts": 11,
+   "reb": 7,
+   "ast": 2,
+   "pra": 20,
+   "fg3m": 3,
+   "gradedOn": "2026-11-21"
+  }
+ },
+ {
+  "id": "2026-11-20|401909311|mobamba|boost|pts",
+  "sport": "nba",
+  "date": "2026-11-20",
+  "at": "2026-11-20T22:07:48.733Z",
+  "model": "2026-11-02-under-filter",
+  "kind": "boost",
+  "name": "Mo Bamba",
+  "key": "mobamba",
+  "team": "UTA",
+  "opp": "PHX",
+  "tags": [
+   "high team total"
+  ],
+  "mpg": 18.7333328,
+  "minProj": 25.5868664464,
+  "stat": "pts",
+  "proj": 12.161351767904932,
+  "projRaw": 12.390964004106134,
+  "avg": 8.1,
+  "back": 0,
+  "starBack": false,
+  "min3": 30,
+  "rest": 2,
+  "dvp": {
+   "pos": "C",
+   "rank": 27,
+   "of": 30,
+   "pct": 11
+  },
+  "h2h": null,
+  "inj": null,
+  "compGap": null,
+  "gameId": "401909311",
+  "tip": "2026-11-21T02:30Z",
+  "modes": [
+   "morning"
+  ],
+  "result": {
+   "status": "final",
+   "min": 20,
+   "pts": 2,
+   "reb": 2,
+   "ast": 0,
+   "pra": 4,
+   "fg3m": 0,
+   "gradedOn": "2026-11-21"
+  }
+ },
+ {
+  "id": "2026-11-20|401909311|svimykhailiuk|boost|pra",
+  "sport": "nba",
+  "date": "2026-11-20",
+  "at": "2026-11-20T22:07:48.733Z",
+  "model": "2026-11-02-under-filter",
+  "kind": "boost",
+  "name": "Svi Mykhailiuk",
+  "key": "svimykhailiuk",
+  "team": "UTA",
+  "opp": "PHX",
+  "tags": [
+   "high team total"
+  ],
+  "mpg": 18.0625,
+  "minProj": 24.91314583333333,
+  "stat": "pra",
+  "proj": 12.040862759215685,
+  "projRaw": 12.220372156862743,
+  "avg": 8.125,
+  "back": 0,
+  "starBack": false,
+  "min3": 29.333333333333332,
+  "rest": 2,
+  "dvp": {
+   "pos": "G",
+   "rank": 26,
+   "of": 30,
+   "pct": 5
+  },
+  "h2h": {
+   "n": 3,
+   "diff": 4.5
+  },
+  "inj": null,
+  "compGap": null,
+  "gameId": "401909311",
+  "tip": "2026-11-21T02:30Z",
+  "modes": [
+   "morning"
+  ],
+  "result": {
+   "status": "final",
+   "min": 28,
+   "pts": 11,
+   "reb": 7,
+   "ast": 2,
+   "pra": 20,
+   "fg3m": 3,
+   "gradedOn": "2026-11-21"
+  }
+ },
+ {
+  "id": "2026-11-20|401909313|malikmonk|boost|pts",
+  "sport": "nba",
+  "date": "2026-11-20",
+  "at": "2026-11-20T22:07:48.733Z",
+  "model": "2026-11-02-under-filter",
+  "kind": "boost",
+  "name": "Malik Monk",
+  "key": "malikmonk",
+  "team": "SAC",
+  "opp": "LAL",
+  "tags": [
+   "w/o Achiuwa",
+   "high team total",
+   "blowout risk",
+   "+14.5 underdog"
+  ],
+  "mpg": 17.733333266666666,
+  "minProj": 23.209337168997465,
+  "stat": "pts",
+  "proj": 12.915380690541534,
+  "projRaw": 13.183844048939573,
+  "avg": 8.793548066666666,
+  "back": 0,
+  "starBack": false,
+  "min3": 22.333333333333332,
+  "rest": 2,
+  "dvp": {
+   "pos": "G",
+   "rank": 25,
+   "of": 30,
+   "pct": 3
+  },
+  "h2h": {
+   "n": 5,
+   "diff": 6
+  },
+  "inj": null,
+  "compGap": null,
+  "gameId": "401909313",
+  "tip": "2026-11-21T03:00Z",
+  "modes": [
+   "morning"
+  ],
+  "result": {
+   "status": "final",
+   "min": 12,
+   "pts": 2,
+   "reb": 0,
+   "ast": 3,
+   "pra": 5,
+   "fg3m": 0,
+   "gradedOn": "2026-11-21"
+  }
+ },
+ {
+  "id": "2026-11-20|401909313|malikmonk|boost|pra",
+  "sport": "nba",
+  "date": "2026-11-20",
+  "at": "2026-11-20T22:07:48.733Z",
+  "model": "2026-11-02-under-filter",
+  "kind": "boost",
+  "name": "Malik Monk",
+  "key": "malikmonk",
+  "team": "SAC",
+  "opp": "LAL",
+  "tags": [
+   "w/o Achiuwa",
+   "high team total",
+   "blowout risk",
+   "+14.5 underdog"
+  ],
+  "mpg": 17.733333266666666,
+  "minProj": 23.209337168997465,
+  "stat": "pra",
+  "proj": 20.101078505616513,
+  "projRaw": 20.581591810805513,
+  "avg": 13.84301046,
+  "back": 0,
+  "starBack": false,
+  "min3": 22.333333333333332,
+  "rest": 2,
+  "dvp": {
+   "pos": "G",
+   "rank": 25,
+   "of": 30,
+   "pct": 3
+  },
+  "h2h": {
+   "n": 5,
+   "diff": 6
+  },
+  "inj": null,
+  "compGap": null,
+  "gameId": "401909313",
+  "tip": "2026-11-21T03:00Z",
+  "modes": [
+   "morning"
+  ],
+  "result": {
+   "status": "final",
+   "min": 12,
+   "pts": 2,
+   "reb": 0,
+   "ast": 3,
+   "pra": 5,
+   "fg3m": 0,
+   "gradedOn": "2026-11-21"
+  }
+ },
+ {
+  "id": "2026-11-20|401909312|game|spread|spread",
+  "sport": "nba",
+  "date": "2026-11-20",
+  "at": "2026-11-20T22:07:48.734Z",
+  "model": "2026-11-02-under-filter",
+  "key": "game",
+  "stat": "spread",
+  "gameId": "401909312",
+  "tip": "2026-11-21T03:00Z",
+  "home": "DEN",
+  "away": "HOU",
+  "name": "HOU @ DEN",
+  "proj": -2.9723733755443584,
+  "projTotal": 226.20855176968863,
+  "b2b": [],
+  "def": {
+   "away": {
+    "n": 16,
+    "pa": 109.1875,
+    "l10": 108.7,
+    "rank": 7,
+    "of": 30
+   },
+   "home": {
+    "n": 13,
+    "pa": 112.23076923076923,
+    "l10": 109.4,
+    "rank": 13,
+    "of": 30
+   }
+  },
+  "kind": "spread",
+  "side": "away",
+  "team": "HOU",
+  "line": 1.5,
+  "edge": 4.472373375544358,
+  "tick": false,
+  "modes": [
+   "morning"
+  ],
+  "result": {
+   "status": "final",
+   "hs": 133,
+   "as": 124,
+   "cover": -7.5,
+   "gradedOn": "2026-11-21"
+  },
+  "close": -1.5
+ },
+ {
+  "id": "2026-11-20|401909308|jakobpoeltl|prop|pra",
+  "sport": "nba",
+  "date": "2026-11-20",
+  "at": "2026-11-20T22:35:28.640Z",
+  "model": "2026-11-02-under-filter",
+  "kind": "prop",
+  "stat": "pra",
+  "name": "Jakob Poeltl",
+  "key": "jakobpoeltl",
+  "team": "TOR",
+  "opp": "DET",
+  "mpg": 23.530434399999997,
+  "minProj": 22.41140274053333,
+  "proj": 16.318887174870753,
+  "projRaw": 16.62475337549589,
+  "avg": 16.7681158,
+  "line": 20.5,
+  "po": 0.29215415234671893,
+  "price": 100,
+  "book": "FanDuel",
+  "prob": 0.5925943965351885,
+  "ev": 0.18518879307037706,
+  "modelP": 0.7078458476532811,
+  "mktP": 0.4773429454170961,
+  "mktEV": -0.0453141091658078,
+  "soft": 0,
+  "why": "model",
+  "fair": {
+   "p": 0.4773429454170961,
+   "book": "BetOnline.ag",
+   "L": 20.5
+  },
+  "l5": [
+   16,
+   17,
+   17,
+   10,
+   22
+  ],
+  "hits": 4,
+  "games": 5,
+  "h2h": {
+   "n": 3,
+   "diff": 8.9
+  },
+  "tags": [
+   "w/o Barrett, Murray-Boyles"
+  ],
+  "rest": 2,
+  "dvp": {
+   "pos": "C",
+   "rank": 12,
+   "of": 30,
+   "pct": -4
+  },
+  "inj": null,
+  "compGap": null,
+  "revenge": null,
+  "back": 0,
+  "starBack": false,
+  "min3": 21.333333333333332,
+  "gameId": "401909308",
+  "tip": "2026-11-21T00:30Z",
+  "modes": [
+   "board"
+  ],
+  "result": {
+   "status": "final",
+   "min": 32,
+   "pts": 10,
+   "reb": 9,
+   "ast": 3,
+   "pra": 22,
+   "fg3m": 0,
+   "gradedOn": "2026-11-21"
+  }
+ },
+ {
+  "id": "2026-11-20|401909310|jaylinwilliams|prop|pra",
+  "sport": "nba",
+  "date": "2026-11-20",
+  "at": "2026-11-20T22:35:28.640Z",
+  "model": "2026-11-02-under-filter",
+  "kind": "prop",
+  "stat": "pra",
+  "name": "Jaylin Williams",
+  "key": "jaylinwilliams",
+  "team": "OKC",
+  "opp": "NOP",
+  "mpg": 19.646154,
+  "minProj": 20.410528268666667,
+  "proj": 16.59638014982551,
+  "projRaw": 16.946012603553434,
+  "avg": 15.153846000000001,
+  "line": 12.5,
+  "po": 0.7030629112953899,
+  "price": -102,
+  "book": "FanDuel",
+  "prob": 0.5922779084546044,
+  "ev": 0.17294252458656945,
+  "modelP": 0.7030629112953899,
+  "mktP": 0.48149290561381897,
+  "mktEV": -0.046455226137338934,
+  "soft": 0,
+  "why": "model",
+  "fair": {
+   "p": 0.48149290561381897,
+   "book": "BetOnline.ag",
+   "L": 12.5
+  },
+  "l5": [
+   null,
+   null,
+   null,
+   null,
+   5
+  ],
+  "hits": 0,
+  "games": 1,
+  "h2h": {
+   "n": 3,
+   "diff": -0.5
+  },
+  "tags": [
+   "high team total"
+  ],
+  "rest": 2,
+  "dvp": {
+   "pos": "F",
+   "rank": 18,
+   "of": 30,
+   "pct": 0
+  },
+  "inj": null,
+  "compGap": null,
+  "revenge": null,
+  "back": 0,
+  "starBack": false,
+  "min3": 20.666666666666668,
+  "gameId": "401909310",
+  "tip": "2026-11-21T01:00Z",
+  "modes": [
+   "board"
+  ],
+  "result": {
+   "status": "final",
+   "min": 9,
+   "pts": 3,
+   "reb": 1,
+   "ast": 1,
+   "pra": 5,
+   "fg3m": 1,
+   "gradedOn": "2026-11-21"
+  }
+ },
+ {
+  "id": "2026-11-20|401909308|jamisonbattle|prop|pra",
+  "sport": "nba",
+  "date": "2026-11-20",
+  "at": "2026-11-20T22:35:28.640Z",
+  "model": "2026-11-02-under-filter",
+  "kind": "prop",
+  "stat": "pra",
+  "name": "Jamison Battle",
+  "key": "jamisonbattle",
+  "team": "TOR",
+  "opp": "DET",
+  "mpg": 18.666666,
+  "minProj": 17.229333058,
+  "proj": 10.78352012818734,
+  "projRaw": 10.9160748217711,
+  "avg": 11.200000000000001,
+  "line": 15.5,
+  "po": 0.24268829629713873,
+  "price": -122,
+  "book": "FanDuel",
+  "prob": 0.6379093990445215,
+  "ev": 0.1607859556383916,
+  "modelP": 0.7573117037028613,
+  "mktP": 0.5185070943861816,
+  "mktEV": -0.05648709054317774,
+  "soft": 0,
+  "why": "model",
+  "fair": {
+   "p": 0.5185070943861816,
+   "book": "BetOnline.ag",
+   "L": 15.5
+  },
+  "l5": [
+   14,
+   15,
+   3,
+   1,
+   24
+  ],
+  "hits": 4,
+  "games": 5,
+  "h2h": null,
+  "tags": [
+   "w/o Barrett, Murray-Boyles"
+  ],
+  "rest": 2,
+  "dvp": {
+   "pos": "F",
+   "rank": 9,
+   "of": 30,
+   "pct": -5
+  },
+  "inj": null,
+  "compGap": null,
+  "revenge": null,
+  "back": 0,
+  "starBack": false,
+  "min3": 16,
+  "gameId": "401909308",
+  "tip": "2026-11-21T00:30Z",
+  "modes": [
+   "board"
+  ],
+  "result": {
+   "status": "final",
+   "min": 20,
+   "pts": 10,
+   "reb": 5,
+   "ast": 0,
+   "pra": 15,
+   "fg3m": 2,
+   "gradedOn": "2026-11-21"
+  }
+ },
+ {
+  "id": "2026-11-20|401909310|saddiqbey|prop|pra",
+  "sport": "nba",
+  "date": "2026-11-20",
+  "at": "2026-11-20T22:35:28.640Z",
+  "model": "2026-11-02-under-filter",
+  "kind": "prop",
+  "stat": "pra",
+  "name": "Saddiq Bey",
+  "key": "saddiqbey",
+  "team": "NOP",
+  "opp": "OKC",
+  "mpg": 29.5,
+  "minProj": 35.19016666666666,
+  "proj": 28.526553911611188,
+  "projRaw": 31.090236670883474,
+  "avg": 23.5,
+  "line": 23.5,
+  "po": 0.708391653927488,
+  "price": -125,
+  "book": "FanDuel",
+  "prob": 0.6200022913742864,
+  "ev": 0.11600412447371555,
+  "modelP": 0.708391653927488,
+  "mktP": 0.5316129288210849,
+  "mktEV": -0.04309672812204712,
+  "soft": 1,
+  "why": "model",
+  "fair": {
+   "p": 0.5316129288210849,
+   "book": "Pinnacle",
+   "L": 24.5
+  },
+  "l5": [
+   18,
+   40,
+   26,
+   32,
+   24
+  ],
+  "hits": 4,
+  "games": 5,
+  "h2h": {
+   "n": 2,
+   "diff": -4.5
+  },
+  "tags": [
+   "w/o Mathurin",
+   "high team total",
+   "+11.5 underdog",
+   "💰 FanDuel 1 softer than Pinnacle"
+  ],
+  "rest": 2,
+  "dvp": {
+   "pos": "F",
+   "rank": 12,
+   "of": 30,
+   "pct": -4
+  },
+  "inj": null,
+  "compGap": null,
+  "revenge": null,
+  "back": 0,
+  "starBack": false,
+  "min3": 38.666666666666664,
+  "gameId": "401909310",
+  "tip": "2026-11-21T01:00Z",
+  "modes": [
+   "board"
+  ],
+  "result": {
+   "status": "final",
+   "min": 37,
+   "pts": 21,
+   "reb": 6,
+   "ast": 3,
+   "pra": 30,
+   "fg3m": 4,
+   "gradedOn": "2026-11-21"
+  }
+ },
+ {
+  "id": "2026-11-20|401909307|andrewnembhard|prop|pra",
+  "sport": "nba",
+  "date": "2026-11-20",
+  "at": "2026-11-20T22:35:28.640Z",
+  "model": "2026-11-02-under-filter",
+  "kind": "prop",
+  "stat": "pra",
+  "name": "Andrew Nembhard",
+  "key": "andrewnembhard",
+  "team": "IND",
+  "opp": "CLE",
+  "mpg": 32.822222133333334,
+  "minProj": 33.78557774106667,
+  "proj": 28.881633491645175,
+  "projRaw": 30.574389218306237,
+  "avg": 26.77894768,
+  "line": 24.5,
+  "po": 0.6830635744355993,
+  "price": -115,
+  "book": "FanDuel",
+  "prob": 0.5915317122675546,
+  "ev": 0.1059071142393413,
+  "modelP": 0.6830635744355993,
+  "mktP": 0.49999985009951,
+  "mktEV": -0.06521767155309005,
+  "soft": 0,
+  "why": "model",
+  "fair": {
+   "p": 0.49999985009951,
+   "book": "Pinnacle",
+   "L": 24.5
+  },
+  "l5": [
+   27,
+   29,
+   22,
+   null,
+   null
+  ],
+  "hits": 2,
+  "games": 3,
+  "h2h": {
+   "n": 3,
+   "diff": 6.2
+  },
+  "tags": [
+   "high team total",
+   "day-to-day"
+  ],
+  "rest": 2,
+  "dvp": {
+   "pos": "G",
+   "rank": 17,
+   "of": 30,
+   "pct": 1
+  },
+  "inj": "Day-To-Day",
+  "compGap": null,
+  "revenge": null,
+  "back": 0,
+  "starBack": false,
+  "min3": 34,
+  "gameId": "401909307",
+  "tip": "2026-11-21T00:30Z",
+  "modes": [
+   "board"
+  ],
+  "result": {
+   "status": "final",
+   "min": 26,
+   "pts": 12,
+   "reb": 3,
+   "ast": 8,
+   "pra": 23,
+   "fg3m": 3,
+   "gradedOn": "2026-11-21"
+  }
+ },
+ {
+  "id": "2026-11-20|401909311|jordangoodwin|prop|pra",
+  "sport": "nba",
+  "date": "2026-11-20",
+  "at": "2026-11-20T22:35:28.640Z",
+  "model": "2026-11-02-under-filter",
+  "kind": "prop",
+  "stat": "pra",
+  "name": "Jordan Goodwin",
+  "key": "jordangoodwin",
+  "team": "PHX",
+  "opp": "UTA",
+  "mpg": 20.752381333333332,
+  "minProj": 22.057400157333333,
+  "proj": 16.69183269981529,
+  "projRaw": 17.389974871176825,
+  "avg": 15.909523799999999,
+  "line": 13.5,
+  "po": 0.6608365207882665,
+  "price": -118,
+  "book": "FanDuel",
+  "prob": 0.5886378888669265,
+  "ev": 0.08748355739822006,
+  "modelP": 0.6608365207882665,
+  "mktP": 0.5164392569455865,
+  "mktEV": -0.04590035581239116,
+  "soft": 0,
+  "why": "model",
+  "fair": {
+   "p": 0.5164392569455865,
+   "book": "BetOnline.ag",
+   "L": 13.5
+  },
+  "l5": [
+   22,
+   13,
+   27,
+   19,
+   10
+  ],
+  "hits": 3,
+  "games": 5,
+  "h2h": {
+   "n": 2,
+   "diff": 0.1
+  },
+  "tags": [],
+  "rest": 2,
+  "dvp": {
+   "pos": "G",
+   "rank": 12,
+   "of": 30,
+   "pct": -2
+  },
+  "inj": null,
+  "compGap": null,
+  "revenge": null,
+  "back": 0,
+  "starBack": false,
+  "min3": 22.666666666666668,
+  "gameId": "401909311",
+  "tip": "2026-11-21T02:30Z",
+  "modes": [
+   "board"
+  ],
+  "result": {
+   "status": "final",
+   "min": 28,
+   "pts": 5,
+   "reb": 9,
+   "ast": 4,
+   "pra": 18,
+   "fg3m": 1,
+   "gradedOn": "2026-11-21"
+  }
+ },
+ {
+  "id": "2026-11-20|401909309|nicclaxton|prop|pra",
+  "sport": "nba",
+  "date": "2026-11-20",
+  "at": "2026-11-20T22:35:28.640Z",
+  "model": "2026-11-02-under-filter",
+  "kind": "prop",
+  "stat": "pra",
+  "name": "Nic Claxton",
+  "key": "nicclaxton",
+  "team": "CHI",
+  "opp": "WAS",
+  "mpg": 27.826086,
+  "minProj": 23.59050685133333,
+  "proj": 20.69735743638745,
+  "projRaw": 20.855895567651963,
+  "avg": 22.3333327,
+  "line": 17.5,
+  "po": 0.651051654681073,
+  "price": -125,
+  "book": "FanDuel",
+  "prob": 0.5948777218452016,
+  "ev": 0.07077989932136292,
+  "modelP": 0.651051654681073,
+  "mktP": 0.5387037890093302,
+  "mktEV": -0.030333179783205544,
+  "soft": 1,
+  "why": "model",
+  "fair": {
+   "p": 0.5387037890093302,
+   "book": "BetOnline.ag",
+   "L": 18.5
+  },
+  "l5": [
+   24,
+   10,
+   null,
+   11,
+   19
+  ],
+  "hits": 2,
+  "games": 4,
+  "h2h": null,
+  "tags": [
+   "w/o Wilson",
+   "high team total",
+   "💰 FanDuel 1 softer than BetOnline.ag"
+  ],
+  "rest": 2,
+  "dvp": {
+   "pos": "C",
+   "rank": 22,
+   "of": 30,
+   "pct": 6
+  },
+  "inj": null,
+  "compGap": null,
+  "revenge": null,
+  "back": 0,
+  "starBack": false,
+  "min3": 20.333333333333332,
+  "gameId": "401909309",
+  "tip": "2026-11-21T01:00Z",
+  "modes": [
+   "board"
+  ],
+  "result": {
+   "status": "final",
+   "min": 29,
+   "pts": 11,
+   "reb": 7,
+   "ast": 1,
+   "pra": 19,
+   "fg3m": 0,
+   "gradedOn": "2026-11-21"
+  }
+ },
+ {
+  "id": "2026-11-20|401909309|joshgiddey|prop|pra",
+  "sport": "nba",
+  "date": "2026-11-20",
+  "at": "2026-11-20T22:35:28.640Z",
+  "model": "2026-11-02-under-filter",
+  "kind": "prop",
+  "stat": "pra",
+  "name": "Josh Giddey",
+  "key": "joshgiddey",
+  "team": "CHI",
+  "opp": "WAS",
+  "mpg": 28.3370366,
+  "minProj": 27.1731961158,
+  "proj": 26.04312515262417,
+  "projRaw": 27.124662179602815,
+  "avg": 25.497531,
+  "line": 29.5,
+  "po": 0.34858816486991184,
+  "price": -106,
+  "book": "FanDuel",
+  "prob": 0.5504449097263774,
+  "ev": 0.06973256041163911,
+  "modelP": 0.6514118351300882,
+  "mktP": 0.4494779843226666,
+  "mktEV": -0.12648618141066675,
+  "soft": -1,
+  "why": "model",
+  "fair": {
+   "p": 0.4494779843226666,
+   "book": "Pinnacle",
+   "L": 30.5
+  },
+  "l5": [
+   18,
+   39,
+   21,
+   16,
+   41
+  ],
+  "hits": 3,
+  "games": 5,
+  "h2h": {
+   "n": 2,
+   "diff": 8.5
+  },
+  "tags": [
+   "w/o Wilson",
+   "high team total"
+  ],
+  "rest": 2,
+  "dvp": {
+   "pos": "G",
+   "rank": 21,
+   "of": 30,
+   "pct": 2
+  },
+  "inj": null,
+  "compGap": null,
+  "revenge": null,
+  "back": 0,
+  "starBack": false,
+  "min3": 26,
+  "gameId": "401909309",
+  "tip": "2026-11-21T01:00Z",
+  "modes": [
+   "board"
+  ],
+  "result": {
+   "status": "final",
+   "min": 23,
+   "pts": 2,
+   "reb": 6,
+   "ast": 7,
+   "pra": 15,
+   "fg3m": 0,
+   "gradedOn": "2026-11-21"
+  }
+ },
+ {
+  "id": "2026-11-20|401909309|kyshawngeorge|prop|pra",
+  "sport": "nba",
+  "date": "2026-11-20",
+  "at": "2026-11-20T22:35:28.640Z",
+  "model": "2026-11-02-under-filter",
+  "kind": "prop",
+  "stat": "pra",
+  "name": "Kyshawn George",
+  "key": "kyshawngeorge",
+  "team": "WAS",
+  "opp": "CHI",
+  "mpg": 33.625,
+  "minProj": 35.307125,
+  "proj": 28.859548605716434,
+  "projRaw": 30.629259070631974,
+  "avg": 26.5,
+  "line": 25.5,
+  "po": 0.6425478971147849,
+  "price": -118,
+  "book": "FanDuel",
+  "prob": 0.5783658597261391,
+  "ev": 0.06850641881608743,
+  "modelP": 0.6425478971147849,
+  "mktP": 0.5141838223374933,
+  "mktEV": -0.050067175681580256,
+  "soft": 0,
+  "why": "model",
+  "fair": {
+   "p": 0.5141838223374933,
+   "book": "Pinnacle",
+   "L": 25.5
+  },
+  "l5": [
+   37,
+   20,
+   17,
+   25,
+   26
+  ],
+  "hits": 2,
+  "games": 5,
+  "h2h": {
+   "n": 2,
+   "diff": 9
+  },
+  "tags": [
+   "high team total"
+  ],
+  "rest": 2,
+  "dvp": {
+   "pos": "F",
+   "rank": 22,
+   "of": 30,
+   "pct": 4
+  },
+  "inj": null,
+  "compGap": null,
+  "revenge": null,
+  "back": 0,
+  "starBack": false,
+  "min3": 36,
+  "gameId": "401909309",
+  "tip": "2026-11-21T01:00Z",
+  "modes": [
+   "board"
+  ],
+  "result": {
+   "status": "final",
+   "min": 35,
+   "pts": 11,
+   "reb": 7,
+   "ast": 5,
+   "pra": 23,
+   "fg3m": 1,
+   "gradedOn": "2026-11-21"
+  }
+ },
+ {
+  "id": "2026-11-20|401909312|jamalmurray|prop|pra",
+  "sport": "nba",
+  "date": "2026-11-20",
+  "at": "2026-11-20T22:35:28.640Z",
+  "model": "2026-11-02-under-filter",
+  "kind": "prop",
+  "stat": "pra",
+  "name": "Jamal Murray",
+  "key": "jamalmurray",
+  "team": "DEN",
+  "opp": "HOU",
+  "mpg": 36.381332,
+  "minProj": 37.040490116,
+  "proj": 36.73911139059434,
+  "projRaw": 38.200390918997975,
+  "avg": 36.65777763333333,
+  "line": 33.5,
+  "po": 0.6269788244685106,
+  "price": -108,
+  "book": "FanDuel",
+  "prob": 0.5545100129488754,
+  "ev": 0.06794521012375998,
+  "modelP": 0.6269788244685106,
+  "mktP": 0.48204120142924,
+  "mktEV": -0.07162435280294516,
+  "soft": -1,
+  "why": "model",
+  "fair": {
+   "p": 0.48204120142924,
+   "book": "Pinnacle",
+   "L": 32.5
+  },
+  "l5": [
+   42,
+   42,
+   39,
+   36,
+   30
+  ],
+  "hits": 4,
+  "games": 5,
+  "h2h": {
+   "n": 5,
+   "diff": 0.5
+  },
+  "tags": [],
+  "rest": 2,
+  "dvp": {
+   "pos": "G",
+   "rank": 19,
+   "of": 30,
+   "pct": 1
+  },
+  "inj": null,
+  "compGap": null,
+  "revenge": null,
+  "back": 0,
+  "starBack": false,
+  "min3": 37,
+  "gameId": "401909312",
+  "tip": "2026-11-21T03:00Z",
+  "modes": [
+   "board"
+  ],
+  "result": {
+   "status": "final",
+   "min": 36,
+   "pts": 14,
+   "reb": 2,
+   "ast": 7,
+   "pra": 23,
+   "fg3m": 1,
+   "gradedOn": "2026-11-21"
+  }
+ },
+ {
+  "id": "2026-11-20|401909312|alperensengun|shadow|pra",
+  "sport": "nba",
+  "date": "2026-11-20",
+  "at": "2026-11-20T22:35:28.641Z",
+  "model": "2026-11-02-under-filter",
+  "kind": "shadow",
+  "stat": "pra",
+  "name": "Alperen Sengun",
+  "key": "alperensengun",
+  "team": "HOU",
+  "opp": "DEN",
+  "mpg": 32.82036926666667,
+  "minProj": 27.834812507133332,
+  "proj": 31.630213429507826,
+  "projRaw": 31.05656754257249,
+  "avg": 37.42870402,
+  "line": 35.5,
+  "po": 0.3417397420363252,
+  "price": -106,
+  "book": "FanDuel",
+  "prob": 0.5766184749069301,
+  "ev": 0.12059816821535474,
+  "modelP": 0.6582602579636748,
+  "mktP": 0.4949766918501852,
+  "mktEV": -0.038064164894923036,
+  "soft": 0,
+  "why": "model",
+  "fair": {
+   "p": 0.4949766918501852,
+   "book": "Pinnacle",
+   "L": 35.5
+  },
+  "l5": [
+   41,
+   60,
+   35,
+   32,
+   15
+  ],
+  "hits": 3,
+  "games": 5,
+  "h2h": {
+   "n": 5,
+   "diff": -7.4
+  },
+  "tags": [
+   "cold vs DEN",
+   "day-to-day"
+  ],
+  "rest": 2,
+  "dvp": {
+   "pos": "C",
+   "rank": 6,
+   "of": 30,
+   "pct": -10
+  },
+  "inj": "Day-To-Day",
+  "compGap": null,
+  "revenge": null,
+  "back": 0,
+  "starBack": false,
+  "min3": 24,
+  "gameId": "401909312",
+  "tip": "2026-11-21T03:00Z",
+  "modes": [
+   "board"
+  ],
+  "result": {
+   "status": "final",
+   "min": 36,
+   "pts": 28,
+   "reb": 11,
+   "ast": 10,
+   "pra": 49,
+   "fg3m": 1,
+   "gradedOn": "2026-11-21"
+  }
+ },
+ {
+  "id": "2026-11-20|401909311|devinbooker|shadow|pra",
+  "sport": "nba",
+  "date": "2026-11-20",
+  "at": "2026-11-20T22:35:28.641Z",
+  "model": "2026-11-02-under-filter",
+  "kind": "shadow",
+  "stat": "pra",
+  "name": "Devin Booker",
+  "key": "devinbooker",
+  "team": "PHX",
+  "opp": "UTA",
+  "mpg": 33.702084533333334,
+  "minProj": 33.35562757893333,
+  "proj": 32.825129242375034,
+  "projRaw": 33.97813986896882,
+  "avg": 33.13125016,
+  "line": 36.5,
+  "po": 0.35114279363498824,
+  "price": -125,
+  "book": "FanDuel",
+  "prob": 0.5943854663209536,
+  "ev": 0.06989383937771643,
+  "modelP": 0.6488572063650118,
+  "mktP": 0.5399137262768954,
+  "mktEV": -0.028155292701588286,
+  "soft": 1,
+  "why": "model",
+  "fair": {
+   "p": 0.5399137262768954,
+   "book": "Pinnacle",
+   "L": 35.5
+  },
+  "l5": [
+   25,
+   38,
+   28,
+   32,
+   37
+  ],
+  "hits": 3,
+  "games": 5,
+  "h2h": {
+   "n": 3,
+   "diff": 12.5
+  },
+  "tags": [
+   "💰 FanDuel 1 softer than Pinnacle"
+  ],
+  "rest": 2,
+  "dvp": {
+   "pos": "G",
+   "rank": 12,
+   "of": 30,
+   "pct": -2
+  },
+  "inj": null,
+  "compGap": null,
+  "revenge": null,
+  "back": 0,
+  "starBack": false,
+  "min3": 32.666666666666664,
+  "gameId": "401909311",
+  "tip": "2026-11-21T02:30Z",
+  "modes": [
+   "board"
+  ],
+  "result": {
+   "status": "final",
+   "min": 38,
+   "pts": 23,
+   "reb": 2,
+   "ast": 3,
+   "pra": 28,
+   "fg3m": 1,
+   "gradedOn": "2026-11-21"
+  }
+ },
+ {
+  "id": "2026-11-20|401909305|christiananderson|boost|pts",
+  "sport": "nba",
+  "date": "2026-11-20",
+  "at": "2026-11-20T22:35:28.797Z",
+  "model": "2026-11-02-under-filter",
+  "kind": "boost",
+  "name": "Christian Anderson",
+  "key": "christiananderson",
+  "team": "CHA",
+  "opp": "ATL",
+  "tags": [
+   "w/o Allen, Schroder",
+   "high team total"
+  ],
+  "mpg": 13.307693,
+  "minProj": 15.412743875666667,
+  "stat": "pts",
+  "proj": 7.526995902680927,
+  "projRaw": 7.517824293039881,
+  "avg": 5.230769,
+  "back": 0,
+  "starBack": false,
+  "min3": 16.666666666666668,
+  "rest": 3,
+  "dvp": {
+   "pos": "G",
+   "rank": 15,
+   "of": 30,
+   "pct": 0
+  },
+  "h2h": null,
+  "inj": null,
+  "compGap": null,
+  "gameId": "401909305",
+  "tip": "2026-11-21T00:00Z",
+  "modes": [
+   "pregame"
+  ],
+  "result": {
+   "status": "final",
+   "min": 21,
+   "pts": 4,
+   "reb": 1,
+   "ast": 2,
+   "pra": 7,
+   "fg3m": 0,
+   "gradedOn": "2026-11-21"
+  }
+ },
+ {
+  "id": "2026-11-20|401909305|christiananderson|boost|pra",
+  "sport": "nba",
+  "date": "2026-11-20",
+  "at": "2026-11-20T22:35:28.797Z",
+  "model": "2026-11-02-under-filter",
+  "kind": "boost",
+  "name": "Christian Anderson",
+  "key": "christiananderson",
+  "team": "CHA",
+  "opp": "ATL",
+  "tags": [
+   "w/o Allen, Schroder",
+   "high team total"
+  ],
+  "mpg": 13.307693,
+  "minProj": 15.412743875666667,
+  "stat": "pra",
+  "proj": 12.07515893463028,
+  "projRaw": 12.25594910231357,
+  "avg": 8.6923075,
+  "back": 0,
+  "starBack": false,
+  "min3": 16.666666666666668,
+  "rest": 3,
+  "dvp": {
+   "pos": "G",
+   "rank": 15,
+   "of": 30,
+   "pct": 0
+  },
+  "h2h": null,
+  "inj": null,
+  "compGap": null,
+  "gameId": "401909305",
+  "tip": "2026-11-21T00:00Z",
+  "modes": [
+   "pregame"
+  ],
+  "result": {
+   "status": "final",
+   "min": 21,
+   "pts": 4,
+   "reb": 1,
+   "ast": 2,
+   "pra": 7,
+   "fg3m": 0,
+   "gradedOn": "2026-11-21"
+  }
+ },
+ {
+  "id": "2026-11-20|401909305|nazreid|boost|pts",
+  "sport": "nba",
+  "date": "2026-11-20",
+  "at": "2026-11-20T22:35:28.797Z",
+  "model": "2026-11-02-under-filter",
+  "kind": "boost",
+  "name": "Naz Reid",
+  "key": "nazreid",
+  "team": "CHA",
+  "opp": "ATL",
+  "tags": [
+   "w/o Allen, Schroder",
+   "high team total"
+  ],
+  "mpg": 30.204329066666666,
+  "minProj": 32.90272123786667,
+  "stat": "pts",
+  "proj": 20.017056574281582,
+  "projRaw": 21.77973711532623,
+  "avg": 17.3722942,
+  "back": 0,
+  "starBack": false,
+  "min3": 34.333333333333336,
+  "rest": 3,
+  "dvp": {
+   "pos": "C",
+   "rank": 18,
+   "of": 30,
+   "pct": 1
+  },
+  "h2h": null,
+  "inj": null,
+  "compGap": null,
+  "gameId": "401909305",
+  "tip": "2026-11-21T00:00Z",
+  "modes": [
+   "pregame"
+  ],
+  "result": {
+   "status": "final",
+   "min": 39,
+   "pts": 12,
+   "reb": 10,
+   "ast": 3,
+   "pra": 25,
+   "fg3m": 2,
+   "gradedOn": "2026-11-21"
+  }
+ },
+ {
+  "id": "2026-11-20|401909310|jaredmccain|boost|pts",
+  "sport": "nba",
+  "date": "2026-11-20",
+  "at": "2026-11-20T23:24:40.273Z",
+  "kind": "boost",
+  "name": "Jared McCain",
+  "key": "jaredmccain",
+  "team": "OKC",
+  "opp": "NOP",
+  "tags": [
+   "w/o Caruso",
+   "high team total"
+  ],
+  "mpg": 27.133333,
+  "minProj": 29.849399862333332,
+  "stat": "pts",
+  "proj": 15.790897057873007,
+  "projRaw": 17.081792760197256,
+  "avg": 13.666667,
+  "gain": 0.2429169377334901,
+  "gameId": "401909310",
+  "tip": "2026-11-21T01:00Z",
+  "modes": [
+   "news"
+  ],
+  "result": {
+   "status": "final",
+   "min": 30,
+   "pts": 18,
+   "reb": 3,
+   "ast": 0,
+   "pra": 21,
+   "fg3m": 3,
+   "gradedOn": "2026-11-21"
+  }
+ },
+ {
+  "id": "2026-11-20|401909309|buddyhield|boost|pts",
+  "sport": "nba",
+  "date": "2026-11-20",
+  "at": "2026-11-20T23:30:42.774Z",
+  "kind": "boost",
+  "name": "Buddy Hield",
+  "key": "buddyhield",
+  "team": "CHI",
+  "opp": "WAS",
+  "tags": [
+   "w/o Smith, Wilson",
+   "high team total"
+  ],
+  "mpg": 15.745098200000001,
+  "minProj": 18.006058889933332,
+  "stat": "pts",
+  "proj": 10.30975242453008,
+  "projRaw": 10.44396153998957,
+  "avg": 7.5294118,
+  "gain": 0.38653445366587924,
+  "gameId": "401909309",
+  "tip": "2026-11-21T01:00Z",
+  "modes": [
+   "news"
+  ],
+  "result": {
+   "status": "final",
+   "min": 23,
+   "pts": 15,
+   "reb": 4,
+   "ast": 0,
+   "pra": 19,
+   "fg3m": 4,
+   "gradedOn": "2026-11-21"
+  }
+ },
+ {
+  "id": "2026-11-20|401909309|buddyhield|boost|fg3m",
+  "sport": "nba",
+  "date": "2026-11-20",
+  "at": "2026-11-20T23:30:42.774Z",
+  "kind": "boost",
+  "name": "Buddy Hield",
+  "key": "buddyhield",
+  "team": "CHI",
+  "opp": "WAS",
+  "tags": [
+   "w/o Smith, Wilson",
+   "high team total"
+  ],
+  "mpg": 15.745098200000001,
+  "minProj": 18.006058889933332,
+  "stat": "fg3m",
+  "proj": 2.0620905875331177,
+  "projRaw": 2.1595066969561247,
+  "avg": 1.5568627999999998,
+  "gain": 0.0799240535403749,
+  "gameId": "401909309",
+  "tip": "2026-11-21T01:00Z",
+  "modes": [
+   "news"
+  ],
+  "result": {
+   "status": "final",
+   "min": 23,
+   "pts": 15,
+   "reb": 4,
+   "ast": 0,
+   "pra": 19,
+   "fg3m": 4,
+   "gradedOn": "2026-11-21"
+  }
+ },
+ {
+  "id": "2026-11-20|401909309|buddyhield|boost|pra",
+  "sport": "nba",
+  "date": "2026-11-20",
+  "at": "2026-11-20T23:30:42.774Z",
+  "kind": "boost",
+  "name": "Buddy Hield",
+  "key": "buddyhield",
+  "team": "CHI",
+  "opp": "WAS",
+  "tags": [
+   "w/o Smith, Wilson",
+   "high team total"
+  ],
+  "mpg": 15.745098200000001,
+  "minProj": 18.006058889933332,
+  "stat": "pra",
+  "proj": 15.274372591799317,
+  "projRaw": 15.57463546867149,
+  "avg": 11.46274524,
+  "gain": 0.5764223842530694,
+  "gameId": "401909309",
+  "tip": "2026-11-21T01:00Z",
+  "modes": [
+   "news"
+  ],
+  "result": {
+   "status": "final",
+   "min": 23,
+   "pts": 15,
+   "reb": 4,
+   "ast": 0,
+   "pra": 19,
+   "fg3m": 4,
+   "gradedOn": "2026-11-21"
+  }
+ },
+ {
+  "id": "2026-11-20|401909309|trejones|boost|pts",
+  "sport": "nba",
+  "date": "2026-11-20",
+  "at": "2026-11-20T23:30:42.774Z",
+  "kind": "boost",
+  "name": "Tre Jones",
+  "key": "trejones",
+  "team": "CHI",
+  "opp": "WAS",
+  "tags": [
+   "w/o Smith, Wilson",
+   "high team total"
+  ],
+  "mpg": 19.5302564,
+  "minProj": 20.5609958932,
+  "stat": "pts",
+  "proj": 13.628988722465023,
+  "projRaw": 13.934220528354388,
+  "avg": 11.070768466666665,
+  "gain": 0.4254264948218722,
+  "gameId": "401909309",
+  "tip": "2026-11-21T01:00Z",
+  "modes": [
+   "news"
+  ],
+  "result": {
+   "status": "final",
+   "min": 25,
+   "pts": 12,
+   "reb": 1,
+   "ast": 7,
+   "pra": 20,
+   "fg3m": 0,
+   "gradedOn": "2026-11-21"
+  }
+ },
+ {
+  "id": "2026-11-20|401909309|trejones|boost|pra",
+  "sport": "nba",
+  "date": "2026-11-20",
+  "at": "2026-11-20T23:30:42.774Z",
+  "kind": "boost",
+  "name": "Tre Jones",
+  "key": "trejones",
+  "team": "CHI",
+  "opp": "WAS",
+  "tags": [
+   "w/o Smith, Wilson",
+   "high team total"
+  ],
+  "mpg": 19.5302564,
+  "minProj": 20.5609958932,
+  "stat": "pra",
+  "proj": 20.404596158875158,
+  "projRaw": 20.896444148210744,
+  "avg": 16.83897353333333,
+  "gain": 0.6379905478117358,
+  "gameId": "401909309",
+  "tip": "2026-11-21T01:00Z",
+  "modes": [
+   "news"
+  ],
+  "result": {
+   "status": "final",
+   "min": 25,
+   "pts": 12,
+   "reb": 1,
+   "ast": 7,
+   "pra": 20,
+   "fg3m": 0,
+   "gradedOn": "2026-11-21"
+  }
  }
 ]
