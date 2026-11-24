@@ -41,6 +41,8 @@ Logged as `ctx.model_version` on every pick since Oct 25, 2026 (`nfl-props/conte
 | Live model picks vs FanDuel's own price (Nov 17 review) | 176 FanDuel-priced picks, once per game, weeks 4–10 | Won 48.3% vs 54.8% the prices imply; model said 63.7%; −21.24u (−12% ROI). Edge <8 pts 51.4%, 8–15 pts 47.1%, 15+ pts 41.2%: bigger claimed edge, worse result | Every live pick is out of sample. Short in both halves (wk ≤9 51.4% vs 54.2%; wk 10 43.3% vs 55.8%) | **No edge vs FanDuel.** The backtest's 62–71% edge-call rate is vs the recent average, not the book. Proposed: model picks info-only (`MODEL_PICKS=0`), log as shadow |
 | Two or more picks on one player in a game (Nov 17) | Live FanDuel picks; backtest edge calls with 2+ calls on one player vs 1 | Live: multi 23-46 (−26.75u, 36 players: 8 all won, 19 all lost) vs single 62-45 (+5.50u) | Backtest shows no difference: 2025 wk 4–18 67.3% vs 67.3%; 2026 wk 4–10 65.9% vs 63.4%. Fails as a model property | **Watch** (36 independent players). Likely the market knows a role change the model doesn't; paired bets double the hit |
 | Wind 12 mph / 1.2% vs 8 mph / 0.9% re-check (Nov 17) | 2026 wk 4–10 | Pass yds MAE 64.73 vs 64.93, rec yds 22.40 vs 22.40, rush 21.65 vs 21.66 | 2nd 2026 check slightly favouring the old setting; gap is noise | Watch (8 mph stays) |
+| Live model picks vs FanDuel, fresh week (Nov 24 review) | Week 11 only: 36 picks nobody had seen when "no edge" was concluded on Nov 17 | 15-21 (41.7%) vs 54.1% needed, −8.08u. Season 100-112 (47.2%) vs 54.7%, model said 63.9%, −29.33u. Edge <8 / 8–15 / 15+ pts: 49.4% / 46.8% / 40.0% | Third stretch below the price (wk ≤9 51.4%, wk 10 43.3%, wk 11 41.7%) | **No edge confirmed.** `MODEL_PICKS=0` re-proposed |
+| Pass-yds bias: faster baselines (`LG_PRIOR_GAMES` 16 / 32 vs 64, Nov 24) | 2026 wk 4–11 and 2025 wk 4–18 | 2026 pass bias −4.89 → −4.47 / −4.63, MAE 63.13 → 63.11; 2025 MAE 60.43 → 60.44 | No gain in either season | **Rejected**; stay at 64 |
 | A CB who got torched the last 2 games | 2023–25 proxy (PBU/tackler) | Regresses almost fully next game (58.5 → 28.3 vs 26.0 average) | — | **Rejected** |
 
 ## Live record (graded by `nfl-lines/grade.js`, ledger `bot-results:nfl/`)
@@ -88,21 +90,42 @@ player 23-46. Tags: teammate_out alone 15-11, qb_changed+teammate_out 5-9, no ta
 Backtest 2026 wk 4–10 (Nov 17): rec yds 22.40 vs 23.97, rec 1.53 vs 1.61, rush 21.66 vs 22.82 (bias +1.23), pass 64.93 vs
 68.61 (bias **−3.72**, was −2.57). Edge-call hit rates 62–71%. Buckets calibrated vs recent average (0.58–0.70 → 60.9%).
 
+**Nov 24 review (week 11):** once per game **15-21 (−8.08u)**, all FanDuel (ledger row 15-24 also holds the parlay and 2
+Friday repeats). Season once per game 116-123 (−25.99u); FanDuel only 100-112 (−29.33u). Overs 25-35, Unders 75-77. Two-plus
+picks on one player: 8-8 this week, season 29-52 (40 players: 9 all won, 20 all lost); singles 71-60 (−1.92u, 7-13 this week),
+so the single/multi gap shrank. Thin-data 2-8. Snap 15+ over projection: Unders 8-14. Tags: teammate_out alone 15-13, no tags
+55-57, questionable 2-7. 💰 stale props 15-16 (Unders 11-5, Overs 4-11). Parlay legs 11-7 vs 10.6 expected (18 legs).
+
+**Found Nov 24: game-day picks use old prices.** `gameday()` calls `attachLines([x],false)`, so it prices off stored lines:
+Friday 5 PM for 1 PM games, the Sunday 11:45 AM parlay pull for later Sunday games. Games outside Friday's pull have no line
+at all (week 11: all 36 picks came from the 6 games Friday priced). The fresh prices are already downloaded at that moment
+(`eventIds()` pulls the whole SGO slate) and then ignored. So live W-L is on quoted prices he may not have been able to get.
+That muddies the size of the loss but is unlikely to rescue the model (later Sunday games, on same-day lines, did no better).
+
+**Found Nov 24: wrong kickoffs.** nflverse's schedule had JAX@NYG (13:00) and PIT@PHI (16:25) swapped until about 12:46 PM ET
+Sunday. JAX@NYG's "game-day" alert went 4 h 45 min early (before its inactives; its 2 picks lost and their
+`mins_to_kick` 79 is wrong) and PIT@PHI got no check. As of Nov 24 every 2026 game in weeks 4–14 matches ESPN.
+
+Backtest 2026 wk 4–11 (Nov 24): rec yds 22.12 vs 23.75 (bias −0.26), rec 1.52 vs 1.60, rush 21.63 vs 23.14 (+1.03), pass
+63.13 vs 66.49 (bias **−4.89**; week 10 −12.0, week 11 −14.4 on 23 QBs each). Edge-call hit rates 64–69%. Buckets
+calibrated vs the recent average (0.58–0.70 → 61.0%). 2025 wk 4–18 reference unchanged.
+
 ## Open questions for the weekly review
 
-1. **Live edge vs FanDuel (new, most important):** 176 picks, 48.3% vs 54.8% needed. Nov 17 proposed `MODEL_PICKS=0` (info only,
-   shadow-logged). If applied, keep grading the shadow picks weekly; only turn picks back on if a held-out stretch of 100+
-   shadow picks beats the prices. If not applied, re-check at 250 picks.
-2. **Two picks on one player:** 23-46 live, no difference in the backtest. Watch to 50 players.
-3. **Wind:** direction multiplier still in the model (Oct 27 proposal waiting). 8 vs 12 mph: noise both checks; re-check end of season.
-4. **Reporting fixes** (once per game, parlay row, FanDuel-only row, keep `sharp`): re-proposed Nov 17; dedupe by hand until applied.
-5. **Role reads:** snap 15+ more than projected → Unders 7-12; backups promoted by injuries (Felton, Bartholomew) were the
-   week-10 misses. "Snap dip" tag (Nov 3) still proposed. Grade at 50+.
-6. **Passing yards:** backtest bias −3.72 (from −2.57) after two 389/409 games; live pass yds 8-10. If bias passes −5, look at it.
-7. **Rushing yards:** bias +1.23, stable; live rush yds 20-16 (+1.62u). Settled unless it passes +2.
-8. **💰 stale props:** 12-13 on 25 (Overs 2-9). Watch until 50; split by reference book once the ledger keeps `sharp`.
-9. **Thin-data picks:** `MIN_PICK_GAMES=2` re-proposed Nov 17 (live 2-7).
-10. **Delivery:** 1 PM week 10 alerts 34 min before kickoff (no scheduled run 09:56–17:25 UTC). If it happens again, consider a
-   self-relay (a run that exits with a window still ahead dispatches the next run).
+1. **Live edge vs FanDuel (most important):** 212 picks, 47.2% vs 54.7% needed; week 11 was a clean holdout and also lost.
+   `MODEL_PICKS=0` (shadow log) re-proposed Nov 24. Turn picks back on only after 100+ shadow picks beat fresh prices.
+2. **Fresh game-day prices** (`ODDS_ON_GAMEDAY=1`, proposed Nov 24). If applied, compare W-L and 💰 before/after; game-day
+   💰 starts existing, so split 💰 by alert (fri / gameday).
+3. **Kickoff times and cron gaps** (proposed Nov 24): check ESPN vs nflverse every week and that Thanksgiving-type slots went out.
+4. **Two picks on one player:** 29-52 live on 40 players, no difference in the backtest. Watch to 50 players.
+5. **Passing yards:** bias −4.89, two straight weeks at −12 to −14 (46 QB games, so wide error bars). Faster baselines don't
+   help. If the season bias passes −5 next week, test the attempts and yards-per-attempt parts separately in 2025 and 2026.
+6. **Reporting fixes** (once per game, parlay row, FanDuel-only row, keep `sharp`): still waiting since Nov 10; dedupe by hand.
+7. **Thin-data picks:** `MIN_PICK_GAMES=2` waiting since Nov 10 (live 2-8).
+8. **Role reads:** snap 15+ over projection → Unders 8-14. "Snap dip" tag (Nov 3) waiting. Grade at 50+.
+9. **💰 stale props:** 15-16 on 31 (Overs 4-11, Unders 11-5). Watch until 50; can't split by reference until the ledger keeps
+   `sharp`. The bot gave both sides of Olave and Kittle rec yds in week 11 (💰 Over Friday, model Under game day).
+10. **Wind:** direction multiplier proposal (Oct 27) waiting. 8 vs 12 mph: noise; re-check end of season.
+11. **Rushing yards:** bias +1.03, live 20-19 FanDuel. Settled unless it passes +2.
 
 - **🎯 Parlays (2026-10-29):** Sunday 5-leg props parlay at 11:45 AM ET. Legs are treated as independent (one per game). Grade on the legs first (do the legs win at their blended chance?) and on the price: a parlay only pays if each leg's edge beats the book's cut five times over. Under ~50 parlays the W-L is pure luck (a fair 5-leg hits ~5-10%); judge the legs, not the tickets.
