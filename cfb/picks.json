@@ -65020,6 +65020,64 @@
    "why": "home field WMU +1.6; small crowd M-OH +1.1"
   },
   {
+   "key": "gameday|401866470",
+   "S": 2026,
+   "wk": 13,
+   "gid": 401866470,
+   "card": "gameday",
+   "ver": "v1",
+   "params": "2026-09-27",
+   "sentAt": "2026-11-24T22:19:25.376Z",
+   "mins": 101,
+   "kick": "2026-11-25T00:00:00.000Z",
+   "away": "KENT",
+   "home": "EMU",
+   "conf": true,
+   "neutral": false,
+   "lm": 6.5,
+   "lt": 46.5,
+   "lmOpen": 5.75,
+   "ltOpen": 46,
+   "src": "DraftKings",
+   "om": 2,
+   "ot": 49.6,
+   "se": 4.5,
+   "te": 3.1,
+   "spick": true,
+   "tpick": false,
+   "swild": false,
+   "min": {
+    "spread": 4,
+    "total": 8,
+    "week": 4
+   },
+   "f": {
+    "home": 1,
+    "capZ": -0.8,
+    "travel": 0.1,
+    "tz": 0,
+    "rest": 0,
+    "climb": 0,
+    "descend": 0,
+    "humid": 0,
+    "heat": 0,
+    "dome": false
+   },
+   "rest": {
+    "home": 7,
+    "away": 7
+   },
+   "wx": {
+    "wind": 4.9,
+    "gust": 10,
+    "precip": 0,
+    "temp": 27,
+    "dew": 12
+   },
+   "outs": {},
+   "why": "home field EMU +1.6; small crowd KENT +1.1"
+  },
+  {
    "key": "update|401866470",
    "S": 2026,
    "wk": 13,
