@@ -45810,5 +45810,317 @@
    "fg3m": 0,
    "gradedOn": "2026-11-24"
   }
+ },
+ {
+  "id": "2026-11-24|401909316|jamalmurray|prop|pra",
+  "sport": "nba",
+  "date": "2026-11-24",
+  "at": "2026-11-25T00:33:29.289Z",
+  "model": "2026-11-02-under-filter",
+  "kind": "prop",
+  "stat": "pra",
+  "name": "Jamal Murray",
+  "key": "jamalmurray",
+  "team": "DEN",
+  "opp": "DAL",
+  "mpg": 37.066666,
+  "minProj": 38.91019972466666,
+  "proj": 39.84166580561194,
+  "projRaw": 42.272289511606814,
+  "avg": 37.066666999999995,
+  "line": 33.5,
+  "po": 0.7310682300745523,
+  "price": -122,
+  "book": "FanDuel",
+  "prob": 0.6230842479196148,
+  "ev": 0.1338090412963483,
+  "modelP": 0.7310682300745523,
+  "mktP": 0.5151002657646773,
+  "mktEV": -0.06268640164132494,
+  "soft": 0,
+  "why": "model",
+  "fair": {
+   "p": 0.5151002657646773,
+   "book": "Pinnacle",
+   "L": 33.5
+  },
+  "l5": [
+   39,
+   36,
+   30,
+   23,
+   57
+  ],
+  "hits": 3,
+  "games": 5,
+  "h2h": {
+   "n": 4,
+   "diff": 7.4
+  },
+  "tags": [
+   "high team total"
+  ],
+  "rest": 2,
+  "dvp": {
+   "pos": "G",
+   "rank": 25,
+   "of": 30,
+   "pct": 4
+  },
+  "inj": null,
+  "compGap": null,
+  "revenge": null,
+  "back": 0,
+  "starBack": false,
+  "min3": 39.666666666666664,
+  "gameId": "401909316",
+  "tip": "2026-11-25T03:00Z",
+  "modes": [
+   "board"
+  ],
+  "result": {
+   "status": "final",
+   "min": 36,
+   "pts": 20,
+   "reb": 2,
+   "ast": 3,
+   "pra": 25,
+   "fg3m": 2,
+   "gradedOn": "2026-11-25"
+  }
+ },
+ {
+  "id": "2026-11-24|401909315|kyshawngeorge|prop|pra",
+  "sport": "nba",
+  "date": "2026-11-24",
+  "at": "2026-11-25T00:33:29.289Z",
+  "model": "2026-11-02-under-filter",
+  "kind": "prop",
+  "stat": "pra",
+  "name": "Kyshawn George",
+  "key": "kyshawngeorge",
+  "team": "WAS",
+  "opp": "BOS",
+  "mpg": 33.77778,
+  "minProj": 35.96522314,
+  "proj": 26.98326923758124,
+  "projRaw": 28.07477051801604,
+  "avg": 26.555557199999996,
+  "line": 23.5,
+  "po": 0.6507918606242098,
+  "price": -102,
+  "book": "FanDuel",
+  "prob": 0.5671763018393119,
+  "ev": 0.12323149972099023,
+  "modelP": 0.6507918606242098,
+  "mktP": 0.483560743054414,
+  "mktEV": -0.042360097088317394,
+  "soft": 0,
+  "why": "model",
+  "fair": {
+   "p": 0.483560743054414,
+   "book": "BetOnline.ag",
+   "L": 23.5
+  },
+  "l5": [
+   17,
+   25,
+   26,
+   23,
+   31
+  ],
+  "hits": 3,
+  "games": 5,
+  "h2h": {
+   "n": 2,
+   "diff": -10.1
+  },
+  "tags": [
+   "+10.5 underdog",
+   "cold vs BOS"
+  ],
+  "rest": 2,
+  "dvp": {
+   "pos": "F",
+   "rank": 4,
+   "of": 30,
+   "pct": -8
+  },
+  "inj": null,
+  "compGap": null,
+  "revenge": null,
+  "back": 0,
+  "starBack": false,
+  "min3": 37,
+  "gameId": "401909315",
+  "tip": "2026-11-25T01:00Z",
+  "modes": [
+   "board",
+   "pregame"
+  ],
+  "result": {
+   "status": "final",
+   "min": 38,
+   "pts": 24,
+   "reb": 9,
+   "ast": 3,
+   "pra": 36,
+   "fg3m": 4,
+   "gradedOn": "2026-11-25"
+  }
+ },
+ {
+  "id": "2026-11-24|401909315|paulgeorge|prop|pra",
+  "sport": "nba",
+  "date": "2026-11-24",
+  "at": "2026-11-25T00:33:29.289Z",
+  "model": "2026-11-02-under-filter",
+  "kind": "prop",
+  "stat": "pra",
+  "name": "Paul George",
+  "key": "paulgeorge",
+  "team": "BOS",
+  "opp": "WAS",
+  "mpg": 30.178378266666666,
+  "minProj": 31.503670224133334,
+  "proj": 30.87135999949909,
+  "projRaw": 32.56609005690429,
+  "avg": 29.081081173333335,
+  "line": 27.5,
+  "po": 0.6399012613212338,
+  "price": -120,
+  "book": "FanDuel",
+  "prob": 0.5919522894401783,
+  "ev": 0.08524586397366024,
+  "modelP": 0.6399012613212338,
+  "mktP": 0.5440033175591228,
+  "mktEV": -0.002660584474941552,
+  "soft": 1,
+  "why": "model",
+  "fair": {
+   "p": 0.5440033175591228,
+   "book": "Pinnacle",
+   "L": 28.5
+  },
+  "l5": [
+   20,
+   33,
+   15,
+   32,
+   null
+  ],
+  "hits": 2,
+  "games": 4,
+  "h2h": null,
+  "tags": [
+   "w/o Robinson",
+   "high team total",
+   "💰 FanDuel 1 softer than Pinnacle"
+  ],
+  "rest": 2,
+  "dvp": {
+   "pos": "F",
+   "rank": 22,
+   "of": 30,
+   "pct": 3
+  },
+  "inj": null,
+  "compGap": null,
+  "revenge": null,
+  "back": 0,
+  "starBack": false,
+  "min3": 32,
+  "gameId": "401909315",
+  "tip": "2026-11-25T01:00Z",
+  "modes": [
+   "board",
+   "pregame"
+  ],
+  "result": {
+   "status": "final",
+   "min": 33,
+   "pts": 28,
+   "reb": 4,
+   "ast": 9,
+   "pra": 41,
+   "fg3m": 6,
+   "gradedOn": "2026-11-25"
+  }
+ },
+ {
+  "id": "2026-11-24|401909315|anthonydavis|prop|pra",
+  "sport": "nba",
+  "date": "2026-11-24",
+  "at": "2026-11-25T00:33:29.289Z",
+  "model": "2026-11-02-under-filter",
+  "kind": "prop",
+  "stat": "pra",
+  "name": "Anthony Davis",
+  "key": "anthonydavis",
+  "team": "WAS",
+  "opp": "BOS",
+  "mpg": 33.875,
+  "minProj": 34.02204166666667,
+  "proj": 35.99697912784547,
+  "projRaw": 37.0547461249648,
+  "avg": 37.125,
+  "line": 32.5,
+  "po": 0.6376459494943179,
+  "price": -118,
+  "book": "FanDuel",
+  "prob": 0.580852118274134,
+  "ev": 0.07309967613356949,
+  "modelP": 0.6376459494943179,
+  "mktP": 0.5240582870539502,
+  "mktEV": -0.031824520527448,
+  "soft": 1,
+  "why": "model",
+  "fair": {
+   "p": 0.5240582870539502,
+   "book": "Pinnacle",
+   "L": 33.5
+  },
+  "l5": [
+   27,
+   27,
+   41,
+   50,
+   30
+  ],
+  "hits": 2,
+  "games": 5,
+  "h2h": null,
+  "tags": [
+   "+10.5 underdog",
+   "💰 FanDuel 1 softer than Pinnacle"
+  ],
+  "rest": 2,
+  "dvp": {
+   "pos": "F",
+   "rank": 4,
+   "of": 30,
+   "pct": -8
+  },
+  "inj": null,
+  "compGap": null,
+  "revenge": null,
+  "back": 0,
+  "starBack": false,
+  "min3": 33.666666666666664,
+  "gameId": "401909315",
+  "tip": "2026-11-25T01:00Z",
+  "modes": [
+   "board"
+  ],
+  "result": {
+   "status": "final",
+   "min": 37,
+   "pts": 33,
+   "reb": 13,
+   "ast": 1,
+   "pra": 47,
+   "fg3m": 1,
+   "gradedOn": "2026-11-25"
+  }
  }
 ]
