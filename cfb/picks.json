@@ -64959,7 +64959,18 @@
     "dew": 11
    },
    "outs": {},
-   "why": "home field EMU +1.6; small crowd KENT +1.1"
+   "why": "home field EMU +1.6; small crowd KENT +1.1",
+   "hm": 5,
+   "tot": 29,
+   "res": "W",
+   "units": 0.909,
+   "close": 7,
+   "clv": -1.5,
+   "tres": "L",
+   "tunits": -1,
+   "tclose": 46.25,
+   "tclv": 0.75,
+   "graded": "2026-11-25"
   },
   {
    "key": "first|401866471",
@@ -65017,7 +65028,18 @@
     "dew": 14
    },
    "outs": {},
-   "why": "home field WMU +1.6; small crowd M-OH +1.1"
+   "why": "home field WMU +1.6; small crowd M-OH +1.1",
+   "hm": -4,
+   "tot": 52,
+   "res": "W",
+   "units": 0.909,
+   "close": 4.25,
+   "clv": 3.25,
+   "tres": "W",
+   "tunits": 0.909,
+   "tclose": 44.5,
+   "tclv": -2,
+   "graded": "2026-11-25"
   },
   {
    "key": "gameday|401866470",
@@ -65075,7 +65097,18 @@
     "dew": 12
    },
    "outs": {},
-   "why": "home field EMU +1.6; small crowd KENT +1.1"
+   "why": "home field EMU +1.6; small crowd KENT +1.1",
+   "hm": 5,
+   "tot": 29,
+   "res": "W",
+   "units": 0.909,
+   "close": 7,
+   "clv": -0.5,
+   "tres": "L",
+   "tunits": -1,
+   "tclose": 46.25,
+   "tclv": -0.25,
+   "graded": "2026-11-25"
   },
   {
    "key": "update|401866470",
@@ -65133,7 +65166,18 @@
     "dew": 14
    },
    "outs": {},
-   "why": "home field EMU +1.6; small crowd KENT +1.1"
+   "why": "home field EMU +1.6; small crowd KENT +1.1",
+   "hm": 5,
+   "tot": 29,
+   "res": "W",
+   "units": 0.909,
+   "close": 7,
+   "clv": -1.5,
+   "tres": "L",
+   "tunits": -1,
+   "tclose": 46.25,
+   "tclv": -0.25,
+   "graded": "2026-11-25"
   },
   {
    "key": "update|401866471",
@@ -65191,7 +65235,18 @@
     "dew": 17
    },
    "outs": {},
-   "why": "home field WMU +1.6; small crowd M-OH +1.1"
+   "why": "home field WMU +1.6; small crowd M-OH +1.1",
+   "hm": -4,
+   "tot": 52,
+   "res": "W",
+   "units": 0.909,
+   "close": 4.25,
+   "clv": 2.25,
+   "tres": "W",
+   "tunits": 0.909,
+   "tclose": 44.5,
+   "tclv": -1,
+   "graded": "2026-11-25"
   },
   {
    "key": "first|401856879",
