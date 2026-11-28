@@ -286,7 +286,7 @@ function evRows(g,D,book,players){
       const over=h.side==="A",mp=pr&&pr[s]!=null?M.pOver(pr[s],h.L,s):null;
       out.push({kind:"ev",name:pl?pl.name:k,key:k,team:pl?pl.team:"",stat:s,side:over?"over":"under",line:h.L,price:h.price,book:h.title,
         fair:h.fair,ev:h.ev,sharp:{book:h.sharp.title,L:h.sharp.L,over:h.sharp.A.price,under:h.sharp.B.price},
-        model:mp==null?null:(over?mp:1-mp),proj:pr?pr[s]:null,gameId:g.id,tip:g.date,tags:[]});
+        modelP:mp==null?null:(over?mp:1-mp),proj:pr?pr[s]:null,gameId:g.id,tip:g.date,tags:[]});
     }
   }
   return out.sort((a,b)=>b.ev-a.ev);
@@ -547,7 +547,7 @@ const shown=(rows,n)=>shownAll(rows.filter(r=>!heldUnder(r)),n);
 // the plain unders that would have been sent without the filter
 const heldOf=(rows,n)=>shownAll(rows,n).flatMap(s=>s[2]).filter(heldUnder);
 const EV_TOP=+(process.env.EV_TOP||5);
-const evLine=r=>`${r.name}${r.team?` (${r.team})`:""} ${LABEL[r.stat]} ${r.side==="over"?"o":"u"}${r.line} ${SH.fmt(r.price)} at ${r.book}: fair ${pct(r.fair)}, +${(r.ev*100).toFixed(1)}% EV vs ${r.sharp.book} ${r.sharp.L} ${SH.fmt(r.sharp.over)}/${SH.fmt(r.sharp.under)}${r.model!=null?`; model ${pct(r.model)}`:""}`;
+const evLine=r=>`${r.name}${r.team?` (${r.team})`:""} ${LABEL[r.stat]} ${r.side==="over"?"o":"u"}${r.line} ${SH.fmt(r.price)} at ${r.book}: fair ${pct(r.fair)}, +${(r.ev*100).toFixed(1)}% EV vs ${r.sharp.book} ${r.sharp.L} ${SH.fmt(r.sharp.over)}/${SH.fmt(r.sharp.under)}${r.modelP!=null?`; model ${pct(r.modelP)}`:""}`;
 const evMessage=rows=>rows.length?`💰 ${SH.MINE.length===1?rows[0].book:"Your books"} vs sharp no-vig\n`+rows.slice(0,EV_TOP).map((r,i)=>`${i+1}. ${evLine(r)}`).join("\n"):"";
 const message=secs=>secs.map(([t,k,l])=>`${t}\n`+l.map((r,i)=>`${i+1}. ${LINE[k](r)}`).join("\n")).join("\n\n");
 // picks results/track.js grades later; only alerts that were really sent (same rule as the sent markers)
