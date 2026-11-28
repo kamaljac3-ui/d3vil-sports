@@ -1,5 +1,6 @@
 // CFB Lines: college football spread/total edges -> ntfy.
-// MODE=auto (cron, every 15 min) decides from Eastern time what's due:
+// MODE=auto (cron every 2 h, looping internally every LOOP_EVERY min for LOOP_MIN min) decides from Eastern time
+// what's due:
 //   first    Sun from FIRST_HOUR ET (or once lines cover the week), Monday noon at the latest: the week's first look
 //   update   noon ET, 2 days before Saturday games (Thursday) or the day before a weeknight game: injuries + forecast
 //   final    FINAL_HOUR ET on game day: weather, availability reports, current lines
@@ -19,16 +20,17 @@ const CFG={
   MAX_EDGE:env("MAX_EDGE",14),           // bigger gaps are usually news the model hasn't seen: shown with ⚠️, not ✅
   MIN_WEEK:env("MIN_WEEK",4),            // weeks 1-3 lost in the backtest (priors-heavy)
   FIRST_HOUR:env("FIRST_HOUR",14),FIRST_COVER:env("FIRST_COVER",0.6),
-  // GitHub runs this cron only about every 3 hours, so the final card is due from 3 AM (an overnight run
-  // reliably lands 3-6 AM ET, before any kickoff) and anything sent before QUIET_UNTIL goes out silently.
+  // The final card is due from 3 AM (an overnight run reliably lands 3-6 AM ET, before any kickoff) and anything
+  // sent before QUIET_UNTIL goes out silently.
   UPDATE_HOUR:env("UPDATE_HOUR",12),FINAL_HOUR:env("FINAL_HOUR",3),QUIET_UNTIL:env("QUIET_UNTIL",8),
-  GD_MIN:env("GD_MIN",30),GD_MAX:env("GD_MAX",200),   // wide enough that a run every ~3 h still catches each game
+  GD_MIN:env("GD_MIN",30),GD_MAX:env("GD_MAX",200),   // left wide as a buffer; the internal loop now checks every LOOP_EVERY min
   GD_MOVE:env("GD_MOVE",1.5),GD_WIND:env("GD_WIND",7),   // material change: our number moved this much / wind shift (mph)
 };
 const RUN_URL=process.env.GITHUB_RUN_ID?`${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`:"";
 const r1=v=>Math.round(v*2)/2,f1=v=>(Math.round(v*10)/10).toFixed(1);
-const now=Date.now(),ET=etParts(new Date(now));
-const S=+ET.date.slice(0,4)-(+ET.date.slice(5,7)<3?1:0);
+let now=Date.now(),ET=etParts(new Date(now));
+let S=+ET.date.slice(0,4)-(+ET.date.slice(5,7)<3?1:0);
+function refreshClock(){now=Date.now();ET=etParts(new Date(now));S=+ET.date.slice(0,4)-(+ET.date.slice(5,7)<3?1:0);}
 // a "card date" is the ET date of kickoff minus 5 h, so a 12:00 AM ET Hawaii kickoff belongs to Saturday
 const cardDate=t=>etParts(new Date(t-5*36e5)).date;
 const addDays=(d,n)=>new Date(Date.parse(d+"T12:00:00Z")+n*864e5).toISOString().slice(0,10);
@@ -258,7 +260,8 @@ async function probe(){
 }
 
 // ---------- main ----------
-(async()=>{
+async function tick(){
+  refreshClock();
   log(`${ET.wd} ${ET.date} ${ET.h}:${String(ET.m).padStart(2,"0")} ET, mode=${MODE}${DRY?" (dry run)":""}${LIVE?"":" (not sending)"}`);
   if(MODE==="probe")return probe();
   const ctx=await context();
@@ -296,9 +299,26 @@ async function probe(){
   if(due.length){sent.gd=sent.gd||{};await gameday(ctx,due,sent);}
   if(LIVE&&MODE==="auto"&&(jobs.length||due.length))writeState(`sent-${S}.json`,sent);
   const u=cfbd.usage();log(`CFBD calls this month: ${u.calls}/${cfbd.BUDGET}${u.remaining!=null?` (key: ${u.remaining} left)`:""}`);
-})().catch(async e=>{
-  console.error(e);
+}
+
+// ---------- run loop ----------
+// Scheduled runs keep going for LOOP_MIN minutes, rechecking every LOOP_EVERY. GitHub skips frequent crons on busy
+// days: this bot's old 15-min cron actually fired only every 4-9 h some days (2026-11 review), missing most
+// daytime kickoff windows even with the wide GD_MIN-GD_MAX buffer above. A few long, overlapping runs replace it,
+// the same fix already used by nfl-props/nfl-lines/mlb-live. Manual runs (LOOP_MIN=0) check once and exit.
+const LOOP_MIN=env("LOOP_MIN",0),LOOP_EVERY=env("LOOP_EVERY",10);
+async function errorAlert(e){
+  console.error(e);process.exitCode=1;
   const last=readState("error-alert.json",6);
   if(!last&&LIVE){await ntfy("CFB lines bot error",String(e.message||e),2,["warning"]).catch(()=>{});writeState("error-alert.json",true);}
-  process.exit(1);
-});
+}
+(async()=>{
+  const t0=Date.now();
+  for(;;){
+    try{await tick();}catch(e){await errorAlert(e);if(!LOOP_MIN)return;}
+    const left=LOOP_MIN*6e4-(Date.now()-t0);
+    if(left<=LOOP_EVERY*6e4)break;
+    log(`next check in ${LOOP_EVERY} min`);
+    await new Promise(r=>setTimeout(r,LOOP_EVERY*6e4));
+  }
+})().catch(errorAlert);

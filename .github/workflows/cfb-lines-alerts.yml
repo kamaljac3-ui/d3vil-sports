@@ -2,9 +2,12 @@ name: CFB Lines
 
 on:
   schedule:
-    # Every 15 min, 12:00-05:59 UTC (8 AM-1:59 AM ET), Aug-Jan. The script decides what's due from
-    # Eastern time via Intl, so the Nov 1 DST change needs no cron edit, and it exits fast otherwise.
-    - cron: "7,22,37,52 12-23,0-5 * 8-12,1 *"
+    # Every 2 h, 12:00-05:59 UTC (8 AM-1:59 AM ET), Aug-Jan; each scheduled run stays up to ~5.75 h (LOOP_MIN),
+    # rechecking every LOOP_EVERY min, so overlapping runs cover the gaps. A 15-min cron here used to fire only
+    # every 4-9 h on busy days (2026-11 review), missing most daytime game-day windows even with a wide
+    # GD_MIN-GD_MAX buffer. The script decides what's due from Eastern time via Intl, so the Nov 1 DST change
+    # needs no cron edit, and it exits each tick fast when nothing is due.
+    - cron: "15 12-23/2,0-5/2 * 8-12,1 *"
   workflow_dispatch:
     inputs:
       mode:
@@ -24,7 +27,7 @@ concurrency:
 jobs:
   run:
     runs-on: ubuntu-latest
-    timeout-minutes: 60   # a full backtest with the adjustment tests runs ~35 min
+    timeout-minutes: 355   # scheduled runs loop for up to ~5.75 h (LOOP_MIN); a full backtest runs ~35 min
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -41,6 +44,7 @@ jobs:
         env:
           NP_CACHE: cfb-lines/.cache
           MODE: ${{ github.event.inputs.mode || 'auto' }}
+          LOOP_MIN: ${{ github.event_name == 'schedule' && '345' || '0' }}
           DRY_RUN: ${{ github.event.inputs.dry_run || '0' }}
           CFBD_API_KEY: ${{ secrets.CFBD_API_KEY }}
           CFBD_MONTHLY_BUDGET: ${{ vars.CFB_CFBD_BUDGET || '700' }}
